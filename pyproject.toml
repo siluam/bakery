@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "baker"
+version = "1.0.0.0"
+description = "An \"sh\" alternative"
+authors = ["shadowrylander <titaniumfiles@outlook.com>"]
+license = "GPL-3.0"
+include = [
+	"baker/**/*.py",
+]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+addict = "*"
+pout = {version = "*", optional = true}
+sarge = "*"
+toml = "*"
+nanite = { git = "https://github.com/shadowrylander/nanite.git", branch = "master" }
+autoslot = "*"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+
+[tool.poetry.extras]
+p = ["pout"]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
