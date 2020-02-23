@@ -98,8 +98,13 @@ class _short_property_vars:
 
 	@_end_args.setter
 	def _end_args(self, value):
-		# If the kwarg value is a string, we'll convert it into a list
-		self.__end_args = [value] if isinstance(value, (str, bytes, bytearray)) else value
+		# If the arg value is a string, we'll convert it into a list
+		if isinstance(value, str):
+			self.__end_args = [value]
+		elif isinstance(value, (bytes, bytearray)):
+			self.__end_args = [value.decode()]
+		else:
+			self.__end_args = value
 
 	@property
 	def _before_args(self):
@@ -107,5 +112,10 @@ class _short_property_vars:
 
 	@_before_args.setter
 	def _before_args(self, value):
-		# If the kwarg value is a string, we'll convert it into a list
-		self.__before_args = [value] if isinstance(value, (str, bytes, bytearray)) else value
+		# If the arg value is a string, we'll convert it into a list
+		if isinstance(value, str):
+			self.__before_args = [value]
+		elif isinstance(value, (bytes, bytearray)):
+			self.__before_args = [value.decode()]
+		else:
+			self.__before_args = value
