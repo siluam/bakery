@@ -1,17 +1,27 @@
 # From Imports
 from copy import deepcopy
-from nanite import gensing
+from gensing import tea
+from typing import Dict, Union, Tuple
+
+genstring = Union[str, tea]
+
+class Error(Exception):
+	pass
+
+
+class not_same_type(Error):
+	pass
+
 
 class baking_:
 
 	def _bake_cake(
 		self, cls, args, kwargs, _cutter=False, _after_cake=False
 	):
-
 		args, kwargs = self._set(cls, args, kwargs, _baking=True)
 
 		_ = self._attach_command_args_kwargs(
-			self.cake if _cutter else gensing(), args, kwargs
+			self.cake if _cutter else tea(), args, kwargs
 		)
 
 		if _after_cake:
@@ -75,6 +85,22 @@ class baking_:
 			),
 		)
 
+	def soubake_(
+		self,
+		*args: Tuple[Dict[genstring, genstring]],
+		**kwargs: Dict[genstring, genstring]
+	):
+		"""
+
+			Bake a subcommand; whenever that subcommand is used, it will be replaced by the command provided instead.
+
+		"""
+		# Merge a tuple of dictionaries and a single dictionary kwargs
+		if args and not all(isinstance(argument, (dict, tea)) for argument in args):
+			raise not_same_type("Sorry! All arguments must be dictionaries or gensings!")
+		total_args = (argument if isinstance(argument, dict) else argument.items(whole) for argument in args)
+		self.soufle = tea(*total_args, kwargs)
+
 	def splat_(self):
 		"""
 
@@ -87,5 +113,6 @@ class baking_:
 			setattr(self, f"_{key}", value)
 
 		# Reset the cake values
-		self.cake = gensing()
-		self.after_cake = gensing()
+		self.soufle = tea()
+		self.cake = tea()
+		self.after_cake = tea()

@@ -27,7 +27,7 @@ def __getattr__(program):
     bakeriy = i if prog_parts[2] == "i" else y
 
     if prog_parts[0] == "ext":
-    	return partial(extension.ext_, bakeriy)
+        return partial(extension.ext_, bakeriy)
     elif prog_parts[0] == "baker":
         return partial(extension.baker_, bakeriy)
     else:

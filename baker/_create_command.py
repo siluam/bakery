@@ -1,5 +1,5 @@
 # From Imports
-from nanite import gensing
+from gensing import tea
 
 class _create_command:
 
@@ -69,6 +69,10 @@ class _create_command:
 			if self._shell:
 				self.__command.glue("'")
 
+		if self.soufle:
+			for c, sc in self.soufle.items():
+				self.__command.replace(c, str(sc) if isinstance(sc, tea) else sc)
+
 		return self.__command
 
 	def __tiered(self):
@@ -84,14 +88,10 @@ class _create_command:
 					
 	def __prepare_command(self):
 
-		self.__command = gensing()
-
-		self.__command.append(
-			(
-				self.__kwargs.pop("_beg_command", ""),
-				self._run_as,
-				self.program,
-			)
+		self.__command = tea(
+			self.__kwargs.pop("_beg_command", ""),
+			self._run_as,
+			self.program,
 		)
 
 		self.__command = self._attach_command_args_kwargs(
@@ -104,11 +104,8 @@ class _create_command:
 			) or not self.__kwargs.pop("_subcommand", False):
 				self.__command.glue(" -c '")
 
-		self.__command.append(
-			(
-				*self.cake,
-				self.__kwargs.pop("_end_command", ""),
-				*self.after_cake,
-			)
+		self.__command.extend(
+			*self.cake,
+			self.__kwargs.pop("_end_command", ""),
+			*self.after_cake,
 		)
-		

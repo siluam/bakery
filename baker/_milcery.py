@@ -1,10 +1,10 @@
 # From Imports
 from addict import Dict as D
 from autoslot import Slots
+from gensing import tea
 from nanite import (
 	check_type,
 	module_installed,
-	gensing,
 	fullpath,
 	mixinport,
 )
@@ -130,9 +130,10 @@ class _milcery(*(mixinport(mixins)), Slots):
 			"verbosity",
 		)
 		self.program: str = program
-		self.cake: type = gensing()
-		self.after_cake: type = gensing()
-		self.tiered: type = gensing()
+		self.cake: type = tea()
+		self.soufle: type = tea()
+		self.after_cake: type = tea()
+		self.tiered: type = tea()
 
 		for key, value in self._kwarg_settings.items():
 			setattr(self, f"_{key}", value)

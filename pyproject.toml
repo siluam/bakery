@@ -9,12 +9,13 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.8"
 addict = "*"
 pout = {version = "*", optional = true}
 sarge = "*"
 toml = "*"
-nanite = { git = "https://github.com/shadowrylander/nanite.git", branch = "master" }
+nanite = {git = "https://gitlab.com/picotech/nanotech/nanite.git", branch = "master"}
+gensing = {git = "https://gitlab.com/picotech/nanotech/gensing.git", branch = "master"}
 autoslot = "*"
 
 [tool.poetry.dev-dependencies]

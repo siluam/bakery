@@ -1,5 +1,5 @@
 # From Imports
-from nanite import gensing
+from gensing import tea
 
 class tier_:
 	"""
@@ -52,7 +52,6 @@ class tier_:
 
 		# If the "tiered" class variable is set, reset it, as we need a new command
 		if self.tiered:
-			# self.tiered = gensing()
 			self.tiered = None
 
 		# Create the new "tiered" command
@@ -64,7 +63,7 @@ class tier_:
 		# If the "_temp_tiered" kwarg is set, return the new command and reset the "tiered" class variable
 		if _temp_tiered:
 			_ = self.tiered
-			self.tiered = gensing()
+			self.tiered = tea()
 			return _
 		# Otherwise, just return the new command in the "tiered" class variable
 		else:
@@ -93,4 +92,4 @@ class tier_:
 			Disable the "tier" functionality; refer to the "tier_" function for more information.
 
 		"""
-		self.tiered = gensing()
+		self.tiered = tea()

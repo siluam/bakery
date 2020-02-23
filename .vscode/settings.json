@@ -1,4 +1,4 @@
 {
-    "python.pythonPath": "/home/shadowrylander/mc3/envs/python38/bin/python",
+    "python.pythonPath": "/usr/bin/python",
     "python.formatting.provider": "black"
 }

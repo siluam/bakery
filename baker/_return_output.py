@@ -1,7 +1,7 @@
 # From Imports
 from addict import Dict as D
 from functools import partial
-from nanite import peek
+from nanite import peek, trim
 from sarge import run
 from typing import Dict, Any
 
@@ -20,7 +20,7 @@ class _return_output:
 		self.__command = self._create_command(args, kwargs)
 
 		if self._str:
-			return self.__command.join()
+			return self.__command()
 
 		self.__capture_output()
 
@@ -36,7 +36,7 @@ class _return_output:
 	def __capture_output(self):
 
 		if self._capture == "run":
-			run(self.__command.join())
+			run(self.__command())
 			return (
 				D(
 					{
@@ -52,7 +52,7 @@ class _return_output:
 
 			_output = getattr(
 				__import__("sarge"), f"capture_{self._capture}"
-			)(self.__command.join())
+			)(self.__command())
 
 			self.__return_code = _output.returncode
 			self.__return_codes = _output.returncodes
@@ -93,7 +93,7 @@ class _return_output:
 			)
 			_.return_code = self.__return_code
 			_.return_codes = self.__return_codes
-			_.command = self.__command.join()
+			_.command = self.__command()
 
 		if self._verbosity > 1:
 			_.args = self._args
@@ -134,18 +134,13 @@ class _return_output:
 			else self._type(self.__decode_std(self.__stderr)),
 			self.__return_code,
 			self.__return_codes,
-			self.__command.join(),
+			self.__command(),
 			self._args,
 			self._kwargs,
 			self.__command,
 		)
 
-		_dict = {
-			key: value
-			for key, value in zip(
-				self._return_categories[:-1], _tup
-			)
-		}
+		_dict = dict(zip(self._return_categories[:-1], _tup))
 
 		if isinstance(
 			self._return, (str, bytes, bytearray)
