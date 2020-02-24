@@ -18,10 +18,10 @@ class y(_milcery):
 		self,
 		program: str,
 		*args,
-		cake: Union[None, tea] = None,
-		soufle: Union[None, tea] = None,
-		after_cake: Union[None, tea] = None,
-		ignore_check: bool = False,
+		_cake: Union[None, tea] = None,
+		_soufle: Union[None, tea] = None,
+		_after_cake: Union[None, tea] = None,
+		_ignore_check: bool = False,
 		_bake_args: MS[Any] = (),
 		_bake_kwargs: Dict[str, Any] = default(),
 		_bake_after_args: MS[Any] = (),
@@ -31,10 +31,10 @@ class y(_milcery):
 	):
 		super().__init__(
 			program,
-			cake,
-			soufle,
-			after_cake,
-			ignore_check,
+			_cake,
+			_soufle,
+			_after_cake,
+			_ignore_check,
 			_bake_args,
 			_bake_kwargs._asdict() if isinstance(_bake_kwargs, default) else _bake_kwargs,
 			_bake_after_args,
@@ -53,12 +53,18 @@ class y(_milcery):
 
 	@property
 	def _(self):
+		current_kwarg_settings: Dict[str, Any] = {}
+		for key, value in self._kwarg_settings.items():
+			if getattr(self, f"_{key}") != value:
+				current_kwarg_settings[f"_{key}"] = getattr(self, f"_{key}")
+
 		return partial(
 			i,
 			self.program,
-			cake = self.cake,
-			soufle = self.soufle,
-			after_cake = self.after_cake
+			_cake = self.cake,
+			_soufle = self.soufle,
+			_after_cake = self.after_cake,
+			_bake_kwargs = current_kwarg_settings,
 		)
 
 	def __call__(self, *args, **kwargs):

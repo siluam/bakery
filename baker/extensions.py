@@ -17,7 +17,7 @@ def ext_(
         _bake_kwargs=_bake_kwargs,
         _bake_after_args=_bake_after_args,
         _bake_after_kwargs=_bake_after_kwargs,
-        ignore_check=True,
+        _ignore_check=True,
     )
 
 
@@ -34,5 +34,5 @@ def baker_(
         _bake_kwargs=_bake_kwargs,
         _bake_after_args=_bake_after_args,
         _bake_after_kwargs=_bake_after_kwargs,
-        ignore_check=True,
+        _ignore_check=True,
     )

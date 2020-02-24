@@ -41,10 +41,10 @@ class _milcery(*(mixinport(mixins))):
 	def __init__(
 		self,
 		program: str,
-		cake: Union[None, tea],
-		soufle: Union[None, tea],
-		after_cake: Union[None, tea],
-		ignore_check: bool,
+		_cake: Union[None, tea],
+		_soufle: Union[None, tea],
+		_after_cake: Union[None, tea],
+		_ignore_check: bool,
 		_bake_args: MS[Any],
 		_bake_kwargs: Dict[str, Any],
 		_bake_after_args: MS[Any],
@@ -67,7 +67,7 @@ class _milcery(*(mixinport(mixins))):
 			A good way to debug commands is to see what the command actually was, using the "_str"
 			keyword argument.
 		"""
-		self._ignore_check: bool = ignore_check
+		self._ignore_check: bool = _ignore_check
 
 		"""
 
@@ -141,9 +141,9 @@ class _milcery(*(mixinport(mixins))):
 			"verbosity",
 		)
 		self.program: str = program
-		self.cake: type = tea() if cake is None else cake
-		self.soufle: type = tea() if soufle is None else soufle
-		self.after_cake: type = tea() if after_cake is None else after_cake
+		self.cake: type = tea() if _cake is None else _cake
+		self.soufle: type = tea() if _soufle is None else _soufle
+		self.after_cake: type = tea() if _after_cake is None else _after_cake
 		self.tiered: type = tea()
 
 		for key, value in self._kwarg_settings.items():
