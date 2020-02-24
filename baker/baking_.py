@@ -16,12 +16,14 @@ class not_same_type(Error):
 class baking_:
 
 	def _bake_cake(
-		self, cls, args, kwargs, _cutter=False, _after_cake=False, _keep=True
+		self, cls, args, kwargs, _after_cake=False, _keep=True
 	):
 		args, kwargs = self._set(cls, args, kwargs, _baking=True)
 
 		_ = self._attach_command_args_kwargs(
-			self.cake if _cutter or _keep else tea(), args, kwargs
+			(
+				self.after_cake if _after_cake else self.cake
+			) if _keep else tea(), args, kwargs
 		)
 
 		if _after_cake:
@@ -80,10 +82,10 @@ class baking_:
 			new_bakery,
 			args,
 			kwargs,
-			_cutter=True,
 			_after_cake=self.__shell_cake(
 				self, kwargs.pop("_bake", False)
 			),
+			_keep=True,
 		)
 
 	def soubake_(
