@@ -14,6 +14,9 @@ class _set:
 		if "_frosting" in self.__kwargs.keys():
 			self.__frosting()
 
+		if "_print" in self.__kwargs.keys():
+			self.__print()
+
 		if "_from_file" in self.__kwargs.keys():
 			self.__from_file()
 
@@ -77,3 +80,6 @@ class _set:
 	def __frosting(self):
 		# Can't be put in a property as it needs "kwargs", which is local to this scope only
 		self.__kwargs["_type"] = iter
+
+	def __print(self):
+		self.__kwargs["_str"] = True

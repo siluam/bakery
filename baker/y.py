@@ -1,3 +1,6 @@
+# Imports
+import builtins
+
 # From Imports
 from nanite import module_installed, fullpath
 from typing import MutableSequence as MS, Dict, Any
@@ -16,6 +19,7 @@ class y(_milcery):
 		_bake_kwargs: Dict[str, Any] = {},
 		_bake_after_args: MS[Any] = (),
 		_bake_after_kwargs: Dict[str, Any] = {},
+		sparse = False,
 		**kwargs,
 	):
 		super().__init__(
@@ -28,11 +32,16 @@ class y(_milcery):
 			_bake_after_kwargs,
 			**kwargs,
 		)
+		try:
+			builtins.bakeriy_stores.append(self)
+		except AttributeError:
+			builtins.bakeriy_stores = [self]
+
 	def __call__(self, *args, **kwargs):
 		return self._run_frosting(args, kwargs)
 
 def __getattr__(program):
-    """
+	"""
 		Answer 1: https://stackoverflow.com/questions/56786604/import-modules-that-dont-exist-yet/56786875#56786875
 		User 1:   https://stackoverflow.com/users/1016216/l3viathan
 
@@ -41,13 +50,13 @@ def __getattr__(program):
 
 		Modified by me
 	"""
-    if program == "__path__":
-        raise AttributeError
+	if program == "__path__":
+		raise AttributeError
 
-    bakeri_menu = (
-        "git",
-    )
+	bakeri_menu = (
+		"git",
+	)
 
-    bakeriy = i if program in bakeri_menu else y
+	bakeriy = i if program in bakeri_menu else y
 
-    return bakeriy(program)
+	return bakeriy(program)

@@ -31,4 +31,4 @@ def __getattr__(program):
     elif prog_parts[0] == "baker":
         return partial(extension.baker_, bakeriy)
     else:
-        return y(program)
+        return y.y(program)

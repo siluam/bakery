@@ -14,6 +14,8 @@ class _run_frosting:
 		self._kwargs.new_kwargs = kwargs
 		try:
 			output = self._return_output(args, kwargs)
+			if self._print:
+				print(output)
 			if self._frosting:
 				for cat in (output):
 					if isinstance(output[cat], int) or isinstance(

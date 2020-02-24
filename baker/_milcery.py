@@ -1,3 +1,6 @@
+# Imports
+import builtins
+
 # From Imports
 from addict import Dict as D
 from autoslot import Slots
@@ -32,6 +35,12 @@ mixins: Generator[str, None, None] = (fullpath(f"{mixin}.py", f_back = 2) for mi
 ))
 
 class _milcery(*(mixinport(mixins)), Slots):
+
+	"""
+		Answer: https://stackoverflow.com/questions/26315584/apply-a-function-to-all-instances-of-a-class/26315625#26315625
+		User: https://stackoverflow.com/users/625914/behzad-nouri
+	"""
+
 	def __init__(
 		self,
 		program: str,
@@ -91,6 +100,7 @@ class _milcery(*(mixinport(mixins)), Slots):
 			"kwarg_one_dash": False,
 			"fixed_key": False,
 			"return": "verbosity",
+			"print": False,
 		}
 		self._non_underscored_properties: Tuple[str] = (
 			"program"
@@ -129,6 +139,7 @@ class _milcery(*(mixinport(mixins)), Slots):
 			"gensing",
 			"verbosity",
 		)
+		self.stores = lambda: builtins.bakeriy_stores
 		self.program: str = program
 		self.cake: type = tea()
 		self.soufle: type = tea()

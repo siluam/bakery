@@ -64,6 +64,14 @@ class _short_property_vars:
 		self.__str = bool(value)
 
 	@property
+	def _print(self):
+		return self.__print
+
+	@_print.setter
+	def _print(self, value):
+		self.__print = bool(value)
+
+	@property
 	def _ignore_stderr(self):
 		return self.__ignore_stderr
 
