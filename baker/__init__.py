@@ -10,7 +10,7 @@ i = module_installed(fullpath("i.py", f_back = 2))
 y = module_installed(fullpath("y.py", f_back = 2))
 
 def __getattr__(program):
-    """
+	"""
 		Answer 1: https://stackoverflow.com/questions/56786604/import-modules-that-dont-exist-yet/56786875#56786875
 		User 1:   https://stackoverflow.com/users/1016216/l3viathan
 
@@ -19,16 +19,19 @@ def __getattr__(program):
 
 		Modified by me
 	"""
-    if program == "__path__":
-        raise AttributeError
+	if program == "__path__":
+		raise AttributeError
 
-    extension = module_installed(fullpath("extensions.py", f_back = 1))
-    prog_parts = program.partition("_")
-    bakeriy = i if prog_parts[2] == "i" else y
+	extension = module_installed(fullpath("extensions.py", f_back = 1))
+	prog_parts = program.partition("_")
+	bakeriy = i if prog_parts[2] == "i" else y
 
-    if prog_parts[0] == "ext":
-        return partial(extension.ext_, bakeriy)
-    elif prog_parts[0] == "baker":
-        return partial(extension.baker_, bakeriy)
-    else:
-        return y.y(program)
+	try:
+		if prog_parts[0] == "ext":
+			return partial(extension.ext_, bakeriy)
+		elif prog_parts[0] == "baker":
+			return partial(extension.baker_, bakeriy)
+		else:
+			return y.y(program)
+	except Exception as e:
+		return e

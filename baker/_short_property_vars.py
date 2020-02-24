@@ -1,3 +1,6 @@
+# Imports
+import builtins
+
 # From Imports
 from nanite import check_type, fullpath
 from toml import load
@@ -15,6 +18,10 @@ class too_verbose(Error):
 
 
 class _short_property_vars:
+
+	@property
+	def stores(self):
+		return builtins.bakeriy_stores
 
 	@property
 	def _type(self):

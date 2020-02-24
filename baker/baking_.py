@@ -52,14 +52,14 @@ class baking_:
 		self._bake_cake(self, args, kwargs, _after_cake=False)
 
 	def bake_all_(self, *args, **kwargs):
-		for store in builtins.bakeriy_stores:
+		for store in self.stores:
 			store.bake_(*args, **kwargs)
 
 	def bake_after_(self, *args, **kwargs):
 		self._bake_cake(self, args, kwargs, _after_cake=True)
 
 	def bake_after_all_(self, *args, **kwargs):
-		for store in builtins.bakeriy_stores:
+		for store in self.stores:
 			store.bake_after_(*args, **kwargs)
 
 	def dale_(self, *args, **kwargs):
@@ -116,7 +116,7 @@ class baking_:
 		self.soufle = tea(*total_args, kwargs)
 
 	def soubake_all_(self, *args, **kwargs):
-		for store in builtins.bakeriy_stores:
+		for store in self.stores:
 			store.soubake_bake_(*args, **kwargs)
 
 	def splat_(self):
@@ -136,5 +136,5 @@ class baking_:
 		self.after_cake = tea()
 
 	def splat_all_(self):
-		for store in builtins.bakeriy_stores:
+		for store in self.stores:
 			store.splat_()

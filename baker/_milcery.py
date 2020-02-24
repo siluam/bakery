@@ -1,9 +1,5 @@
-# Imports
-import builtins
-
 # From Imports
 from addict import Dict as D
-from autoslot import Slots
 from gensing import tea
 from nanite import (
 	check_type,
@@ -18,7 +14,8 @@ from typing import (
 	Dict,
 	MutableSequence as MS,
 	Any,
-	Generator
+	Generator,
+	Union,
 )
 
 mixins: Generator[str, None, None] = (fullpath(f"{mixin}.py", f_back = 2) for mixin in (
@@ -34,7 +31,7 @@ mixins: Generator[str, None, None] = (fullpath(f"{mixin}.py", f_back = 2) for mi
 	"tier_",
 ))
 
-class _milcery(*(mixinport(mixins)), Slots):
+class _milcery(*(mixinport(mixins))):
 
 	"""
 		Answer: https://stackoverflow.com/questions/26315584/apply-a-function-to-all-instances-of-a-class/26315625#26315625
@@ -44,6 +41,9 @@ class _milcery(*(mixinport(mixins)), Slots):
 	def __init__(
 		self,
 		program: str,
+		cake: Union[None, tea],
+		soufle: Union[None, tea],
+		after_cake: Union[None, tea],
 		ignore_check: bool,
 		_bake_args: MS[Any],
 		_bake_kwargs: Dict[str, Any],
@@ -103,7 +103,8 @@ class _milcery(*(mixinport(mixins)), Slots):
 			"print": False,
 		}
 		self._non_underscored_properties: Tuple[str] = (
-			"program"
+			"program",
+			"stores",
 		)
 
 		# Returns the default allowed types and adds "str" as well
@@ -139,11 +140,10 @@ class _milcery(*(mixinport(mixins)), Slots):
 			"gensing",
 			"verbosity",
 		)
-		self.stores = lambda: builtins.bakeriy_stores
 		self.program: str = program
-		self.cake: type = tea()
-		self.soufle: type = tea()
-		self.after_cake: type = tea()
+		self.cake: type = tea() if cake is None else cake
+		self.soufle: type = tea() if soufle is None else soufle
+		self.after_cake: type = tea() if after_cake is None else after_cake
 		self.tiered: type = tea()
 
 		for key, value in self._kwarg_settings.items():

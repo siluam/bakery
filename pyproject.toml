@@ -16,7 +16,6 @@ sarge = "*"
 toml = "*"
 nanite = {git = "https://gitlab.com/picotech/nanotech/nanite.git", branch = "master"}
 gensing = {git = "https://gitlab.com/picotech/nanotech/gensing.git", branch = "master"}
-autoslot = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
