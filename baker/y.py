@@ -32,6 +32,10 @@ class y(_milcery):
 			_bake_after_kwargs,
 			**kwargs,
 		)
+		"""
+			Answer: https://stackoverflow.com/questions/11813287/insert-variable-into-global-namespace-from-within-a-function/39937010#39937010
+			User: https://stackoverflow.com/users/1397061/1
+		"""
 		try:
 			builtins.bakeriy_stores.append(self)
 		except AttributeError:
