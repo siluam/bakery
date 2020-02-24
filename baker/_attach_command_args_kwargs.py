@@ -1,5 +1,6 @@
 # From Imports
 from itertools import chain
+from os import name as os_name
 from typing import Union, Any
 
 class Error(Exception):
@@ -102,10 +103,13 @@ class _attach_command_args_kwargs:
 		for key, value in self.__new_kwargs.items():
 			if isinstance(value, dict):
 
-				if value.get("dashes", None) is None:
-					dash = "-" if len(key) == 1 or self._kwarg_one_dash else "--"
+				if os_name == "nt":
+					dash = "/"
 				else:
-					dash = "-" if value["dashes"] else "--"
+					if value.get("dashes", None) is None:
+						dash = "-" if len(key) == 1 or self._kwarg_one_dash else "--"
+					else:
+						dash = "-" if value["dashes"] else "--"
 				final_key = f'{dash}{key if value.get("fixed", False) or self._fixed_key else key.replace("_", "-")}'
 
 				if "repeat" in value.keys():
@@ -142,7 +146,7 @@ class _attach_command_args_kwargs:
 
 			else:
 				self.__command.append(
-					(
+					"/" if os_name == "nt" else (
 						"-"
 						if self._kwarg_one_dash
 						or len(key) == 1
