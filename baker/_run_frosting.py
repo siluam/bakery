@@ -5,6 +5,14 @@ from nanite import module_installed
 # Debug Imports
 pout = module_installed("pout")
 
+class Error(Exception):
+	pass
+
+
+class cannot_frost_and_run(Error):
+	pass
+
+
 class _run_frosting:
 	def _run_frosting(self, args, kwargs):
 		self._args = D({"old_args": args})
@@ -17,6 +25,8 @@ class _run_frosting:
 			if self._print:
 				print(output)
 			if self._frosting:
+				if self._capture == "run":
+					raise cannot_frost_and_run('Sorry! You can\'t use both the "capture = run" and "frosting" options!')
 				for cat in (output):
 					if isinstance(output[cat], int) or isinstance(
 						output[cat], (str, bytes, bytearray)

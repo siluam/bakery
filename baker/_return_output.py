@@ -24,14 +24,17 @@ class _return_output:
 
 		self.__capture_output()
 
-		_peek_value, self.__stderr = peek(
-			self.__decode_std(self.__stderr), return_first=2
-		)
-
-		if _peek_value and not self._ignore_stderr:
-			raise stderr("\n".join(self.__decode_std(self.__stderr)))
+		if self._capture == "run":
+			return self.__command()
 		else:
-			return self.__verbose_return() if self._return == "verbosity" else self.__regular_return()
+			_peek_value, self.__stderr = peek(
+				self.__decode_std(self.__stderr), return_first=2
+			)
+
+			if _peek_value and not self._ignore_stderr:
+				raise stderr("\n".join(self.__decode_std(self.__stderr)))
+			else:
+				return self.__verbose_return() if self._return == "verbosity" else self.__regular_return()
 
 	def __capture_output(self):
 
