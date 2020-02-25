@@ -8,16 +8,20 @@ class _set:
 		self.__args = args
 		self.__kwargs = kwargs
 
-		if "_drive_through" in self.__kwargs.keys():
+		# if "_drive_through" in self.__kwargs.keys():
+		if self.__kwargs.get("_drive_through", False):
 			self.__drive_through()
 
-		if "_frosting" in self.__kwargs.keys():
+		# if "_frosting" in self.__kwargs.keys():
+		if self.__kwargs.get("_frosting", False):
 			self.__frosting()
 
-		if "_print" in self.__kwargs.keys():
+		# if "_print" in self.__kwargs.keys():
+		if self.__kwargs.get("_print", False):
 			self.__print()
 
-		if "_from_file" in self.__kwargs.keys():
+		# if "_from_file" in self.__kwargs.keys():
+		if self.__kwargs.get("_from_file", ""):
 			self.__from_file()
 
 		for key in self.__cls._kwarg_settings.keys():
