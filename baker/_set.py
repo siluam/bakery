@@ -1,6 +1,14 @@
 # From Imports
 from toml import load
 
+class Error(Exception):
+	pass
+
+
+class cannot_frost_and_run(Error):
+	pass
+
+
 class _set:
 	def _set(self, cls, args, kwargs, _baking=False):
 
@@ -12,12 +20,10 @@ class _set:
 		if self.__kwargs.get("_drive_through", False):
 			self.__drive_through()
 
-		# if "_frosting" in self.__kwargs.keys():
-		if self.__kwargs.get("_frosting", False):
+		if "_frosting" in self.__kwargs.keys():
 			self.__frosting()
 
-		# if "_print" in self.__kwargs.keys():
-		if self.__kwargs.get("_print", False):
+		if "_print" in self.__kwargs.keys():
 			self.__print()
 
 		# if "_from_file" in self.__kwargs.keys():
@@ -46,7 +52,6 @@ class _set:
 						),
 					),
 				)
-
 		return self.__args, self.__kwargs
 
 	def __drive_through(self):
@@ -83,7 +88,12 @@ class _set:
 
 	def __frosting(self):
 		# Can't be put in a property as it needs "kwargs", which is local to this scope only
-		self.__kwargs["_type"] = iter
+		if self.__kwargs.get("_frosting", False):
+			if self.__kwargs.get("_capture", "both") or self._capture == "run":
+				raise cannot_frost_and_run('Sorry! You can\'t use both the "capture = run" and "frosting" options!')
+			self.__kwargs["_type"] = iter
+		else:
+			self.__kwargs.get("_type", iter)
 
 	def __print(self):
-		self.__kwargs["_str"] = True
+		self.__kwargs["_str"] = bool(self.__kwargs.get("_print", False))

@@ -194,14 +194,15 @@ class _milcery(*(mixinport(mixins))):
 			elif subcommand == "pipe_":
 				args = [f"| {_}" for _ in args]
 			else:
+				new_sub = subcommand.replace("_", "-")
 				if self._shell:
 					kwargs["_end_command"] = (
-						subcommand
+						new_sub
 						if kwargs.get("_sub_before_shell", False)
-						else f"-c '{subcommand}"
+						else f"-c '{new_sub}"
 					)
 				else:
-					kwargs["_end_command"] = subcommand
+					kwargs["_end_command"] = new_sub
 				kwargs["_subcommand"] = True
 			return self._run_frosting(args, kwargs)
 
