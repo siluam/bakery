@@ -51,16 +51,57 @@ class baking_:
 	def bake_(self, *args, **kwargs):
 		self._bake_cake(self, args, kwargs, _after_cake=False)
 
+	def bake_replacement_(self, *args, **kwargs):
+		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
+		for key, value in self.cake.items():
+			if value == replacement[0]:
+				self.cake[next(key)] = replacement[1]
+
 	def bake_all_(self, *args, **kwargs):
 		for store in self.stores:
 			store.bake_(*args, **kwargs)
 
+	def bake_all_replacement_(self, *args, **kwargs):
+		pass
+
 	def bake_after_(self, *args, **kwargs):
 		self._bake_cake(self, args, kwargs, _after_cake=True)
+
+	def bake_after_replacement_(self, *args, **kwargs):
+		pass
 
 	def bake_after_all_(self, *args, **kwargs):
 		for store in self.stores:
 			store.bake_after_(*args, **kwargs)
+
+	def bake_after_all_replacement_(self, *args, **kwargs):
+		pass
+
+	def soubake_(
+		self,
+		*args: Tuple[Dict[genstring, genstring]],
+		**kwargs: Dict[genstring, genstring]
+	):
+		"""
+
+			Bake a subcommand; whenever that subcommand is used, it will be replaced by the command provided instead.
+
+		"""
+		# Merge a tuple of dictionaries and a single dictionary kwargs
+		if args and not all(isinstance(argument, (dict, tea)) for argument in args):
+			raise not_same_type("Sorry! All arguments must be dictionaries or gensings!")
+		total_args = (argument if isinstance(argument, dict) else argument.items(whole) for argument in args)
+		self.soufle = tea(*total_args, kwargs)
+
+	def soubake_replacement_(self, *args, **kwargs):
+		pass
+
+	def soubake_all_(self, *args, **kwargs):
+		for store in self.stores:
+			store.soubake_bake_(*args, **kwargs)
+
+	def soubake_all_replacement_(self, *args, **kwargs):
+		pass
 
 	def dale_(self, *args, **kwargs):
 		"""
@@ -98,26 +139,6 @@ class baking_:
 			),
 			_keep=True,
 		)
-
-	def soubake_(
-		self,
-		*args: Tuple[Dict[genstring, genstring]],
-		**kwargs: Dict[genstring, genstring]
-	):
-		"""
-
-			Bake a subcommand; whenever that subcommand is used, it will be replaced by the command provided instead.
-
-		"""
-		# Merge a tuple of dictionaries and a single dictionary kwargs
-		if args and not all(isinstance(argument, (dict, tea)) for argument in args):
-			raise not_same_type("Sorry! All arguments must be dictionaries or gensings!")
-		total_args = (argument if isinstance(argument, dict) else argument.items(whole) for argument in args)
-		self.soufle = tea(*total_args, kwargs)
-
-	def soubake_all_(self, *args, **kwargs):
-		for store in self.stores:
-			store.soubake_bake_(*args, **kwargs)
 
 	def splat_(self):
 		"""
