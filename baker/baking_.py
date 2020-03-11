@@ -51,22 +51,26 @@ class baking_:
 	def bake_(self, *args, **kwargs):
 		self._bake_cake(self, args, kwargs, _after_cake=False)
 
+	# TODO
 	def bake_replacement_(self, *args, **kwargs):
-		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
-		for key, value in self.cake.items():
-			if value == replacement[0]:
-				self.cake[next(key)] = replacement[1]
+		# replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
+		# for key, value in self.cake.items():
+		# 	if value == replacement[0]:
+		# 		self.cake[next(key)] = replacement[1]
+		pass
 
 	def bake_all_(self, *args, **kwargs):
 		for store in self.stores:
 			store.bake_(*args, **kwargs)
 
+	# TODO
 	def bake_all_replacement_(self, *args, **kwargs):
 		pass
 
 	def bake_after_(self, *args, **kwargs):
 		self._bake_cake(self, args, kwargs, _after_cake=True)
 
+	# TODO
 	def bake_after_replacement_(self, *args, **kwargs):
 		pass
 
@@ -74,6 +78,7 @@ class baking_:
 		for store in self.stores:
 			store.bake_after_(*args, **kwargs)
 
+	# TODO
 	def bake_after_all_replacement_(self, *args, **kwargs):
 		pass
 
@@ -93,6 +98,7 @@ class baking_:
 		total_args = (argument if isinstance(argument, dict) else argument.items(whole) for argument in args)
 		self.soufle = tea(*total_args, kwargs)
 
+	# TODO
 	def soubake_replacement_(self, *args, **kwargs):
 		pass
 
@@ -100,6 +106,7 @@ class baking_:
 		for store in self.stores:
 			store.soubake_bake_(*args, **kwargs)
 
+	# TODO
 	def soubake_all_replacement_(self, *args, **kwargs):
 		pass
 
