@@ -51,36 +51,40 @@ class baking_:
 	def bake_(self, *args, **kwargs):
 		self._bake_cake(self, args, kwargs, _after_cake=False)
 
-	# TODO
+	# DONE
 	def bake_replacement_(self, *args, **kwargs):
-		# replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
-		# for key, value in self.cake.items():
-		# 	if value == replacement[0]:
-		# 		self.cake[next(key)] = replacement[1]
-		pass
+		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
+		for index, kv in self.cake.items(indexed = True).items():
+			if kv.value == replacement[0].value:
+				self.cake[f"values:{index}":] = replacement.values()
 
 	def bake_all_(self, *args, **kwargs):
 		for store in self.stores:
 			store.bake_(*args, **kwargs)
 
-	# TODO
+	# DONE
 	def bake_all_replacement_(self, *args, **kwargs):
-		pass
+		for store in self.stores:
+			store.bake_replacement_(*args, **kwargs)
 
 	def bake_after_(self, *args, **kwargs):
 		self._bake_cake(self, args, kwargs, _after_cake=True)
 
-	# TODO
+	# DONE
 	def bake_after_replacement_(self, *args, **kwargs):
-		pass
+		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
+		for index, kv in self.after_cake.items(indexed = True).items():
+			if kv.value == replacement[0].value:
+				self.after_cake[f"values:{index}":] = replacement.values()
 
 	def bake_after_all_(self, *args, **kwargs):
 		for store in self.stores:
 			store.bake_after_(*args, **kwargs)
 
-	# TODO
+	# DONE
 	def bake_after_all_replacement_(self, *args, **kwargs):
-		pass
+		for store in self.stores:
+			store.bake_after_replacement_(*args, **kwargs)
 
 	def soubake_(
 		self,
@@ -98,17 +102,21 @@ class baking_:
 		total_args = (argument if isinstance(argument, dict) else argument.items(whole) for argument in args)
 		self.soufle = tea(*total_args, kwargs)
 
-	# TODO
+	# DONE
 	def soubake_replacement_(self, *args, **kwargs):
-		pass
+		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
+		for index, kv in self.soufle.items(indexed = True).items():
+			if kv.value == replacement[0].value:
+				self.soufle[f"values:{index}":] = replacement.values()
 
 	def soubake_all_(self, *args, **kwargs):
 		for store in self.stores:
-			store.soubake_bake_(*args, **kwargs)
+			store.soubake_(*args, **kwargs)
 
-	# TODO
+	# DONE
 	def soubake_all_replacement_(self, *args, **kwargs):
-		pass
+		for store in self.stores:
+			store.soubake_replacement_(*args, **kwargs)
 
 	def dale_(self, *args, **kwargs):
 		"""
