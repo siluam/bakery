@@ -1,7 +1,6 @@
 # From Imports
 from addict import Dict as D
-from autoslot import Slots
-from gensing import tea
+from gensing import tea, frosting
 from nanite import (
 	check_type,
 	module_installed,
@@ -31,29 +30,6 @@ mixins: Generator[str, None, None] = (fullpath(f"{mixin}.py", f_back = 2) for mi
 	"baking_",
 	"tier_",
 ))
-
-class _getattr_(tea, Slots):
-	def __init__(self, output, capture = "stdout"):
-		super().__init__(output)
-		self.output = self.items(whole = True, addict = True)
-		self.capture = "stderr" if capture == "stderr" else "stdout"
-	def __iter__(self):
-		self.n = 0
-		self.next_output = tuple(getattr(self.output, self.capture))
-		return self
-	def __next__(self):
-		if self.n < len(self.next_output):
-			self.n += 1
-			return self.next_output[self.n - 1]
-		else:
-			raise StopIteration
-	@property
-	def __getattr__(self, attr):
-		return getattr(self.output, attr)
-	def __repr__(self):
-		return repr(self.output)
-	def __call__(self):
-		return self.output
 
 class _milcery(*(mixinport(mixins))):
 
@@ -228,7 +204,7 @@ class _milcery(*(mixinport(mixins))):
 				else:
 					kwargs["_end_command"] = new_sub
 				kwargs["_subcommand"] = True
-			return _getattr_(self._run_frosting(args, kwargs), self._capture)
+			return frosting(self._run_frosting(args, kwargs), self._capture)
 		return inner
 
 	def __iter__(self):
