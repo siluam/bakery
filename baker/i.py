@@ -68,6 +68,7 @@ class i(_milcery):
 			_soufle = self.soufle,
 			_after_cake = self.after_cake,
 			_bake_kwargs = current_kwarg_settings,
+			_partial = True,
 		)
 
 

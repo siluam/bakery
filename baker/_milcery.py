@@ -49,6 +49,7 @@ class _milcery(*(mixinport(mixins))):
 		_bake_kwargs: Dict[str, Any],
 		_bake_after_args: MS[Any],
 		_bake_after_kwargs: Dict[str, Any],
+		_partial = False,
 		*args,
 		**kwargs,
 	):
@@ -141,7 +142,12 @@ class _milcery(*(mixinport(mixins))):
 			"verbosity",
 		)
 		self.program: str = program
+
 		self.cake: type = tea() if _cake is None else _cake
+		if _partial:
+			self.remove_slice_(*args, **kwargs)
+			# self.remove_souslice_(*args, **kwargs)
+
 		self.soufle: type = tea() if _soufle is None else _soufle
 		self.after_cake: type = tea() if _after_cake is None else _after_cake
 		self.tiered: type = tea()

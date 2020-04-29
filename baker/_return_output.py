@@ -22,10 +22,10 @@ class _return_output:
 		if self._str:
 			return self.__command()
 
-		self.__capture_output()
+		output = self.__capture_output()
 
 		if self._capture == "run":
-			return self.__command()
+			return self.__command() if output == 0 else output
 		else:
 			_peek_value, self.__stderr = peek(
 				self.__decode_std(self.__stderr), return_first=2
@@ -43,9 +43,10 @@ class _return_output:
 			return (
 				D(
 					{
-						"command": self.__command,
-						"args": self._args,
-						"kwargs": self._kwargs,
+						"command" : self.__command(),
+						"gensing" : self.__command,
+						"args" : self._args,
+						"kwargs" : self._kwargs,
 					}
 				)
 				if self._verbosity in (1, 2)

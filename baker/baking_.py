@@ -58,6 +58,13 @@ class baking_:
 			if kv.value == replacement[0].value:
 				self.cake[f"values:{index}":] = replacement.values()
 
+	# DONE
+	def remove_slice_(self, *args, **kwargs):
+		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
+		for index, kv in self.cake.items(indexed = True).items():
+			if kv.value == replacement[0].value:
+				del self.cake[index:]
+
 	def bake_all_(self, *args, **kwargs):
 		for store in self.stores:
 			store.bake_(*args, **kwargs)
@@ -66,6 +73,11 @@ class baking_:
 	def bake_all_replacement_(self, *args, **kwargs):
 		for store in self.stores:
 			store.bake_replacement_(*args, **kwargs)
+
+	# DONE
+	def remove_all_slices_(self, *args, **kwargs):
+		for store in self.stores:
+			store.remove_slice_(*args, **kwargs)
 
 	def bake_after_(self, *args, **kwargs):
 		self._bake_cake(self, args, kwargs, _after_cake=True)
@@ -77,6 +89,13 @@ class baking_:
 			if kv.value == replacement[0].value:
 				self.after_cake[f"values:{index}":] = replacement.values()
 
+	# DONE
+	def remove_after_slice_(self, *args, **kwargs):
+		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
+		for index, kv in self.after_cake.items(indexed = True).items():
+			if kv.value == replacement[0].value:
+				del self.after_cake[index:]
+
 	def bake_after_all_(self, *args, **kwargs):
 		for store in self.stores:
 			store.bake_after_(*args, **kwargs)
@@ -85,6 +104,11 @@ class baking_:
 	def bake_after_all_replacement_(self, *args, **kwargs):
 		for store in self.stores:
 			store.bake_after_replacement_(*args, **kwargs)
+
+	# DONE
+	def remove_after_all_slices_(self, *args, **kwargs):
+		for store in self.stores:
+			store.remove_after_slice_(*args, **kwargs)
 
 	def soubake_(
 		self,
@@ -99,7 +123,7 @@ class baking_:
 		# Merge a tuple of dictionaries and a single dictionary kwargs
 		if args and not all(isinstance(argument, (dict, tea)) for argument in args):
 			raise not_same_type("Sorry! All arguments must be dictionaries or gensings!")
-		total_args = (argument if isinstance(argument, dict) else argument.items(whole) for argument in args)
+		total_args = (argument if isinstance(argument, dict) else argument.items(whole = True) for argument in args)
 		self.soufle = tea(*total_args, kwargs)
 
 	# DONE
@@ -109,6 +133,13 @@ class baking_:
 			if kv.value == replacement[0].value:
 				self.soufle[f"values:{index}":] = replacement.values()
 
+	# DONE
+	def remove_souslice_(self, *args, **kwargs):
+		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
+		for index, kv in self.soufle.items(indexed = True).items():
+			if kv.value == replacement[0].value:
+				del self.soufle[index:]
+
 	def soubake_all_(self, *args, **kwargs):
 		for store in self.stores:
 			store.soubake_(*args, **kwargs)
@@ -117,6 +148,11 @@ class baking_:
 	def soubake_all_replacement_(self, *args, **kwargs):
 		for store in self.stores:
 			store.soubake_replacement_(*args, **kwargs)
+
+	# DONE
+	def remove_all_souslices_(self, *args, **kwargs):
+		for store in self.stores:
+			store.remove_souslice_(*args, **kwargs)
 
 	def dale_(self, *args, **kwargs):
 		"""
