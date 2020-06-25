@@ -1,6 +1,7 @@
 # From Imports
 from addict import Dict as D
 from nanite import module_installed
+from gensing import tea, frosting
 
 # Debug Imports
 pout = module_installed("pout")
@@ -32,6 +33,9 @@ class _run_frosting:
 								print(line)
 			if pout:
 				pout.v(output)
-			return output
+			if isinstance(output, (dict, tea, frosting)) and len(output) == 1:
+				return next(iter(output))
+			else:
+				return output
 		finally:
 			self._reset_all()

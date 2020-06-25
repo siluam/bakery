@@ -210,15 +210,27 @@ class _milcery(*(mixinport(mixins))):
 				else:
 					kwargs["_end_command"] = new_sub
 				kwargs["_subcommand"] = True
-			return frosting(self._run_frosting(args, kwargs), self._capture)
+
+			# DONE: Change to accomodate the new return methods
+			if isinstance(output := self._run_frosting(args, kwargs), (dict, tea, frosting)):
+				return frosting(output, self._capture)
+			else:
+				return frosting(output)
+
 		return inner
 
 	def __iter__(self):
 		self.n = 0
-		self.__next_output = tuple(getattr(
-			self._run_frosting([], {}),
-			"stderr" if self._capture == "stderr" else "stdout"
-		))
+
+		# TODO: Change to accomodate the new return methods
+		if isinstance(output := self._run_frosting([], {}), (dict, tea, frosting)):
+			self.__next_output = tuple(getattr(
+				output,
+				"stderr" if self._capture == "stderr" else "stdout"
+			))
+		else:
+			tuple(output)
+
 		return self
 
 	def __next__(self):
