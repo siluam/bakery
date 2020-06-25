@@ -186,6 +186,9 @@ class _milcery(*(mixinport(mixins))):
 
 			setattr(self, __temp_key, None)
 
+	def _convert_to_type(self, input):
+		return " ".join(input) if self._type.__name__ == "str" else self._type(input)
+
 	def __getattr__(self, subcommand):
 		def inner(*args, **kwargs):
 			if subcommand == "shell_":
@@ -213,9 +216,9 @@ class _milcery(*(mixinport(mixins))):
 
 			# DONE: Change to accomodate the new return methods
 			if isinstance(output := self._run_frosting(args, kwargs), (dict, tea, frosting)):
-				return frosting(output, self._capture)
+				return self._convert_to_type(frosting(output, self._capture))
 			else:
-				return frosting(output)
+				return self._convert_to_type(frosting(output))
 
 		return inner
 
@@ -224,12 +227,12 @@ class _milcery(*(mixinport(mixins))):
 
 		# TODO: Change to accomodate the new return methods
 		if isinstance(output := self._run_frosting([], {}), (dict, tea, frosting)):
-			self.__next_output = tuple(getattr(
+			self.__next_output = list(getattr(
 				output,
 				"stderr" if self._capture == "stderr" else "stdout"
 			))
 		else:
-			tuple(output)
+			list(output)
 
 		return self
 

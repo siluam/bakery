@@ -81,20 +81,12 @@ class _return_output:
 
 	def __verbose_return(self):
 
-		_: Dict[str, Any] = D(
-			{
-				"stdout": " ".join(self.__decode_std(self.__stdout))
-				if self._type.__name__ == "str"
-				else self._type(self.__decode_std(self.__stdout))
-			}
-		)
+		_: Dict[str, Any] = D({
+			"stdout": self._convert_to_type(self.__decode_std(self.__stdout))
+		})
 
 		if self._verbosity > 0:
-			_.stderr = (
-				" ".join(self.__decode_std(self.__stderr))
-				if self._type.__name__ == "str"
-				else self._type(self.__decode_std(self.__stderr))
-			)
+			_.stderr = self._convert_to_type(self.__decode_std(self.__stderr))
 			_.return_code = self.__return_code
 			_.return_codes = self.__return_codes
 			_.command = self.__command()
@@ -130,12 +122,8 @@ class _return_output:
 	def __regular_return(self):
 
 		_tup = (
-			" ".join(self.__decode_std(self.__stdout))
-			if self._type.__name__ == "str"
-			else self._type(self.__decode_std(self.__stdout)),
-			" ".join(self.__decode_std(self.__stderr))
-			if self._type.__name__ == "str"
-			else self._type(self.__decode_std(self.__stderr)),
+			self._convert_to_type(self.__decode_std(self.__stdout)),
+			self._convert_to_type(self.__decode_std(self.__stderr)),
 			self.__return_code,
 			self.__return_codes,
 			self.__command(),

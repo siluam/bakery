@@ -34,7 +34,7 @@ class _run_frosting:
 			if pout:
 				pout.v(output)
 			if isinstance(output, (dict, tea, frosting)) and len(output) == 1:
-				return next(iter(output))
+				return next(iter(output.values()))
 			else:
 				return output
 		finally:
