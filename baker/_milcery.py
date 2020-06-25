@@ -186,6 +186,8 @@ class _milcery(*(mixinport(mixins))):
 
 			setattr(self, __temp_key, None)
 
+	# DONE: Something's wrong with this, or returning the generator created by this
+	# DONE: Always remember a generator is used up
 	def __convert_to_generator(self, input):
 		yield from input
 
@@ -242,7 +244,7 @@ class _milcery(*(mixinport(mixins))):
 				"stderr" if self._capture == "stderr" else "stdout"
 			))
 		else:
-			list(output)
+			self.__next_output = list(output)
 
 		return self
 
