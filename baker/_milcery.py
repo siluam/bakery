@@ -186,8 +186,16 @@ class _milcery(*(mixinport(mixins))):
 
 			setattr(self, __temp_key, None)
 
-	def _convert_to_type(self, input):
-		return " ".join(input) if self._type.__name__ == "str" else self._type(input)
+	def __convert_to_generator(self, input):
+		yield from input
+
+	def _convert_to_type(self, input, _type):
+		if _type.__name__ == "str":
+			return " ".join(input)
+		if _type.__name__ in ("generator", "iter"):
+			return self.__convert_to_generator(input)
+		else:
+			return _type(input)
 
 	def __getattr__(self, subcommand):
 		def inner(*args, **kwargs):
@@ -214,18 +222,20 @@ class _milcery(*(mixinport(mixins))):
 					kwargs["_end_command"] = new_sub
 				kwargs["_subcommand"] = True
 
-			# DONE: Change to accomodate the new return methods
+			# DONE: Change to account for the new return methods
 			if isinstance(output := self._run_frosting(args, kwargs), (dict, tea, frosting)):
-				return self._convert_to_type(frosting(output, self._capture))
+				return frosting(output, self._capture)
 			else:
-				return self._convert_to_type(frosting(output))
+				# DONE: _convert_to_type isn't working here because _run_frosting resets
+				#  all properties, including _type; find an alternative
+				return self._convert_to_type(frosting(output), type(output))
 
 		return inner
 
 	def __iter__(self):
 		self.n = 0
 
-		# TODO: Change to accomodate the new return methods
+		# TODO: Change to account for the new return methods
 		if isinstance(output := self._run_frosting([], {}), (dict, tea, frosting)):
 			self.__next_output = list(getattr(
 				output,

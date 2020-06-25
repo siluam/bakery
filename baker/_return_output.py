@@ -82,11 +82,11 @@ class _return_output:
 	def __verbose_return(self):
 
 		_: Dict[str, Any] = D({
-			"stdout": self._convert_to_type(self.__decode_std(self.__stdout))
+			"stdout": self._convert_to_type(self.__decode_std(self.__stdout), self._type)
 		})
 
 		if self._verbosity > 0:
-			_.stderr = self._convert_to_type(self.__decode_std(self.__stderr))
+			_.stderr = self._convert_to_type(self.__decode_std(self.__stderr), self._type)
 			_.return_code = self.__return_code
 			_.return_codes = self.__return_codes
 			_.command = self.__command()
@@ -122,8 +122,8 @@ class _return_output:
 	def __regular_return(self):
 
 		_tup = (
-			self._convert_to_type(self.__decode_std(self.__stdout)),
-			self._convert_to_type(self.__decode_std(self.__stderr)),
+			self._convert_to_type(self.__decode_std(self.__stdout), self._type),
+			self._convert_to_type(self.__decode_std(self.__stderr), self._type),
 			self.__return_code,
 			self.__return_codes,
 			self.__command(),
