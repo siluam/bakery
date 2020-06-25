@@ -32,6 +32,6 @@ class _run_frosting:
 								print(line)
 			if pout:
 				pout.v(output)
-		    return output
+		        return output
 		finally:
 			self._reset_all()
