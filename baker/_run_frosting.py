@@ -32,6 +32,9 @@ class _run_frosting:
 								print(line)
 			if pout:
 				pout.v(output)
-			return output
+			if isinstance(output, dict) and len(output) == 1:
+                return next(iter(output.values()))
+			else:
+			    return output
 		finally:
 			self._reset_all()
