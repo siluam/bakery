@@ -57,7 +57,7 @@ class tier_:
 		# Create the new "tiered" command
 		self.tiered = self._create_command(args, self.__kwargs)
 
-		# Put the original "_end_args" list back into the variable, and set the temp variable to None
+		# Put the original "_starter_args" list back into the variable, and set the temp variable to None
 		self._reset_all()
 
 		# If the "_temp_tiered" kwarg is set, return the new command and reset the "tiered" class variable
@@ -72,19 +72,15 @@ class tier_:
 	def __set_args_kwargs(self):
 		"""
 
-			Since we don't want to use the current "_end_args" list,
+			Since we don't want to use the current "_starter_args" list,
 			we'll store the current list in its temp variable and get the list
 			in the keyword arguments, and an empty list if it doesn't exist.
 
 		"""
-		if not self.__kwargs.get("_before_args", False):
-			self.__kwargs["_before_args"] = []
-		if not self.__kwargs.get("_before_kwargs", False):
-			self.__kwargs["_before_kwargs"] = {}
-		if not self.__kwargs.get("_end_args", False):
-			self.__kwargs["_end_args"] = []
-		if not self.__kwargs.get("_end_kwargs", False):
-			self.__kwargs["_end_kwargs"] = {}
+		if not self.__kwargs.get("_command_kwargs", False):
+			self.__kwargs["_command_kwargs"] = {}
+		if not self.__kwargs.get("_starter_args", False):
+			self.__kwargs["_starter_args"] = []
 
 	def flat_(self):
 		"""

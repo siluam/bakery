@@ -57,13 +57,13 @@ class _create_command:
 				if key[0] != "_"
 			}
 
+			# _starter_args is global because otherwise it would be incorporated into the self.__kwargs above
 			self.__command = self._attach_command_args_kwargs(
-				self.__command, args, self.__kwargs
+				self.__command, self._starter_args, {}
 			)
 
-			# End args is global because otherwise it would be incorporated into the self.__kwargs above
 			self.__command = self._attach_command_args_kwargs(
-				self.__command, self._end_args, self._end_kwargs
+				self.__command, self.__args, self.__kwargs
 			)
 
 			if self._shell:
@@ -95,7 +95,7 @@ class _create_command:
 		)
 
 		self.__command = self._attach_command_args_kwargs(
-			self.__command, self._before_args, self._before_kwargs
+			self.__command, (), self._command_kwargs
 		)
 
 		if self._shell:

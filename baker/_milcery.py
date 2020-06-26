@@ -60,10 +60,6 @@ class _milcery(*(mixinport(mixins))):
 			* tuple
 			* set
 			* frozenset
-			
-			There are two ways to put arguments at the end of the command:
-			1. Use the "_end_args" keyword argument in the function call
-			2. Bake them in using any of the baking methods below
 
 			A good way to debug commands is to see what the command actually was, using the "_str"
 			keyword argument.
@@ -75,11 +71,9 @@ class _milcery(*(mixinport(mixins))):
 		"""
 		self._kwarg_settings: Dict[str, Any] = {
 			"type": iter,
-			"capture": "both",
-			"before_args": [],
-			"before_kwargs": {},
-			"end_args": [],
-			"end_kwargs": {},
+			"capture": "stdout",
+			"command_kwargs": {},
+			"starter_args": [],
 			"shell": False,
 			"frosting": False,
 			"str": False,
@@ -95,7 +89,7 @@ class _milcery(*(mixinport(mixins))):
 				{
 					"ordinal": "first",
 					"number": None,
-					"std": "both",
+					"std": "out",
 				}
 			),
 			"kwarg_one_dash": False,
@@ -166,8 +160,7 @@ class _milcery(*(mixinport(mixins))):
 		self.bake_(*_bake_args, **_bake_kwargs)
 		self.bake_after_(*_bake_after_args, **_bake_after_kwargs)
 
-		self._before_args = args
-		self._before_kwargs = kwargs
+		self._command_kwargs = kwargs
 
 	def _debug_output(self, _key, __temp_key):
 		print(_key, ":", getattr(self, _key))

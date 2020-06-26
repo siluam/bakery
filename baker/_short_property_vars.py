@@ -108,29 +108,15 @@ class _short_property_vars:
 		self.__from_file = load(fullpath(value)) if value else ""
 
 	@property
-	def _end_args(self):
-		return self.__end_args
+	def _starter_args(self):
+		return self.__starter_args
 
-	@_end_args.setter
-	def _end_args(self, value):
+	@_starter_args.setter
+	def _starter_args(self, value):
 		# If the arg value is a string, we'll convert it into a list
 		if isinstance(value, str):
-			self.__end_args = [value]
+			self.__starter_args = [value]
 		elif isinstance(value, (bytes, bytearray)):
-			self.__end_args = [value.decode()]
+			self.__starter_args = [value.decode()]
 		else:
-			self.__end_args = value
-
-	@property
-	def _before_args(self):
-		return self.__before_args
-
-	@_before_args.setter
-	def _before_args(self, value):
-		# If the arg value is a string, we'll convert it into a list
-		if isinstance(value, str):
-			self.__before_args = [value]
-		elif isinstance(value, (bytes, bytearray)):
-			self.__before_args = [value.decode()]
-		else:
-			self.__before_args = value
+			self.__starter_args = value

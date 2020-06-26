@@ -89,7 +89,10 @@ class _set:
 	def __frosting(self):
 		# Can't be put in a property as it needs "kwargs", which is local to this scope only
 		if self.__kwargs.get("_frosting", False):
-			if self.__kwargs.get("_capture", "both") or self._capture == "run":
+			if (
+				self.__kwargs.get("_capture", "stdout") == "run" or
+				self._capture == "run"
+			):
 				raise cannot_frost_and_run('Sorry! You can\'t use both the "capture = run" and "frosting" options!')
 			self.__kwargs["_type"] = iter
 		else:

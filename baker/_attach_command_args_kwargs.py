@@ -19,10 +19,10 @@ class _attach_command_args_kwargs:
 		self.__command = command
 		self.__kwargs = kwargs
 
-		if self.__args:
-			self.__if_args()
 		if self.__kwargs:
 			self.__if_kwargs()
+		if self.__args:
+			self.__if_args()
 
 		return self.__command
 

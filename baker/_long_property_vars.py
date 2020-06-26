@@ -92,7 +92,7 @@ class _long_property_vars:
 					f'Sorry! You must choose from: [{(", ").join(stds)}]'
 				)
 		else:
-			value["std"] = "both"
+			value["std"] = "out"
 
 		self.__n_lines = D(value)
 
