@@ -36,35 +36,31 @@ class baking_:
 
 		"""
 
-		if _bt == "ck":
-			if _bar == "add":
-				pass
-			elif _bar == "replace":
-				cls.settings.ck.baked = tea()
+		for bt in (
+			"ck",
+			"scaa",
+			"scla",
+			"scaka",
+			"sclka",
+		):
+			if _bt == bt:
+				if _bar == "add":
+					pass
+				elif _bar == "replace":
+					cls.settings.cakes[bt].baked = tea()
 
-		elif _bt == "scaa":
-			if _bar == "add":
-				pass
-			elif _bar == "replace":
-				cls.settings.scaa.baked = tea()
+	def splat_(self, _bt = "scaka", _all = False):
+		if _all:
+			for key in self.settings.cakes.keys():
+				del self.settings.cakes[key].baked
+		else:
+			del self.settings.cakes[_bt].baked
+		for key, value in self.settings.defaults.items():
+			setattr(self.__cls, key, value)
 
-		elif _bt == "scla":
-			if _bar == "add":
-				pass
-			elif _bar == "replace":
-				cls.settings.scla.baked = tea()
-
-		elif _bt == "scaka":
-			if _bar == "add":
-				pass
-			elif _bar == "replace":
-				cls.settings.scaka.baked = tea()
-
-		elif _bt == "sclka":
-			if _bar == "add":
-				pass
-			elif _bar == "replace":
-				cls.settings.sclka.baked = tea()
+	def splat_all_(self, _bt = "scaka", _all = False):
+		for store in self.stores:
+			store.splat_(_bt, _all)
 
 	############################################################################################
 
@@ -237,23 +233,3 @@ class baking_:
 			),
 			_keep=True,
 		)
-
-	def splat_(self):
-		"""
-
-			Disable the default settings; refer to the "bake_" function for more information.
-
-		"""
-		# Reset the kwarg settings values; refer to the "_kwarg_settings" class variable for more
-		# information.
-		for key, value in self._kwarg_settings.items():
-			setattr(self, f"_{key}", value)
-
-		# Reset the cake values
-		self.soufle = tea()
-		self.cake = tea()
-		self.after_cake = tea()
-
-	def splat_all_(self):
-		for store in self.stores:
-			store.splat_()
