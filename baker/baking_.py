@@ -18,6 +18,56 @@ class not_same_type(Error):
 
 class baking_:
 
+	############################################################################################
+
+	def bake_(self, *args, cls = self, _bt = "scaka", _bar = "add", **kwargs):
+		"""
+
+			_bt: bake type
+				* ck: command kwargs
+				* scaa: any subcommand args
+				* scla: linked subcommand args
+				* scaka: any subcommand kwargs, then args
+				* sclka: linked subcommand kwargs, then args
+
+			_bar: bake add or replace
+				* add: adds to the currently baked args and kwargs
+				* replace: replaces the currently baked args and kwargs
+
+		"""
+
+		if _bt == "ck":
+			if _bar == "add":
+				pass
+			elif _bar == "replace":
+				cls.settings.ck.baked = tea()
+
+		elif _bt == "scaa":
+			if _bar == "add":
+				pass
+			elif _bar == "replace":
+				cls.settings.scaa.baked = tea()
+
+		elif _bt == "scla":
+			if _bar == "add":
+				pass
+			elif _bar == "replace":
+				cls.settings.scla.baked = tea()
+
+		elif _bt == "scaka":
+			if _bar == "add":
+				pass
+			elif _bar == "replace":
+				cls.settings.scaka.baked = tea()
+
+		elif _bt == "sclka":
+			if _bar == "add":
+				pass
+			elif _bar == "replace":
+				cls.settings.sclka.baked = tea()
+
+	############################################################################################
+
 	def _bake_cake(
 		self, cls, args, kwargs, _after_cake=False, _keep=True
 	):
@@ -47,9 +97,6 @@ class baking_:
 				_after_cake_temp = False
 
 		return _after_cake_temp
-
-	def bake_(self, *args, **kwargs):
-		self._bake_cake(self, args, kwargs, _after_cake=False)
 
 	# DONE
 	def bake_replacement_(self, *args, **kwargs):

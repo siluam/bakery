@@ -1,5 +1,6 @@
 # From Imports
 from addict import Dict as D
+from box import Box
 from gensing import tea, frosting
 from nanite import (
 	check_type,
@@ -69,7 +70,7 @@ class _milcery(*(mixinport(mixins))):
 		"""
 
 		"""
-		self._kwarg_settings: Dict[str, Any] = {
+		self._kwarg_settings: Dict[str, Any] = Box({
 			"type": iter,
 			"capture": "stdout",
 			"command_kwargs": {},
@@ -96,7 +97,7 @@ class _milcery(*(mixinport(mixins))):
 			"fixed_key": False,
 			"return": "verbosity",
 			"print": False,
-		}
+		}, frozen_box = True)
 		self._non_underscored_properties: Tuple[str] = (
 			"program",
 			"stores",
@@ -165,19 +166,6 @@ class _milcery(*(mixinport(mixins))):
 	def _debug_output(self, _key, __temp_key):
 		print(_key, ":", getattr(self, _key))
 		print(__temp_key, ":", getattr(self, __temp_key))
-
-	def _reset_all(self):
-		for key in self._kwarg_settings.keys():
-
-			__temp_key_value = getattr(self, __temp_key := f"__temp_{key}")
-
-			if getattr(self, _key := f"_{key}") != __temp_key_value:
-				if __temp_key_value is None:
-					pass
-				else:
-					setattr(self, _key, __temp_key_value)
-
-			setattr(self, __temp_key, None)
 
 	# DONE: Something's wrong with this, or returning the generator created by this
 	# DONE: Always remember a generator is used up

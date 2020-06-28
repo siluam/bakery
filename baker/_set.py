@@ -9,26 +9,78 @@ class cannot_frost_and_run(Error):
 	pass
 
 
-class _set:
-	def _set(self, cls, args, kwargs, _baking=False):
+class cannot_set_multiple(Error):
+	pass
 
-		self.__cls = cls
+
+################################################################################################
+
+class _set:
+	def _set(
+		self,
+		*args,
+		_cls = self,
+		_baking = False,
+		_calling = True,
+		_final = False,
+		_subcommand = False,
+		_bake_type = "ck",
+		_bake_add_replace = "add",
+		**kwargs,
+	):
 		self.__args = args
 		self.__kwargs = kwargs
+		self.__cls = _cls
+		self.__subcommand = _subcommand
+		self.__bake_type = _bake_type
 
-		# if "_drive_through" in self.__kwargs.keys():
-		if self.__kwargs.get("_drive_through", False):
-			self.__drive_through()
+		if (
+			(_baking and _calling) or
+			(_baking and _final) or
+			(_calling and _final) or
+			(_baking and _calling and _final)
+		):
+			raise cannot_set_multiple('Sorry! No combination of _baking, _calling, or _final may be used! Please choose only a single category!')
 
-		if "_frosting" in self.__kwargs.keys():
-			self.__frosting()
+		# Can't be put in a property as it needs "kwargs", which is local to this scope only
+		if self.__kwargs.get("_frosting", False):
+			if (
+				self.__kwargs.get("_capture", "stdout") == "run" or
+				self._capture == "run"
+			):
+				raise cannot_frost_and_run('Sorry! You can\'t use both the "capture = run" and "frosting" options!')
+			self.__kwargs["_type"] = iter
 
-		if "_print" in self.__kwargs.keys():
-			self.__print()
+		if self.__kwargs.get("_print", False):
+			self.__kwargs["_str"] = bool(self.__kwargs.get("_print", False))
 
-		# if "_from_file" in self.__kwargs.keys():
-		if self.__kwargs.get("_from_file", ""):
-			self.__from_file()
+		if _baking:
+			self.__baking()
+		elif _calling:
+			self.__calling()
+		elif _final:
+			self.__final()
+
+	def __baking(self):
+		for key, value in self.__kwargs.items():
+			if key[0] == "_":
+				self.settings[self.__bake_type].baked[key] = value
+		for key, value in self.settings[self.__bake_type].baked.items():
+			setattr(self.__cls, key, value)
+
+	def _reset_all(self):
+		for key in self.settings.keys():
+			del self.settings[key].called
+			del self.settings[key].final
+		for key, value in self.settings.default.items():
+			setattr(self.__cls, key, value)
+		for key, value in self.settings[self.__bake_type].baked.items():
+			setattr(self.__cls, key, value)
+
+################################################################################################
+
+class _set:
+	def _set(self, cls, args, kwargs, _baking=False):
 
 		for key in self.__cls._kwarg_settings.keys():
 			# TODO: Explain this
@@ -54,49 +106,15 @@ class _set:
 				)
 		return self.__args, self.__kwargs
 
-	def __drive_through(self):
-		"""
-			Drive Through:
-				Allows for baking and running the command in one go;
-				for users who don't want to write that one extra line.
+	def _reset_all(self):
+		for key in self._kwarg_settings.keys():
 
-			TODO: Give an example of this
-		"""
-		_ = self.__kwargs.pop("_drive_through")
-		_args = _.pop("args", ())
-		_kwargs = _.pop("kwargs", {})
-		_after_args = _.pop("after_args", ())
-		_after_kwargs = _.pop("after_kwargs", {})
-		self._bake_cake(self, _args, _kwargs, _after_cake=False)
-		self._bake_cake(
-			self, _after_args, _after_kwargs, _after_cake=True
-		)
+			__temp_key_value = getattr(self, __temp_key := f"__temp_{key}")
 
-	def __from_file(self):
-		"""
-			Uses a toml file
+			if getattr(self, _key := f"_{key}") != __temp_key_value:
+				if __temp_key_value is None:
+					pass
+				else:
+					setattr(self, _key, __temp_key_value)
 
-			TODO: Create an example of this
-		"""
-		self.__args = list(self.__args)
-		self._from_file = load(self.__kwargs.pop("_from_file"))
-		for arg in self._from_file["args"]:
-			self.__args.append(arg)
-		for key, value in self._from_file["kwargs"].items():
-			if key not in self.__kwargs.keys():
-				self.__kwargs[key] = value
-
-	def __frosting(self):
-		# Can't be put in a property as it needs "kwargs", which is local to this scope only
-		if self.__kwargs.get("_frosting", False):
-			if (
-				self.__kwargs.get("_capture", "stdout") == "run" or
-				self._capture == "run"
-			):
-				raise cannot_frost_and_run('Sorry! You can\'t use both the "capture = run" and "frosting" options!')
-			self.__kwargs["_type"] = iter
-		else:
-			self.__kwargs.get("_type", iter)
-
-	def __print(self):
-		self.__kwargs["_str"] = bool(self.__kwargs.get("_print", False))
+			setattr(self, __temp_key, None)
