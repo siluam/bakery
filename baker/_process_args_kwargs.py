@@ -26,8 +26,8 @@ class _process_args_kwargs:
 		_cls = self,
 		_baking = False,
 		_calling = True,
-		_subcommand = None,
-		_bake_add_replace = "add",
+		_subcommand = "command",
+		_add_replace = "add",
 		**kwargs,
 	):
 		self.__args = args
@@ -35,7 +35,7 @@ class _process_args_kwargs:
 		self.__baking = _baking
 		self.__calling = _calling
 		self.__subcommand = _subcommand
-		self.__bake_add_replace = _bake_add_replace
+		self.__add_replace = _add_replace
 
 		if _baking and _calling:
 			raise cannot_set_multiple('Sorry! _baking and _calling may not be used together! Please choose only a single category!')
@@ -46,6 +46,14 @@ class _process_args_kwargs:
 			self.__if_kwargs()
 
 	def __quoting(self, quote_value: Union[bool, None], value: Any):
+		"""
+
+			quote_value:
+				* True: double quoting
+				* False: single quoting
+				* None: no quoting
+
+		"""
 		if isinstance(value, dict) or quote_value is None:
 			return value
 
@@ -58,26 +66,22 @@ class _process_args_kwargs:
 			return f'"{value}"'
 
 	def __process_args(self):
-		sub = self.__subcommand if self.__subcommand else "command"
-
 		if self.__baking:
-			boc = "baked"
-			if self.__bake_add_replace == "replace":
-				self.__command[sub].components.baked = tea()
+			if self.__add_replace == "replace":
+				self.__command.baked[self.__subcommand].components = tea()
 		else:
-			boc = "called"
-			self.__command[sub].components.called = tea()
+			self.__command.called[self.__subcommand].components = tea()
 
 		for arg in self.__args:
 			if isinstance(arg, dict):
-				self.__command[sub].components[boc].append(
+				self.__command.current.baked[sub].components[boc].append(
 					self.__quoting(
 						arg.get("quotes", None),
 						arg["value"],
 					)
 				)
 			elif isinstance(arg, (str, bytes, bytearray, int)):
-				self.__command[sub].components[boc].append(arg)
+				self.__command.current.baked[sub].components[boc].append(arg)
 			else:
 				raise not_string_dict(
 					f'Sorry! Value "{arg}" must be a string, integer, or dictionary!'

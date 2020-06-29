@@ -2,6 +2,7 @@
 from addict import Dict as D
 from box import Box
 from gensing import tea, frosting
+from itertools import chain
 from nanite import (
 	check_type,
 	module_installed,
@@ -68,14 +69,6 @@ class _milcery(*(mixinport(mixins))):
 		self._ignore_check: bool = _ignore_check
 
 		self._command = D({})
-		self._command.types = (
-			"ck",
-			"scaa",
-			"scba",
-			"scaka",
-			"scbka",
-		)
-		self._command.sub.baked_set = set()
 
 		"""
 
@@ -108,6 +101,16 @@ class _milcery(*(mixinport(mixins))):
 			"_return": "verbosity",
 			"_print": False,
 		}, frozen_box = True)
+		for key, value in self._settings.defaults.items():
+			if getattr(self.__cls, key, None) != value:
+				setattr(self.__cls, key, value)
+		self._settings.functions = (
+			"frosting_",
+			"f_",
+			"shell_",
+			"str_",
+		)
+
 		self._non_underscored_properties: Tuple[str] = (
 			"program",
 			"stores",
@@ -192,30 +195,23 @@ class _milcery(*(mixinport(mixins))):
 
 	def __getattr__(self, subcommand):
 		def inner(*args, **kwargs):
-			if subcommand == "shell_":
-				if "_shell" not in kwargs.keys():
-					kwargs["_shell"] = True
-			elif subcommand == "str_":
-				if "_str" not in kwargs.keys():
-					kwargs["_str"] = True
-			elif subcommand in ["frosting_", "f_"]:
-				if "_frosting" not in kwargs.keys():
-					kwargs["_frosting"] = True
-			elif subcommand == "pipe_":
-				args = [f"| {_}" for _ in args]
+			self._command.current.sub.unprocessed = subcommand
+			# if subcommand == "pipe_":
+			# 	args = [f"| {_}" for _ in args]
+			if subcommand in self._settings.functions:
+				pass
 			else:
-				self._command.sub.unprocessed = subcommand
 				new_sub = subcommand.replace("_", "-")
 				if self._shell:
-					self._command.sub.processed = (
+					self._command.current.sub.processed = (
 						new_sub
 						if kwargs.get("_sub_before_shell", False)
 						else f"-c '{new_sub}"
 					)
 				else:
-					self._command.sub.processed = new_sub
-				if subcommand in self._command.sub.baked_set:
-					self._command.sub.baked = True
+					self._command.current.sub.processed = new_sub
+				if subcommand in chain(self._command.baked.keys(), self._settings.baked.keys()):
+					self._command.current.sub.baked = True
 
 			# DONE: Change to account for the new return methods
 			if isinstance(output := self._run_frosting(args, kwargs), (dict, tea, frosting)):

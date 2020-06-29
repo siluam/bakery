@@ -23,9 +23,9 @@ class baking_:
 		self,
 		*args,
 		_cls = self,
-		_ct = "scaka",
-		_bar = "add",
-		_subcommand = None,
+		_akar = "add",
+		_sar = "add",
+		_subcommand = "command",
 		**kwargs
 	):
 		"""
@@ -37,35 +37,78 @@ class baking_:
 				* scaka: any subcommand kwargs, then args
 				* scbka: linked subcommand kwargs, then args
 
-			_bar: bake add or replace
+			_akar: args and kwargs add or replace
 				* add: adds to the currently baked args and kwargs
 				* replace: replaces the currently baked args and kwargs
 
+			_sar: settings add or replace
+				* add: adds to the currently baked settings
+				* replace: replaces the currently baked settings
+
 		"""
 
-		for ct in self._command.types:
-			if _ct == ct:
-				if _bar == "add":
-					pass
-				elif _bar == "replace":
-					cls.settings.cakes[ct].baked = tea()
+		if _sar == "add":
+			pass
+		elif _sar == "replace":
+			self._settings.current.baked[sub].baked = tea()
 
-	def splat_(self, _ct = "scaka", _all = False, _subcommand = None):
-		if _subcommand:
+		if _akar == "add":
+			pass
+		elif _akar == "replace":
+			self._command.current.baked[sub].baked = tea()
+
+	def splat_(
+		self,
+		_all = False,
+		_all_subcommands = False,
+		_subcommands = ["command"],
+		_settings = False,
+		_args_kwargs = True
+	):
+		"""
+
+			splat_(_all = True):
+				Removes all baked args, kwargs, and settings for both the main command and
+				subcommands
+				Eg: git.splat_(_all = True)
+
+			splat(_subcommands = ["subcommand"]):
+				Removes all baked args, kwargs, and settings for just the subcommands
+				in the list
+				Eg: git.splat_(_subcommands = ["status"])
+
+			splat(_subcommands = ["command"]):
+				The default; removes all baked args, kwargs, and settings for the main command
+				Eg: git.splat_(_subcommands = ["command"])
+
+		"""
+		def inner(category):
 			if _all:
-				del self._command.sub.baked_set
+				delattr(getattr(self, category), baked)
+			elif _all_subcommands:
+				for key in getattr(self, category).baked.keys():
+					if key != "command":
+						delattr(getattr(self, category).baked, key)
 			else:
-				self._command.sub.baked_set.remove(_subcommand)
+				for sub in _subcommands:
+					delattr(getattr(self, category).baked, sub)
+
+		if _settings and _args_kwargs:
+			for category in ("_settings", "_command"):
+				inner(category)
 		else:
-			if _all:
-				for key in self._settings.cakes.keys():
-					del self._settings.cakes[key].baked
-			else:
-				del self._settings.cakes[_ct].baked
+			inner(_settings if _settings else _args_kwargs)
 
-	def splat_all_(self, _ct = "scaka", _all = False):
+	def splat_all_(
+		self,
+		_all = False,
+		_all_subcommands = False,
+		_subcommands = ["command"],
+		_settings = False,
+		_args_kwargs = True
+	):
 		for store in self.stores:
-			store.splat_(_ct, _all)
+			store.splat_(_all, _all_subcommands, _subcommands, _settings, _args_kwargs)
 
 ################################################################################################
 

@@ -21,9 +21,7 @@ class _set:
 		_baking = False,
 		_calling = True,
 		_final = False,
-		_subcommand = False,
-		_command_type = "scaka",
-		_bake_add_replace = "add",
+		_subcommand = "command",
 		_reset = False,
 		**kwargs,
 	):
@@ -31,7 +29,7 @@ class _set:
 		self.__kwargs = kwargs
 		self.__cls = _cls
 		self.__subcommand = _subcommand
-		self.__command_type = _command_type
+		self.__add_replace = _add_replace
 
 		if _reset:
 			self.__reset()
@@ -39,17 +37,11 @@ class _set:
 			self.__set()
 
 	def __reset(self):
-		for key in self._settings.cakes.keys():
-			del self._settings.cakes[key].called
-			del self._settings.cakes[key].final
+		del self._settings.current
+		del self._command.current
 		for key, value in self._settings.defaults.items():
 			if getattr(self.__cls, key, None) != value:
 				setattr(self.__cls, key, value)
-		for key, value in self._settings.cakes[self.__command_type].baked.items():
-			if getattr(self.__cls, key, None) != value:
-				setattr(self.__cls, key, value)
-		del self._command.sub.bool
-		del self._command.sub.baked
 
 	def __set(self):
 
@@ -61,6 +53,44 @@ class _set:
 		):
 			raise cannot_set_multiple('Sorry! No combination of _baking, _calling, or _final may be used! Please choose only a single category!')
 
+		self.__kwargs_mods()
+
+		if _baking or _calling:
+			for key in self.__kwargs.keys():
+				if key[0] == "_":
+					self._settings[
+						"baked" if _baking else "called"
+					][self.__subcommand] = self.__kwargs.pop(key)
+		else:
+			for key, value in self._settings.defaults.items():
+				if getattr(self.__cls, key, None) != value:
+					setattr(self.__cls, key, value)
+			for key, value in self._settings.baked[self.__subcommand].items():
+				if getattr(self.__cls, key, None) != value:
+					setattr(self.__cls, key, value)
+			for key, value in self._settings.called[self.__subcommand].items():
+				if getattr(self.__cls, key, None) != value:
+					setattr(self.__cls, key, value)
+
+	def __kwargs_mods(self):
+		self.__frosting()
+
+		if self.__kwargs.get("_print", False):
+			self.__kwargs["_str"] = bool(self.__kwargs.get("_print", False))
+
+		if self._command.current.sub.unprocessed == "shell_":
+			if self.__kwargs.get("_shell", False):
+				self.__kwargs["_shell"] = True
+
+		if self._command.current.sub.unprocessed == "str_":
+			if self.__kwargs.get("_str", False):
+				self.__kwargs["_str"] = True
+
+	def __frosting(self):
+		if self._command.current.sub.unprocessed in ("frosting_", "f_"):
+			if self.__kwargs.get("_frosting", False):
+				self.__kwargs["_frosting"] = True
+
 		if self.__kwargs.get("_frosting", False):
 			if (
 				self.__kwargs.get("_capture", "stdout") == "run" or
@@ -68,25 +98,3 @@ class _set:
 			):
 				raise cannot_frost_and_run('Sorry! You can\'t use both the "capture = run" and "frosting" options!')
 			self.__kwargs["_type"] = iter
-
-		if self.__kwargs.get("_print", False):
-			self.__kwargs["_str"] = bool(self.__kwargs.get("_print", False))
-
-		if _baking:
-			for key, value in self.__kwargs.items():
-				if key[0] == "_":
-					self._settings.cakes[self.__command_type].baked[key] = value
-		elif _calling:
-			for key, value in self.__kwargs.items():
-				if key[0] == "_":
-					self._settings.cakes[self.__command_type].called[key] = value
-		elif _final:
-			for key, value in self._settings.defaults.items():
-				if getattr(self.__cls, key, None) != value:
-					setattr(self.__cls, key, value)
-			for key, value in self._settings.cakes[self.__command_type].baked.items():
-				if getattr(self.__cls, key, None) != value:
-					setattr(self.__cls, key, value)
-			for key, value in self._settings.cakes[self.__command_type].called.items():
-				if getattr(self.__cls, key, None) != value:
-					setattr(self.__cls, key, value)
