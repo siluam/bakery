@@ -20,10 +20,10 @@ from typing import (
 )
 
 mixins: Generator[str, None, None] = (fullpath(f"{mixin}.py", f_back = 2) for mixin in (
-	"_attach_command_args_kwargs",
 	"_create_command",
 	"_funky_properties",
 	"_long_property_vars",
+	"_process_args_kwargs",
 	"_return_output",
 	"_run_frosting",
 	"_set",
@@ -67,36 +67,46 @@ class _milcery(*(mixinport(mixins))):
 		"""
 		self._ignore_check: bool = _ignore_check
 
+		self._command = D({})
+		self._command.types = (
+			"ck",
+			"scaa",
+			"scba",
+			"scaka",
+			"scbka",
+		)
+		self._command.sub.baked_set = set()
+
 		"""
 
 		"""
-		self._kwarg_settings: Dict[str, Any] = Box({
-			"type": iter,
-			"capture": "stdout",
-			"command_kwargs": {},
-			"starter_args": [],
-			"shell": False,
-			"frosting": False,
-			"str": False,
-			"ignore_stderr": False,
-			"kwargs": {},
-			"args": [],
-			"verbosity": int(
+		self._settings = D({})
+		self._settings.defaults: Dict[str, Any] = Box({
+			"_type": iter,
+			"_capture": "stdout",
+			"_command_kwargs": {},
+			"_starter_args": [],
+			"_shell": False,
+			"_frosting": False,
+			"_str": False,
+			"_ignore_stderr": False,
+			"_kwargs": {},
+			"_args": [],
+			"_verbosity": int(
 				environ.get("verbose_bakery", 0)
 			),
-			"from_file": "",
-			"run_as": "",
-			"n_lines": D(
+			"_run_as": "",
+			"_n_lines": D(
 				{
 					"ordinal": "first",
 					"number": None,
 					"std": "out",
 				}
 			),
-			"kwarg_one_dash": False,
-			"fixed_key": False,
-			"return": "verbosity",
-			"print": False,
+			"_kwarg_one_dash": False,
+			"_fixed_key": False,
+			"_return": "verbosity",
+			"_print": False,
 		}, frozen_box = True)
 		self._non_underscored_properties: Tuple[str] = (
 			"program",
@@ -194,16 +204,18 @@ class _milcery(*(mixinport(mixins))):
 			elif subcommand == "pipe_":
 				args = [f"| {_}" for _ in args]
 			else:
+				self._command.sub.unprocessed = subcommand
 				new_sub = subcommand.replace("_", "-")
 				if self._shell:
-					kwargs["_end_command"] = (
+					self._command.sub.processed = (
 						new_sub
 						if kwargs.get("_sub_before_shell", False)
 						else f"-c '{new_sub}"
 					)
 				else:
-					kwargs["_end_command"] = new_sub
-				kwargs["_subcommand"] = True
+					self._command.sub.processed = new_sub
+				if subcommand in self._command.sub.baked_set:
+					self._command.sub.baked = True
 
 			# DONE: Change to account for the new return methods
 			if isinstance(output := self._run_frosting(args, kwargs), (dict, tea, frosting)):

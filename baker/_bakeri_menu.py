@@ -1,0 +1,3 @@
+bakeri_menu = (
+    "git",
+)

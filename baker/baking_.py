@@ -15,20 +15,27 @@ class Error(Exception):
 class not_same_type(Error):
 	pass
 
+################################################################################################
 
 class baking_:
 
-	############################################################################################
-
-	def bake_(self, *args, cls = self, _bt = "scaka", _bar = "add", **kwargs):
+	def bake_(
+		self,
+		*args,
+		_cls = self,
+		_ct = "scaka",
+		_bar = "add",
+		_subcommand = None,
+		**kwargs
+	):
 		"""
 
-			_bt: bake type
+			_ct: command type
 				* ck: command kwargs
 				* scaa: any subcommand args
-				* scla: linked subcommand args
+				* scba: linked subcommand args
 				* scaka: any subcommand kwargs, then args
-				* sclka: linked subcommand kwargs, then args
+				* scbka: linked subcommand kwargs, then args
 
 			_bar: bake add or replace
 				* add: adds to the currently baked args and kwargs
@@ -36,33 +43,33 @@ class baking_:
 
 		"""
 
-		for bt in (
-			"ck",
-			"scaa",
-			"scla",
-			"scaka",
-			"sclka",
-		):
-			if _bt == bt:
+		for ct in self._command.types:
+			if _ct == ct:
 				if _bar == "add":
 					pass
 				elif _bar == "replace":
-					cls.settings.cakes[bt].baked = tea()
+					cls.settings.cakes[ct].baked = tea()
 
-	def splat_(self, _bt = "scaka", _all = False):
-		if _all:
-			for key in self.settings.cakes.keys():
-				del self.settings.cakes[key].baked
+	def splat_(self, _ct = "scaka", _all = False, _subcommand = None):
+		if _subcommand:
+			if _all:
+				del self._command.sub.baked_set
+			else:
+				self._command.sub.baked_set.remove(_subcommand)
 		else:
-			del self.settings.cakes[_bt].baked
-		for key, value in self.settings.defaults.items():
-			setattr(self.__cls, key, value)
+			if _all:
+				for key in self._settings.cakes.keys():
+					del self._settings.cakes[key].baked
+			else:
+				del self._settings.cakes[_ct].baked
 
-	def splat_all_(self, _bt = "scaka", _all = False):
+	def splat_all_(self, _ct = "scaka", _all = False):
 		for store in self.stores:
-			store.splat_(_bt, _all)
+			store.splat_(_ct, _all)
 
-	############################################################################################
+################################################################################################
+
+class baking_:
 
 	def _bake_cake(
 		self, cls, args, kwargs, _after_cake=False, _keep=True

@@ -2,6 +2,7 @@
 from itertools import chain
 from os import name as os_name
 from typing import Union, Any
+from gensing import tea, frosting
 
 class Error(Exception):
 	pass
@@ -11,28 +12,44 @@ class not_string_dict(Error):
 	pass
 
 
-class _attach_command_args_kwargs:
+class cannot_set_multiple(Error):
+	pass
 
-	def _attach_command_args_kwargs(self, command, args, kwargs):
 
+################################################################################################
+
+class _process_args_kwargs:
+
+	def _process_args_kwargs(
+		self,
+		*args,
+		_cls = self,
+		_baking = False,
+		_calling = True,
+		_subcommand = None,
+		_bake_add_replace = "add",
+		**kwargs,
+	):
 		self.__args = args
-		self.__command = command
 		self.__kwargs = kwargs
+		self.__baking = _baking
+		self.__calling = _calling
+		self.__subcommand = _subcommand
+		self.__bake_add_replace = _bake_add_replace
 
+		if _baking and _calling:
+			raise cannot_set_multiple('Sorry! _baking and _calling may not be used together! Please choose only a single category!')
+
+		if self.__args:
+			self.__process_args()
 		if self.__kwargs:
 			self.__if_kwargs()
-		if self.__args:
-			self.__if_args()
-
-		return self.__command
 
 	def __quoting(self, quote_value: Union[bool, None], value: Any):
-		if isinstance(value, dict):
-			return value
-		if quote_value is None:
+		if isinstance(value, dict) or quote_value is None:
 			return value
 
-		# Be Careful! Note the quotes!
+		# Be Careful! Mind the quotes on the values below!
 		# The following two returns are NOT the same!
 		# The first returns '{value}' and the second "{value}"!
 		elif not quote_value:
@@ -40,23 +57,35 @@ class _attach_command_args_kwargs:
 		else:
 			return f'"{value}"'
 
-	def __if_args(self):
-		for argument in self.__args:
-			if isinstance(argument, dict):
-				self.__command.append(
+	def __process_args(self):
+		sub = self.__subcommand if self.__subcommand else "command"
+
+		if self.__baking:
+			boc = "baked"
+			if self.__bake_add_replace == "replace":
+				self.__command[sub].components.baked = tea()
+		else:
+			boc = "called"
+			self.__command[sub].components.called = tea()
+
+		for arg in self.__args:
+			if isinstance(arg, dict):
+				self.__command[sub].components[boc].append(
 					self.__quoting(
-						argument.get("quotes", None),
-						argument["value"],
+						arg.get("quotes", None),
+						arg["value"],
 					)
 				)
-			elif isinstance(
-				argument, (str, bytes, bytearray, int)
-			):
-				self.__command.append(argument)
+			elif isinstance(arg, (str, bytes, bytearray, int)):
+				self.__command[sub].components[boc].append(arg)
 			else:
 				raise not_string_dict(
-					f'Sorry! Value "{argument}" must be a string, integer, or dictionary!'
+					f'Sorry! Value "{arg}" must be a string, integer, or dictionary!'
 				)
+
+################################################################################################
+
+class _attach_command_args_kwargs:
 
 	def __if_kwargs(self):
 		self.__new_kwargs = {}

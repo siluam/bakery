@@ -13,8 +13,6 @@ class cannot_set_multiple(Error):
 	pass
 
 
-################################################################################################
-
 class _set:
 	def _set(
 		self,
@@ -24,15 +22,36 @@ class _set:
 		_calling = True,
 		_final = False,
 		_subcommand = False,
-		_bake_type = "scaka",
+		_command_type = "scaka",
 		_bake_add_replace = "add",
+		_reset = False,
 		**kwargs,
 	):
 		self.__args = args
 		self.__kwargs = kwargs
 		self.__cls = _cls
 		self.__subcommand = _subcommand
-		self.__bake_type = _bake_type
+		self.__command_type = _command_type
+
+		if _reset:
+			self.__reset()
+		else:
+			self.__set()
+
+	def __reset(self):
+		for key in self._settings.cakes.keys():
+			del self._settings.cakes[key].called
+			del self._settings.cakes[key].final
+		for key, value in self._settings.defaults.items():
+			if getattr(self.__cls, key, None) != value:
+				setattr(self.__cls, key, value)
+		for key, value in self._settings.cakes[self.__command_type].baked.items():
+			if getattr(self.__cls, key, None) != value:
+				setattr(self.__cls, key, value)
+		del self._command.sub.bool
+		del self._command.sub.baked
+
+	def __set(self):
 
 		if (
 			(_baking and _calling) or
@@ -56,66 +75,18 @@ class _set:
 		if _baking:
 			for key, value in self.__kwargs.items():
 				if key[0] == "_":
-					self.settings.cakes[self.__bake_type].baked[key] = value
+					self._settings.cakes[self.__command_type].baked[key] = value
 		elif _calling:
 			for key, value in self.__kwargs.items():
 				if key[0] == "_":
-					self.settings.cakes[self.__bake_type].called[key] = value
+					self._settings.cakes[self.__command_type].called[key] = value
 		elif _final:
-			for key, value in self.settings.defaults.items():
-				setattr(self.__cls, key, value)
-			for key, value in self.settings.cakes[self.__bake_type].baked.items():
-				setattr(self.__cls, key, value)
-			for key, value in self.settings.cakes[self.__bake_type].called.items():
-				setattr(self.__cls, key, value)
-
-	def _reset_all(self, _bt = "scaka"):
-		for key in self.settings.cakes.keys():
-			del self.settings.cakes[key].called
-			del self.settings.cakes[key].final
-		for key, value in self.settings.defaults.items():
-			setattr(self.__cls, key, value)
-		for key, value in self.settings.cakes[_bt].baked.items():
-			setattr(self.__cls, key, value)
-
-################################################################################################
-
-# class _set:
-# 	def _set(self, cls, args, kwargs, _baking=False):
-
-# 		for key in self.__cls._kwarg_settings.keys():
-# 			# TODO: Explain this
-# 			_key = f"_{key}"
-# 			__temp_key = f"__temp_{key}"
-# 			if _key in self.__kwargs.keys():
-# 				if not _baking:
-# 					setattr(
-# 						self.__cls,
-# 						__temp_key,
-# 						getattr(self.__cls, _key),
-# 					)
-# 				setattr(
-# 					self.__cls,
-# 					_key,
-# 					self.__kwargs.pop(
-# 						_key,
-# 						getattr(
-# 							self.__cls,
-# 							_key if _baking else __temp_key,
-# 						),
-# 					),
-# 				)
-# 		return self.__args, self.__kwargs
-
-# 	def _reset_all(self):
-# 		for key in self._kwarg_settings.keys():
-
-# 			__temp_key_value = getattr(self, __temp_key := f"__temp_{key}")
-
-# 			if getattr(self, _key := f"_{key}") != __temp_key_value:
-# 				if __temp_key_value is None:
-# 					pass
-# 				else:
-# 					setattr(self, _key, __temp_key_value)
-
-# 			setattr(self, __temp_key, None)
+			for key, value in self._settings.defaults.items():
+				if getattr(self.__cls, key, None) != value:
+					setattr(self.__cls, key, value)
+			for key, value in self._settings.cakes[self.__command_type].baked.items():
+				if getattr(self.__cls, key, None) != value:
+					setattr(self.__cls, key, value)
+			for key, value in self._settings.cakes[self.__command_type].called.items():
+				if getattr(self.__cls, key, None) != value:
+					setattr(self.__cls, key, value)

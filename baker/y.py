@@ -12,6 +12,8 @@ _milcery = module_installed(fullpath("_milcery.py", f_back = 2))._milcery
 
 i = module_installed(fullpath("i.py", f_back = 2)).i
 
+bakeri_menu = module_installed(fullpath("_bakeri_menu.py.py", f_back = 2)).bakeri_menu
+
 default: Tuple[None] = namedtuple("default", "")
 
 class y(_milcery):
@@ -83,10 +85,6 @@ def __getattr__(program):
 	"""
 	if program == "__path__":
 		raise AttributeError
-
-	bakeri_menu = (
-		"git",
-	)
 
 	bakeriy = i if program in bakeri_menu else y
 
