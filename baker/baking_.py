@@ -151,7 +151,7 @@ class baking_:
 				_args_kwargs = _args_kwargs,
 			)
 
-	def dale_(
+	def fresh_(
 		self,
 		*args,
 		_akar = "add",
@@ -161,7 +161,8 @@ class baking_:
 		**kwargs
 	):
 		"""
-			Create a new version of this instance with the given arguments baked in
+			Create a new version of this instance with the given args, kwargs, and settings
+			baked in
 		"""
 
 		new_bakery = self.__class__(self.program)
@@ -176,7 +177,7 @@ class baking_:
 			**kwargs,
 		)
 
-	def cutter_(
+	def duped_(
 		self,
 		*args,
 		_akar = "add",
@@ -204,36 +205,6 @@ class baking_:
 ################################################################################################
 
 class baking_:
-
-	def _bake_cake(
-		self, cls, args, kwargs, _after_cake=False, _keep=True
-	):
-		args, kwargs = self._set(cls, args, kwargs, _baking=True)
-
-		_ = self._attach_command_args_kwargs(
-			(
-				self.after_cake if _after_cake else self.cake
-			) if _keep else tea(), args, kwargs
-		)
-
-		if _after_cake:
-			cls.after_cake = _
-		else:
-			cls.cake = _
-
-		return cls
-
-	def __shell_cake(self, cls, _bake_bool):
-
-		if _bake_bool:
-			_after_cake_temp = False
-		else:
-			if cls._shell:
-				_after_cake_temp = True
-			else:
-				_after_cake_temp = False
-
-		return _after_cake_temp
 
 	# DONE
 	def bake_replacement_(self, *args, **kwargs):

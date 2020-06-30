@@ -107,7 +107,7 @@ class _process_args_kwargs:
 				if isinstance(value, dict):
 					self.__cls._command[self.__boc][
 						self.__subcommand
-					].components.args.unprocessed[key]["value"] = self.__quoting(
+					].components.kwargs.unprocessed[key]["value"] = self.__quoting(
 						value.get("quotes", None),
 						value.get("value", ""),
 					)
@@ -120,22 +120,27 @@ class _process_args_kwargs:
 						if keyop in value.keys():
 							self.__cls._command[self.__boc][
 								self.__subcommand
-							].components.args.unprocessed[key][keyop] = value[keyop]
+							].components.kwargs.unprocessed[key][keyop] = value[keyop]
 				elif isinstance(
 					value, (str, bytes, bytearray, int)
 				):
 					self.__cls._command[self.__boc][
 						self.__subcommand
-					].components.args.unprocessed[key] = value
+					].components.kwargs.unprocessed[key] = value
 				else:
 					raise not_string_dict(
 						"Sorry! Value must be a string, integer, or dictionary!"
 					)
 
+		# Resets the unprocessed kwargs
+		self.__cls._command[self.__boc][
+			self.__subcommand
+		].components.kwargs.unprocessed = tea()
+
 	def __process_kwargs(self):
 		for key, value in self.__cls._command[self.__boc][
 			self.__subcommand
-		].components.args.unprocessed.items():
+		].components.kwargs.unprocessed.items():
 			if isinstance(value, dict):
 
 				if self.__cls._dos:
@@ -148,7 +153,7 @@ class _process_args_kwargs:
 				final_key = f'{dash}{key if value.get("fixed", False) or self.__cls._fixed_key else key.replace("_", "-")}'
 
 				if "repeat" in value.keys():
-					self.__cls._command[self.__boc][self.__subcommand].components.args[
+					self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
 						self.__starter_regular
 					].append([final_key] * value["repeat"])
 				elif "repeat_with_values" in value.keys():
@@ -162,7 +167,7 @@ class _process_args_kwargs:
 							"repeat_with_values"
 						]
 					]
-					self.__cls._command[self.__boc][self.__subcommand].components.args[
+					self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
 						self.__starter_regular
 					].append(
 						chain(
@@ -174,10 +179,10 @@ class _process_args_kwargs:
 						)
 					)
 				else:
-					self.__cls._command[self.__boc][self.__subcommand].components.args[
+					self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
 						self.__starter_regular
 					].append(final_key)
-					self.__cls._command[self.__boc][self.__subcommand].components.args[
+					self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
 						self.__starter_regular
 					].append(
 						""
@@ -186,7 +191,7 @@ class _process_args_kwargs:
 					)
 
 			else:
-				self.__cls._command[self.__boc][self.__subcommand].components.args[
+				self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
 					self.__starter_regular
 				].append(
 					"/" if self.__cls._dos else (
@@ -201,7 +206,7 @@ class _process_args_kwargs:
 						else key.replace("_", "-")
 					)
 				)
-				self.__cls._command[self.__boc][self.__subcommand].components.args[
+				self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
 					self.__starter_regular
 				].append(
 					"" if isinstance(value, bool) else value
