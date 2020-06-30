@@ -195,7 +195,7 @@ class _milcery(*(mixinport(mixins))):
 
 	def __getattr__(self, subcommand):
 		def inner(*args, **kwargs):
-			self._command.current.sub.unprocessed = subcommand
+			self._sub.unprocessed = subcommand
 			# if subcommand == "pipe_":
 			# 	args = [f"| {_}" for _ in args]
 			if subcommand in self._settings.functions:
@@ -203,15 +203,15 @@ class _milcery(*(mixinport(mixins))):
 			else:
 				new_sub = subcommand.replace("_", "-")
 				if self._shell:
-					self._command.current.sub.processed = (
+					self._sub.processed = (
 						new_sub
 						if kwargs.get("_sub_before_shell", False)
 						else f"-c '{new_sub}"
 					)
 				else:
-					self._command.current.sub.processed = new_sub
+					self._sub.processed = new_sub
 				if subcommand in chain(self._command.baked.keys(), self._settings.baked.keys()):
-					self._command.current.sub.baked = True
+					self._sub.baked = True
 
 			# DONE: Change to account for the new return methods
 			if isinstance(output := self._run_frosting(args, kwargs), (dict, tea, frosting)):

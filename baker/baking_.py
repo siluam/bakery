@@ -50,12 +50,12 @@ class baking_:
 		if _sar == "add":
 			pass
 		elif _sar == "replace":
-			self._settings.current.baked[sub].baked = tea()
+			self._settings.current.baked[_subcommand].baked = tea()
 
 		if _akar == "add":
 			pass
 		elif _akar == "replace":
-			self._command.current.baked[sub].baked = tea()
+			self._command.current.baked[_subcommand].baked = tea()
 
 	def splat_(
 		self,

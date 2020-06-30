@@ -30,6 +30,9 @@ class _set:
 		self.__cls = _cls
 		self.__subcommand = _subcommand
 		self.__add_replace = _add_replace
+		self.__baking = _baking
+		self.__calling = _calling
+		self.__final = _final
 
 		if _reset:
 			self.__reset()
@@ -37,8 +40,10 @@ class _set:
 			self.__set()
 
 	def __reset(self):
-		del self._settings.current
-		del self._command.current
+		for c1 in ("_settings", "_command"):
+			for c2 in ("called", "final"):
+				del getattr(self, c1)[c2]
+		del self._sub
 		for key, value in self._settings.defaults.items():
 			if getattr(self.__cls, key, None) != value:
 				setattr(self.__cls, key, value)
@@ -46,31 +51,34 @@ class _set:
 	def __set(self):
 
 		if (
-			(_baking and _calling) or
-			(_baking and _final) or
-			(_calling and _final) or
-			(_baking and _calling and _final)
+			(self.__baking and self.__calling) or
+			(self.__baking and self.__final) or
+			(self.__calling and self.__final) or
+			(self.__baking and self.__calling and self.__final)
 		):
 			raise cannot_set_multiple('Sorry! No combination of _baking, _calling, or _final may be used! Please choose only a single category!')
 
 		self.__kwargs_mods()
 
-		if _baking or _calling:
+		if self.__baking or self.__calling:
+
 			for key in self.__kwargs.keys():
 				if key[0] == "_":
 					self._settings[
-						"baked" if _baking else "called"
-					][self.__subcommand] = self.__kwargs.pop(key)
+						"baked" if self.__baking else "called"
+					][self.__subcommand][key] = self.__kwargs.pop(key)
+
 		else:
+
 			for key, value in self._settings.defaults.items():
 				if getattr(self.__cls, key, None) != value:
 					setattr(self.__cls, key, value)
-			for key, value in self._settings.baked[self.__subcommand].items():
-				if getattr(self.__cls, key, None) != value:
-					setattr(self.__cls, key, value)
-			for key, value in self._settings.called[self.__subcommand].items():
-				if getattr(self.__cls, key, None) != value:
-					setattr(self.__cls, key, value)
+
+			# Careful! The order of the categories here matters!
+			for category in ("baked", "called"):
+				for key, value in self._settings[category][self.__subcommand].items():
+					if getattr(self.__cls, key, None) != value:
+						setattr(self.__cls, key, value)
 
 	def __kwargs_mods(self):
 		self.__frosting()
@@ -78,16 +86,16 @@ class _set:
 		if self.__kwargs.get("_print", False):
 			self.__kwargs["_str"] = bool(self.__kwargs.get("_print", False))
 
-		if self._command.current.sub.unprocessed == "shell_":
+		if self._sub.unprocessed == "shell_":
 			if self.__kwargs.get("_shell", False):
 				self.__kwargs["_shell"] = True
 
-		if self._command.current.sub.unprocessed == "str_":
+		if self._sub.unprocessed == "str_":
 			if self.__kwargs.get("_str", False):
 				self.__kwargs["_str"] = True
 
 	def __frosting(self):
-		if self._command.current.sub.unprocessed in ("frosting_", "f_"):
+		if self._sub.unprocessed in ("frosting_", "f_"):
 			if self.__kwargs.get("_frosting", False):
 				self.__kwargs["_frosting"] = True
 
