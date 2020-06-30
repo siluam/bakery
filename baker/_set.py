@@ -1,4 +1,5 @@
 # From Imports
+from addict import Dict as D
 from toml import load
 
 class Error(Exception):
@@ -70,15 +71,17 @@ class _set:
 
 		else:
 
-			for key, value in self._settings.defaults.items():
-				if getattr(self.__cls, key, None) != value:
-					setattr(self.__cls, key, value)
+			# for key, value in self._settings.defaults.items():
+			# 	if getattr(self.__cls, key, None) != value:
+			# 		setattr(self.__cls, key, value)
 
 			# Careful! The order of the categories here matters!
-			for category in ("baked", "called"):
-				for key, value in self._settings[category][self.__subcommand].items():
-					if getattr(self.__cls, key, None) != value:
-						setattr(self.__cls, key, value)
+			for category in (
+				"defaults",
+				"baked",
+				"category",
+			):
+				self._settings.final[self.__subcommand].extend(D(self._settings[category]))
 
 	def __kwargs_mods(self):
 		self.__frosting()
