@@ -47,6 +47,8 @@ class baking_:
 
 		"""
 
+		# If kwargs is not the same after passing it to _set(), then add the subcommand to
+		# the baked list
 		if _akar == "add":
 			pass
 		elif _akar == "replace":

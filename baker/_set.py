@@ -24,6 +24,7 @@ class _set:
 		_final = False,
 		_subcommand = "command",
 		_reset = False,
+		_apply = False,
 		**kwargs,
 	):
 		self.__args = args
@@ -36,18 +37,32 @@ class _set:
 		self.__final = _final
 
 		if _reset:
-			self.__reset()
+
+			for c1 in ("_settings", "_command"):
+				for c2 in ("called", "final"):
+					del getattr(self.__cls, c1)[c2]
+			del self.__cls._sub
+			for key, value in self.__cls._settings.defaults.items():
+				if getattr(self.__cls, key, None) != value:
+					setattr(self.__cls, key, value)
+
+		elif _apply:
+
+			# Careful! The order of the categories here matters!
+			for key, value in self._settings.defaults.items():
+				if getattr(self.__cls, key, None) != value:
+					setattr(self.__cls, key, value)
+			for category in (
+				"baked",
+				"called",
+			):
+				for key, value in self._settings[category][self.__subcommand].items():
+					if getattr(self.__cls, key, None) != value:
+						setattr(self.__cls, key, value)
+
 		else:
 			self.__set()
-
-	def __reset(self):
-		for c1 in ("_settings", "_command"):
-			for c2 in ("called", "final"):
-				del getattr(self, c1)[c2]
-		del self._sub
-		for key, value in self._settings.defaults.items():
-			if getattr(self.__cls, key, None) != value:
-				setattr(self.__cls, key, value)
+			return self.__args, self.__kwargs
 
 	def __set(self):
 
@@ -65,15 +80,11 @@ class _set:
 
 			for key in self.__kwargs.keys():
 				if key[0] == "_":
-					self._settings[
+					self.__cls._settings[
 						"baked" if self.__baking else "called"
 					][self.__subcommand][key] = self.__kwargs.pop(key)
 
 		else:
-
-			# for key, value in self._settings.defaults.items():
-			# 	if getattr(self.__cls, key, None) != value:
-			# 		setattr(self.__cls, key, value)
 
 			# Careful! The order of the categories here matters!
 			for category in (
@@ -81,7 +92,9 @@ class _set:
 				"baked",
 				"category",
 			):
-				self._settings.final[self.__subcommand].extend(D(self._settings[category]))
+				self.__cls._settings.final[self.__subcommand].extend(
+					D(self.__cls._settings[category])
+				)
 
 	def __kwargs_mods(self):
 		self.__frosting()
@@ -89,23 +102,24 @@ class _set:
 		if self.__kwargs.get("_print", False):
 			self.__kwargs["_str"] = bool(self.__kwargs.get("_print", False))
 
-		if self._sub.unprocessed == "shell_":
+		if self.__cls._sub.unprocessed == "shell_":
 			if self.__kwargs.get("_shell", False):
 				self.__kwargs["_shell"] = True
 
-		if self._sub.unprocessed == "str_":
+		if self.__cls._sub.unprocessed == "str_":
 			if self.__kwargs.get("_str", False):
 				self.__kwargs["_str"] = True
 
 	def __frosting(self):
-		if self._sub.unprocessed in ("frosting_", "f_"):
+		if self.__cls._sub.unprocessed in ("frosting_", "f_"):
 			if self.__kwargs.get("_frosting", False):
 				self.__kwargs["_frosting"] = True
 
 		if self.__kwargs.get("_frosting", False):
 			if (
 				self.__kwargs.get("_capture", "stdout") == "run" or
-				self._capture == "run"
+				self.__cls._capture == "run"
 			):
 				raise cannot_frost_and_run('Sorry! You can\'t use both the "capture = run" and "frosting" options!')
+
 			self.__kwargs["_type"] = iter

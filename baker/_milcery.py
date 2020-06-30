@@ -100,6 +100,9 @@ class _milcery(*(mixinport(mixins))):
 			"_fixed_key": False,
 			"_return": "verbosity",
 			"_print": False,
+
+			# This setting will use a single forward slash instead of a dash for options
+			"_dos": False,
 		}, frozen_box = True)
 		for key, value in self._settings.defaults.items():
 			if getattr(self.__cls, key, None) != value:

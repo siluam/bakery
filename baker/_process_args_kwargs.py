@@ -16,8 +16,6 @@ class cannot_set_multiple(Error):
 	pass
 
 
-################################################################################################
-
 class _process_args_kwargs:
 
 	def _process_args_kwargs(
@@ -33,8 +31,10 @@ class _process_args_kwargs:
 	):
 		self.__args = args
 		self.__kwargs = kwargs
+		self.__cls = _cls
 		self.__baking = _baking
 		self.__calling = _calling
+		self.__boc = "baked" if self.__baking else "called"
 		self.__subcommand = _subcommand
 		self.__add_replace = _add_replace
 		self.__starter_regular = _starter_regular
@@ -45,7 +45,8 @@ class _process_args_kwargs:
 		if self.__args:
 			self.__process_args()
 		if self.__kwargs:
-			self.__if_kwargs()
+			self.__add_kwargs()
+			self.__process_kwargs()
 
 	def __quoting(self, quote_value: Union[bool, None], value: Any):
 		"""
@@ -68,36 +69,29 @@ class _process_args_kwargs:
 			return f'"{value}"'
 
 	def __process_args(self):
-		boc = "baked" if self.__baking else "called"
 		if (
 			(self.__baking and self.__add_replace == "replace") or
 			self.__calling
 		):
-			self._command[boc][self.__subcommand].components.args[self.__starter_regular] = tea()
+			self.__cls._command[self.__boc][self.__subcommand].components.args[self.__starter_regular] = tea()
 
 		for arg in self.__args:
 			if isinstance(arg, dict):
-				self.__command[boc][self.__subcommand].components.args[self.__starter_regular].append(
-					self.__quoting(
+				self.__cls._command[self.__boc][self.__subcommand].components.args[
+					self.__starter_regular
+				].append(self.__quoting(
 						arg.get("quotes", None),
 						arg["value"],
 					)
 				)
 			elif isinstance(arg, (str, bytes, bytearray, int)):
-				self.__command[boc][self.__subcommand].components.args[self.__starter_regular].append(arg)
+				self.__cls._command[self.__boc][self.__subcommand].components.args[
+					self.__starter_regular
+				].append(arg)
 			else:
 				raise not_string_dict(
 					f'Sorry! Value "{arg}" must be a string, integer, or dictionary!'
 				)
-
-################################################################################################
-
-class _attach_command_args_kwargs:
-
-	def __if_kwargs(self):
-		self.__new_kwargs = {}
-		self.__add_kwargs()
-		self.__process_kwargs()
 
 	def __add_kwargs(self):
 		for key, value in self.__kwargs.items():
@@ -111,8 +105,9 @@ class _attach_command_args_kwargs:
 			"""
 			if bool(value):
 				if isinstance(value, dict):
-					self.__new_kwargs[key] = {}
-					self.__new_kwargs[key]["value"] = self.__quoting(
+					self.__cls._command[self.__boc][
+						self.__subcommand
+					].components.args.unprocessed[key]["value"] = self.__quoting(
 						value.get("quotes", None),
 						value.get("value", ""),
 					)
@@ -123,35 +118,39 @@ class _attach_command_args_kwargs:
 						"repeat_with_values",
 					):
 						if keyop in value.keys():
-							self.__new_kwargs[key][keyop] = value[
-								keyop
-							]
+							self.__cls._command[self.__boc][
+								self.__subcommand
+							].components.args.unprocessed[key][keyop] = value[keyop]
 				elif isinstance(
 					value, (str, bytes, bytearray, int)
 				):
-					self.__new_kwargs[key] = value
+					self.__cls._command[self.__boc][
+						self.__subcommand
+					].components.args.unprocessed[key] = value
 				else:
 					raise not_string_dict(
 						"Sorry! Value must be a string, integer, or dictionary!"
 					)
 
 	def __process_kwargs(self):
-		for key, value in self.__new_kwargs.items():
+		for key, value in self.__cls._command[self.__boc][
+			self.__subcommand
+		].components.args.unprocessed.items():
 			if isinstance(value, dict):
 
-				if os_name == "nt":
+				if self.__cls._dos:
 					dash = "/"
 				else:
 					if value.get("dashes", None) is None:
-						dash = "-" if len(key) == 1 or self._kwarg_one_dash else "--"
+						dash = "-" if (len(key) == 1 or self.__cls._kwarg_one_dash) else "--"
 					else:
 						dash = "-" if value["dashes"] else "--"
-				final_key = f'{dash}{key if value.get("fixed", False) or self._fixed_key else key.replace("_", "-")}'
+				final_key = f'{dash}{key if value.get("fixed", False) or self.__cls._fixed_key else key.replace("_", "-")}'
 
 				if "repeat" in value.keys():
-					self.__command.append(
-						[final_key] * value["repeat"]
-					)
+					self.__cls._command[self.__boc][self.__subcommand].components.args[
+						self.__starter_regular
+					].append([final_key] * value["repeat"])
 				elif "repeat_with_values" in value.keys():
 					value_list = [
 						self.__quoting(
@@ -163,7 +162,9 @@ class _attach_command_args_kwargs:
 							"repeat_with_values"
 						]
 					]
-					self.__command.append(
+					self.__cls._command[self.__boc][self.__subcommand].components.args[
+						self.__starter_regular
+					].append(
 						chain(
 							*zip(
 								[final_key]
@@ -173,27 +174,35 @@ class _attach_command_args_kwargs:
 						)
 					)
 				else:
-					self.__command.append(final_key)
-					self.__command.append(
+					self.__cls._command[self.__boc][self.__subcommand].components.args[
+						self.__starter_regular
+					].append(final_key)
+					self.__cls._command[self.__boc][self.__subcommand].components.args[
+						self.__starter_regular
+					].append(
 						""
 						if isinstance(value["value"], bool)
 						else value["value"]
 					)
 
 			else:
-				self.__command.append(
-					"/" if os_name == "nt" else (
+				self.__cls._command[self.__boc][self.__subcommand].components.args[
+					self.__starter_regular
+				].append(
+					"/" if self.__cls._dos else (
 						"-"
-						if self._kwarg_one_dash
+						if self.__cls._kwarg_one_dash
 						or len(key) == 1
 						else "--"
 					)
 					+ (
 						key
-						if self._fixed_key
+						if self.__cls._fixed_key
 						else key.replace("_", "-")
 					)
 				)
-				self.__command.append(
+				self.__cls._command[self.__boc][self.__subcommand].components.args[
+					self.__starter_regular
+				].append(
 					"" if isinstance(value, bool) else value
 				)
