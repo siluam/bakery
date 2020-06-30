@@ -47,17 +47,9 @@ class _set:
 
 		elif _apply:
 
-			# Careful! The order of the categories here matters!
-			for key, value in self._settings.defaults.items():
+			for key, value in self._settings.final[self.__subcommand].items():
 				if getattr(self.__cls, key, None) != value:
 					setattr(self.__cls, key, value)
-			for category in (
-				"baked",
-				"called",
-			):
-				for key, value in self._settings[category][self.__subcommand].items():
-					if getattr(self.__cls, key, None) != value:
-						setattr(self.__cls, key, value)
 
 		else:
 			self.__set()
@@ -84,15 +76,17 @@ class _set:
 					][self.__subcommand][key] = self.__kwargs.pop(key)
 
 		else:
+			self.__cls._settings.final[self.__subcommand].extend(
+				D(self.__cls._settings.defaults)
+			)
 
 			# Careful! The order of the categories here matters!
 			for category in (
-				"defaults",
 				"baked",
 				"category",
 			):
 				self.__cls._settings.final[self.__subcommand].extend(
-					D(self.__cls._settings[category])
+					D(self.__cls._settings[category][self.__subcommand])
 				)
 
 	def __kwargs_mods(self):

@@ -94,6 +94,12 @@ class _process_args_kwargs:
 				)
 
 	def __add_kwargs(self):
+
+		# Resets or initializes the unprocessed kwargs
+		self.__cls._command[self.__boc][
+			self.__subcommand
+		].components.kwargs.unprocessed = tea()
+
 		for key, value in self.__kwargs.items():
 			"""
 
@@ -131,11 +137,6 @@ class _process_args_kwargs:
 					raise not_string_dict(
 						"Sorry! Value must be a string, integer, or dictionary!"
 					)
-
-		# Resets the unprocessed kwargs
-		self.__cls._command[self.__boc][
-			self.__subcommand
-		].components.kwargs.unprocessed = tea()
 
 	def __process_kwargs(self):
 		for key, value in self.__cls._command[self.__boc][
