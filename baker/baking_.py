@@ -25,17 +25,11 @@ class baking_:
 		_cls = self,
 		_akar = "add",
 		_sar = "add",
-		_subcommand = "command",
+		_sc = "command",
+		_sr = "regular",
 		**kwargs
 	):
 		"""
-
-			_ct: command type
-				* ck: command kwargs
-				* scaa: any subcommand args
-				* scba: linked subcommand args
-				* scaka: any subcommand kwargs, then args
-				* scbka: linked subcommand kwargs, then args
 
 			_akar: args and kwargs add or replace
 				* add: adds to the currently baked args and kwargs
@@ -45,19 +39,58 @@ class baking_:
 				* add: adds to the currently baked settings
 				* replace: replaces the currently baked settings
 
+			_sc: subcommand
+				* command: will act on the main command
+			
+			_sr: starter or regular args and / or kwargs
+
 		"""
 
-		# If kwargs is not the same after passing it to _set(), then add the subcommand to
-		# the baked list
-		if _akar == "add":
-			pass
-		elif _akar == "replace":
-			self._command.baked[_subcommand] = tea()
+		if _akar == "replace":
+			_cls._command.baked[_subcommand] = tea()
 
-		if _sar == "add":
-			pass
-		elif _sar == "replace":
-			self._settings.baked[_subcommand] = tea()
+		if _sar == "replace":
+			_cls._settings.baked[_subcommand] = tea()
+
+		args, kwargs, _cls = self._set(
+			*args,
+			_cls = _cls,
+			_baking = True,
+			_subcommand = _sc,
+			**kwargs,
+		)
+
+		_cls = self._process_args_kwargs(
+			*args,
+			_cls = _cls,
+			_baking = True,
+			_subcommand = _sc,
+			_starter_regular = _sr,
+			**kwargs,
+		)
+
+		return _cls
+
+	def bake_all_(
+		self,
+		*args,
+		_cls = self,
+		_akar = "add",
+		_sar = "add",
+		_sc = "command",
+		_sr = "regular",
+		**kwargs
+	):
+		for store in self.stores:
+			store.bake_(
+				*args,
+				_cls = _cls,
+				_akar = _akar,
+				_sar = _sar,
+				_sc = "command",
+				_sr = "regular",
+				**kwargs
+			)
 
 	def splat_(
 		self,
@@ -65,7 +98,7 @@ class baking_:
 		_all_subcommands = False,
 		_subcommands = ["command"],
 		_settings = False,
-		_args_kwargs = True
+		_args_kwargs = False,
 	):
 		"""
 
@@ -107,10 +140,66 @@ class baking_:
 		_all_subcommands = False,
 		_subcommands = ["command"],
 		_settings = False,
-		_args_kwargs = True
+		_args_kwargs = False,
 	):
 		for store in self.stores:
-			store.splat_(_all, _all_subcommands, _subcommands, _settings, _args_kwargs)
+			store.splat_(
+				_all = _all,
+				_all_subcommands = _all_subcommands,
+				_subcommands = _subcommands,
+				_settings = _settings,
+				_args_kwargs = _args_kwargs,
+			)
+
+	def dale_(
+		self,
+		*args,
+		_akar = "add",
+		_sar = "add",
+		_sc = "command",
+		_sr = "regular",
+		**kwargs
+	):
+		"""
+			Create a new version of this instance with the given arguments baked in
+		"""
+
+		new_bakery = self.__class__(self.program)
+
+		return self.bake_(
+			*args,
+			_cls = new_bakery,
+			_akar = _akar,
+			_sar = _sar,
+			_sc = _sc,
+			_sr = _sr,
+			**kwargs,
+		)
+
+	def cutter_(
+		self,
+		*args,
+		_akar = "add",
+		_sar = "add",
+		_sc = "command",
+		_sr = "regular",
+		**kwargs
+	):
+		"""
+			Create a copy of this instance with the original arguments plus the new arguments
+		"""
+
+		new_bakery = deepcopy(self)
+
+		return self.bake_(
+			*args,
+			_cls = new_bakery,
+			_akar = _akar,
+			_sar = _sar,
+			_sc = _sc,
+			_sr = _sr,
+			**kwargs,
+		)
 
 ################################################################################################
 
@@ -160,10 +249,6 @@ class baking_:
 			if kv.value == replacement[0].value:
 				del self.cake[index:]
 
-	def bake_all_(self, *args, **kwargs):
-		for store in self.stores:
-			store.bake_(*args, **kwargs)
-
 	# DONE
 	def bake_all_replacement_(self, *args, **kwargs):
 		for store in self.stores:
@@ -173,115 +258,3 @@ class baking_:
 	def remove_all_slices_(self, *args, **kwargs):
 		for store in self.stores:
 			store.remove_slice_(*args, **kwargs)
-
-	def bake_after_(self, *args, **kwargs):
-		self._bake_cake(self, args, kwargs, _after_cake=True)
-
-	# DONE
-	def bake_after_replacement_(self, *args, **kwargs):
-		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
-		for index, kv in self.after_cake.items(indexed = True).items():
-			if kv.value == replacement[0].value:
-				self.after_cake[f"values:{index}":] = replacement.values()
-
-	# DONE
-	def remove_after_slice_(self, *args, **kwargs):
-		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
-		for index, kv in self.after_cake.items(indexed = True).items():
-			if kv.value == replacement[0].value:
-				del self.after_cake[index:]
-
-	def bake_after_all_(self, *args, **kwargs):
-		for store in self.stores:
-			store.bake_after_(*args, **kwargs)
-
-	# DONE
-	def bake_after_all_replacement_(self, *args, **kwargs):
-		for store in self.stores:
-			store.bake_after_replacement_(*args, **kwargs)
-
-	# DONE
-	def remove_after_all_slices_(self, *args, **kwargs):
-		for store in self.stores:
-			store.remove_after_slice_(*args, **kwargs)
-
-	def soubake_(
-		self,
-		*args: Tuple[Dict[genstring, genstring]],
-		**kwargs: Dict[genstring, genstring]
-	):
-		"""
-
-			Bake a subcommand; whenever that subcommand is used, it will be replaced by the command provided instead.
-
-		"""
-		# Merge a tuple of dictionaries and a single dictionary kwargs
-		if args and not all(isinstance(argument, (dict, tea)) for argument in args):
-			raise not_same_type("Sorry! All arguments must be dictionaries or gensings!")
-		total_args = (argument if isinstance(argument, dict) else argument.items(whole = True) for argument in args)
-		self.soufle = tea(*total_args, kwargs)
-
-	# DONE
-	def soubake_replacement_(self, *args, **kwargs):
-		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
-		for index, kv in self.soufle.items(indexed = True).items():
-			if kv.value == replacement[0].value:
-				self.soufle[f"values:{index}":] = replacement.values()
-
-	# DONE
-	def remove_souslice_(self, *args, **kwargs):
-		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
-		for index, kv in self.soufle.items(indexed = True).items():
-			if kv.value == replacement[0].value:
-				del self.soufle[index:]
-
-	def soubake_all_(self, *args, **kwargs):
-		for store in self.stores:
-			store.soubake_(*args, **kwargs)
-
-	# DONE
-	def soubake_all_replacement_(self, *args, **kwargs):
-		for store in self.stores:
-			store.soubake_replacement_(*args, **kwargs)
-
-	# DONE
-	def remove_all_souslices_(self, *args, **kwargs):
-		for store in self.stores:
-			store.remove_souslice_(*args, **kwargs)
-
-	def dale_(self, *args, **kwargs):
-		"""
-			Create a new version of this instance with the given arguments baked in
-		"""
-
-		new_bakery = self.__class__(self.program)
-
-		# TODO: Set up a way to set both the "_cake" and "_after_cake" values at the same time
-		return self._bake_cake(
-			new_bakery,
-			args,
-			kwargs,
-			_after_cake=self.__shell_cake(
-				self, kwargs.pop("_bake", False)
-			),
-			keep=False,
-		)
-
-	def cutter_(self, *args, **kwargs):
-		"""
-			Create a copy of this instance with the original arguments plus the new arguments
-		"""
-
-		# Change these
-		new_bakery = deepcopy(self)
-
-		# TODO: Set up a way to set both the "_cake" and "_after_cake" values at the same time
-		return self._bake_cake(
-			new_bakery,
-			args,
-			kwargs,
-			_after_cake=self.__shell_cake(
-				self, kwargs.pop("_bake", False)
-			),
-			_keep=True,
-		)

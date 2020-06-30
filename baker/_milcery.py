@@ -213,7 +213,10 @@ class _milcery(*(mixinport(mixins))):
 					)
 				else:
 					self._sub.processed = new_sub
-				if subcommand in chain(self._command.baked.keys(), self._settings.baked.keys()):
+				if subcommand in set(chain(
+					self._command.baked.keys(),
+					self._settings.baked.keys()
+				)):
 					self._sub.baked = True
 
 			# DONE: Change to account for the new return methods

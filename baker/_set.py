@@ -20,7 +20,7 @@ class _set:
 		*args,
 		_cls = self,
 		_baking = False,
-		_calling = True,
+		_calling = False,
 		_final = False,
 		_subcommand = "command",
 		_reset = False,
@@ -31,17 +31,16 @@ class _set:
 		self.__kwargs = kwargs
 		self.__cls = _cls
 		self.__subcommand = _subcommand
-		self.__add_replace = _add_replace
 		self.__baking = _baking
 		self.__calling = _calling
 		self.__final = _final
 
 		if _reset:
 
+			del self.__cls._sub
 			for c1 in ("_settings", "_command"):
 				for c2 in ("called", "final"):
 					del getattr(self.__cls, c1)[c2]
-			del self.__cls._sub
 			for key, value in self.__cls._settings.defaults.items():
 				if getattr(self.__cls, key, None) != value:
 					setattr(self.__cls, key, value)
@@ -62,7 +61,7 @@ class _set:
 
 		else:
 			self.__set()
-			return self.__args, self.__kwargs
+			return self.__args, self.__kwargs, self.__cls
 
 	def __set(self):
 

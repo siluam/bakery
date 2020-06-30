@@ -23,9 +23,8 @@ class _process_args_kwargs:
 		*args,
 		_cls = self,
 		_baking = False,
-		_calling = True,
+		_calling = False,
 		_subcommand = "command",
-		_add_replace = "add",
 		_starter_regular = "regular",
 		**kwargs,
 	):
@@ -36,7 +35,6 @@ class _process_args_kwargs:
 		self.__calling = _calling
 		self.__boc = "baked" if self.__baking else "called"
 		self.__subcommand = _subcommand
-		self.__add_replace = _add_replace
 		self.__starter_regular = _starter_regular
 
 		if _baking and _calling:
@@ -47,6 +45,8 @@ class _process_args_kwargs:
 		if self.__kwargs:
 			self.__add_kwargs()
 			self.__process_kwargs()
+
+		return self.__cls
 
 	def __quoting(self, quote_value: Union[bool, None], value: Any):
 		"""
