@@ -17,6 +17,24 @@ class _create_command:
 		self.__cls = _cls
 		self.__subcommand = _subcommand
 
+		_command = tea(
+			self.__cls._run_as,
+			self.__cls.program,
+			*self.__cls._command.final[self.__subcommand].components.kwargs.starter
+		)
+
+		if self.__cls._shell:
+			_command.glue(" -c '")
+
+		_command.append(
+			*self.__cls._command.final[self.__subcommand].components.args.starter
+			*self.__cls._command.final[self.__subcommand].components.kwargs.regular
+			*self.__cls._command.final[self.__subcommand].components.args.regular
+		)
+
+		if self.__cls._shell:
+			_command.glue("'")
+
 		if self.__cls._tiered:
 
 			tier = "{{ b.t }}"
@@ -34,21 +52,5 @@ class _create_command:
 			for index, kv in _command.items(indexed = True):
 				if kv.value == tier:
 					_command[kv.key] = args[index]
-
-		else:
-
-			_command = tea(
-				self.__cls._run_as,
-				self.__cls.program,
-				**self.__cls._command.final[self.__subcommand].components.kwargs.starter
-			)
-
-			if self.__cls._shell:
-				_command.glue(" -c '")
-
-			pass
-
-			if self._shell:
-				_command.glue("'")
 
 		return _command
