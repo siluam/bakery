@@ -1,111 +1,54 @@
 # From Imports
 from gensing import tea
 
+class Error(Exception):
+	pass
+
+
+class tbr_not_equal_to_args(Error):
+	pass
+
+
 class _create_command:
-
-	"""
-
-		Example final commands are below:
-
-			***
-
-			Code:
-
-				from bakery import ext_
-				script = ext_()
-				script
-					OR
-				script = ext_()
-					OR
-				script = ext_()
-
-			self.__command = python3 script.py arg1 arg2
-
-			Where:
-
-				self._run_as = python3
-				self.program = script.py
-				self.cake / self.after_cake = arg1 arg2 (or it can be attached to the command
-														 after the preliminary command is created,
-														 when passed in while calling the function.)
-
-			***
-
-			self.__command = [hg example]
-
-			***
-
-			self.__command = [git example]
-
-	"""
-
-	def _create_command(self, args, kwargs):
+	def _create_command(self, *args, _cls = self, _subcommand = "command", **kwargs):
 
 		self.__args = args
 		self.__kwargs = kwargs
+		self.__cls = _cls
+		self.__subcommand = _subcommand
 
-		if self.tiered:
-			self.__tiered()
+		if self.__cls._tiered:
+
+			tier = "{{ b.t }}"
+
+			to_be_replaced = 0
+			for value in _command.values():
+				if value == tier:
+					to_be_replaced += 1
+					if to_be_replaced > len(args):
+						raise tbr_not_equal_to_args("Sorry! The number of tiered replacements must be equal to the number of arguments provided!")
+
+			if to_be_replaced < len(args):
+				raise tbr_not_equal_to_args("Sorry! The number of tiered replacements must be equal to the number of arguments provided!")
+
+			for index, kv in _command.items(indexed = True):
+				if kv.value == tier:
+					_command[kv.key] = args[index]
 
 		else:
-			
-			self.__prepare_command()
 
-			self.__kwargs = {
-				key: value
-				for key, value in self.__kwargs.items()
-				if key[0] != "_"
-			}
-
-			# _starter_args is global because otherwise it would be incorporated into the self.__kwargs above
-			self.__command = self._attach_command_args_kwargs(
-				self.__command, self._starter_args, {}
+			_command = tea(
+				self.__cls._run_as,
+				self.__cls.program,
+				**self.__cls._command.final[self.__subcommand].components.kwargs.starter
 			)
 
-			self.__command = self._attach_command_args_kwargs(
-				self.__command, self.__args, self.__kwargs
-			)
+			if self.__cls._shell:
+				_command.glue(" -c '")
+
+			pass
 
 			if self._shell:
-				self.__command.glue("'")
+				_command.glue("'")
 
-		if self.soufle:
-			for c, sc in self.soufle.items():
-				self.__command.replace(c, str(sc) if isinstance(sc, tea) else sc)
-
-		return self.__command
-
-	def __tiered(self):
-
-		# The good thing about assigning self.tiered to self.__command is that self.tiered can be reused
-		self.__command = self.tiered
-
-		for argument in self.__args:
-			for part in (self.__command):
-				if "__tier__" in part:
-					part.replace("__tier__", str(argument))
-					break
-					
-	def __prepare_command(self):
-
-		self.__command = tea(
-			self.__kwargs.pop("_beg_command", ""),
-			self._run_as,
-			self.program,
-		)
-
-		self.__command = self._attach_command_args_kwargs(
-			self.__command, (), self._command_kwargs
-		)
-
-		if self._shell:
-			if self.__kwargs.pop(
-				"_sub_before_shell", False
-			) or not self.__kwargs.pop("_subcommand", False):
-				self.__command.glue(" -c '")
-
-		self.__command.extend(
-			*self.cake,
-			self.__kwargs.pop("_end_command", ""),
-			*self.after_cake,
-		)
+		return _command

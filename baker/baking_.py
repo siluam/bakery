@@ -86,8 +86,8 @@ class baking_:
 				_cls = _cls,
 				_akar = _akar,
 				_sar = _sar,
-				_sc = "command",
-				_sr = "regular",
+				_sc = _sc,
+				_sr = _sr,
 				**kwargs
 			)
 

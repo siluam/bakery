@@ -250,26 +250,6 @@ class _milcery(*(mixinport(mixins))):
 		else:
 			raise StopIteration
 
-	def redirect_(self, last_arg, *args, redr_in=None, **kwargs):
-		"""
-			("[command]", "[redirect_type]")
-			redirect types cannot include "<" types, such as "here-documents", "here-strings", etc.
-		"""
-
-		args, kwargs = self._set(self, args, kwargs)
-
-		new_args = [f" {_[0]} {_[1]}" for _ in args]
-		new_args.append(f" {last_arg}")
-		new_kwargs = {
-			key: value
-			for key, value in kwargs.items()
-			if key in self._kwarg_settings
-		}
-		# if using run, convert this to use feeding
-		_redr_in = f"cat {redr_in} | " if redr_in else ""
-		new_kwargs["_beg_command"] = _redr_in
-		return self._run_frosting(new_args, new_kwargs)
-
 	def add_types_(self, *args):
 		self._allowed_type_names = (
 			self._allowed_type_names + list(args)
