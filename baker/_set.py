@@ -90,18 +90,32 @@ class _set:
 				)
 
 	def __kwargs_mods(self):
+		self.__kwargs_based()
+		self.__subcommand_based()
+
+	def __kwargs_based(self):
 		self.__frosting()
 
 		if self.__kwargs.get("_print", False):
 			self.__kwargs["_str"] = bool(self.__kwargs.get("_print", False))
 
-		if self.__cls._sub.unprocessed == "shell_":
-			if self.__kwargs.get("_shell", False):
-				self.__kwargs["_shell"] = True
+		if self.__kwargs.get("_starter_args", []):
+			self.__cls = self._process_args_kwargs(
+				*self.__kwargs.pop("_starter_args"),
+				_cls = self.__cls,
+				_calling = True,
+				_subcommand = self.__subcommand,
+				_starter_regular = "starter",
+			)
 
-		if self.__cls._sub.unprocessed == "str_":
-			if self.__kwargs.get("_str", False):
-				self.__kwargs["_str"] = True
+		if self.__kwargs.get("_starter_kwargs", {}):
+			self.__cls = self._process_args_kwargs(
+				_cls = self.__cls,
+				_calling = True,
+				_subcommand = self.__subcommand,
+				_starter_regular = "starter",
+				**self.__kwargs.pop("_starter_kwargs"),
+			)
 
 	def __frosting(self):
 		if self.__cls._sub.unprocessed in ("frosting_", "f_"):
@@ -116,3 +130,12 @@ class _set:
 				raise cannot_frost_and_run('Sorry! You can\'t use both the "capture = run" and "frosting" options!')
 
 			self.__kwargs["_type"] = iter
+
+	def __subcommand_based(self):
+		if self.__cls._sub.unprocessed == "shell_":
+			if self.__kwargs.get("_shell", False):
+				self.__kwargs["_shell"] = True
+
+		if self.__cls._sub.unprocessed == "str_":
+			if self.__kwargs.get("_str", False):
+				self.__kwargs["_str"] = True

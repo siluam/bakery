@@ -77,14 +77,12 @@ class _milcery(*(mixinport(mixins))):
 		self._settings.defaults: Dict[str, Any] = Box({
 			"_type": iter,
 			"_capture": "stdout",
-			"_command_kwargs": {},
 			"_starter_args": [],
+			"_starter_kwargs": {},
 			"_shell": False,
 			"_frosting": False,
 			"_str": False,
 			"_ignore_stderr": False,
-			"_kwargs": {},
-			"_args": [],
 			"_verbosity": int(
 				environ.get("verbose_bakery", 0)
 			),
@@ -98,11 +96,18 @@ class _milcery(*(mixinport(mixins))):
 			),
 			"_kwarg_one_dash": False,
 			"_fixed_key": False,
-			"_return": "verbosity",
 			"_print": False,
+
+			# If set to "verbosity", this setting will trigger a verbose return with as much
+			# information as dictated by the "_verbosity" setting;
+			# otherwise, this will trigger a regular return, returning just one category, such as
+			# standard out, standard error, etc.
+			"_return": "verbosity",
+
 
 			# This setting will use a single forward slash instead of a dash for options
 			"_dos": False,
+
 		}, frozen_box = True)
 		for key, value in self._settings.defaults.items():
 			if getattr(self.__cls, key, None) != value:
