@@ -42,21 +42,14 @@ class _milcery(*(mixinport(mixins))):
 		User: https://stackoverflow.com/users/625914/behzad-nouri
 	"""
 
-###############################################################################################
-
 	def __init__(
 		self,
 		program: str,
-		_cake: Union[None, tea],
-		_soufle: Union[None, tea],
-		_after_cake: Union[None, tea],
-		_ignore_check: bool,
-		_bake_args: MS[Any],
-		_bake_kwargs: Dict[str, Any],
-		_bake_after_args: MS[Any],
-		_bake_after_kwargs: Dict[str, Any],
-		_partial = False,
 		*args,
+		_ignore_check: bool = False,
+		_partial: bool = False,
+		_baked_commands: Dict[str, Any] = D({}),
+		_baked_settings: Dict[str, Any] = D({}),
 		**kwargs,
 	):
 		"""
@@ -122,6 +115,17 @@ class _milcery(*(mixinport(mixins))):
 			"shell_",
 			"str_",
 		)
+
+###############################################################################################
+
+		_bake_args: MS[Any],
+		_bake_kwargs: Dict[str, Any],
+		_bake_after_args: MS[Any],
+		_bake_after_kwargs: Dict[str, Any],
+		_partial = False,
+		*args,
+		**kwargs,
+	):
 
 		self._non_underscored_properties: Tuple[str] = (
 			"program",

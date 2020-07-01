@@ -40,6 +40,12 @@ class _process_args_kwargs:
 		if _baking and _calling:
 			raise cannot_set_multiple('Sorry! _baking and _calling may not be used together! Please choose only a single category!')
 
+		for bc in ("baked", "called"):
+			for ak in ("args", "kwargs"):
+				for sr in ("starter", "regular"):
+					if not self.__cls._command[bc][self.__subcommand].components[ak][sr]:
+						self.__cls._command[bc][self.__subcommand].components[ak][sr] = tea()
+
 		if self.__args:
 			self.__process_args()
 		if self.__kwargs:
