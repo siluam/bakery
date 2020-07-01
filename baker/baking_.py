@@ -15,7 +15,6 @@ class Error(Exception):
 class not_same_type(Error):
 	pass
 
-################################################################################################
 
 class baking_:
 
@@ -201,31 +200,3 @@ class baking_:
 			_sr = _sr,
 			**kwargs,
 		)
-
-################################################################################################
-
-class baking_:
-
-	# DONE
-	def bake_replacement_(self, *args, **kwargs):
-		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
-		for index, kv in self.cake.items(indexed = True).items():
-			if kv.value == replacement[0].value:
-				self.cake[f"values:{index}":] = replacement.values()
-
-	# DONE
-	def remove_slice_(self, *args, **kwargs):
-		replacement: type = self._attach_command_args_kwargs(tea(), args, kwargs)
-		for index, kv in self.cake.items(indexed = True).items():
-			if kv.value == replacement[0].value:
-				del self.cake[index:]
-
-	# DONE
-	def bake_all_replacement_(self, *args, **kwargs):
-		for store in self.stores:
-			store.bake_replacement_(*args, **kwargs)
-
-	# DONE
-	def remove_all_slices_(self, *args, **kwargs):
-		for store in self.stores:
-			store.remove_slice_(*args, **kwargs)
