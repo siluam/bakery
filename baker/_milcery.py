@@ -33,12 +33,16 @@ mixins: Generator[str, None, None] = (fullpath(f"{mixin}.py", f_back = 2) for mi
 	"tier_",
 ))
 
+###############################################################################################
+
 class _milcery(*(mixinport(mixins))):
 
 	"""
 		Answer: https://stackoverflow.com/questions/26315584/apply-a-function-to-all-instances-of-a-class/26315625#26315625
 		User: https://stackoverflow.com/users/625914/behzad-nouri
 	"""
+
+###############################################################################################
 
 	def __init__(
 		self,
@@ -256,9 +260,7 @@ class _milcery(*(mixinport(mixins))):
 			raise StopIteration
 
 	def add_types_(self, *args):
-		self._allowed_type_names = (
-			self._allowed_type_names + list(args)
-		)
+		self._allowed_type_names = self._allowed_type_names + list(args)
 
 	def add_shells_(self, *args):
 		self._shells = self._shells + list(args)

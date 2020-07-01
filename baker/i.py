@@ -62,7 +62,7 @@ class i(_milcery):
 				current_kwarg_settings[f"_{key}"] = getattr(self, f"_{key}")
 
 		return partial(
-			i,
+			self.__class__,
 			self.program,
 			_cake = self.cake,
 			_soufle = self.soufle,
