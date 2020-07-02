@@ -24,6 +24,7 @@ class _process_args_kwargs:
 		_cls = self,
 		_baking = False,
 		_calling = False,
+		_final = False,
 		_subcommand = "command",
 		_starter_regular = "regular",
 		**kwargs,
@@ -33,24 +34,33 @@ class _process_args_kwargs:
 		self.__cls = _cls
 		self.__baking = _baking
 		self.__calling = _calling
+		self.__final = _final
 		self.__boc = "baked" if self.__baking else "called"
 		self.__subcommand = _subcommand
 		self.__starter_regular = _starter_regular
 
-		if _baking and _calling:
-			raise cannot_set_multiple('Sorry! _baking and _calling may not be used together! Please choose only a single category!')
+		if (
+			(self.__baking and self.__calling) or
+			(self.__baking and self.__final) or
+			(self.__calling and self.__final) or
+			(self.__baking and self.__calling and self.__final)
+		):
+			raise cannot_set_multiple('Sorry! No combination of _baking, _calling, or _final may be used! Please choose only a single category!')
 
-		for bc in ("baked", "called"):
+		for bcf in ("baked", "called", "final"):
 			for ak in ("args", "kwargs"):
 				for sr in ("starter", "regular"):
-					if not self.__cls._command[bc][self.__subcommand].components[ak][sr]:
-						self.__cls._command[bc][self.__subcommand].components[ak][sr] = tea()
+					if not self.__cls._command[bcf][self.__subcommand].components[ak][sr]:
+						self.__cls._command[bcf][self.__subcommand].components[ak][sr] = tea()
 
-		if self.__args:
-			self.__process_args()
-		if self.__kwargs:
-			self.__add_kwargs()
-			self.__process_kwargs()
+		if self.__final:
+			pass
+		else:
+			if self.__args:
+				self.__process_args()
+			if self.__kwargs:
+				self.__add_kwargs()
+				self.__process_kwargs()
 
 		if self.__cls != self:
 			return self.__cls

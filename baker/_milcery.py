@@ -181,6 +181,13 @@ class _milcery(*(mixinport(mixins))):
 			_subcommand = self._sub.unprocessed,
 			**kwargs,
 		)
+		self._set(
+			_final = True,
+		)
+		self._set(
+			_subcommand = self._sub.unprocessed,
+			_apply = True,
+		)
 		self._process_args_kwargs(
 			*self._args,
 			_calling = True,
@@ -195,12 +202,19 @@ class _milcery(*(mixinport(mixins))):
 			_starter_regular = "regular",
 			**kwargs,
 		)
-		self._set(
+		self._process_args_kwargs(
+			*self._args,
 			_final = True,
-		)
-		self._set(
 			_subcommand = self._sub.unprocessed,
-			_apply = True,
+			_starter_regular = "starter",
+			**self._kwargs,
+		)
+		self._process_args_kwargs(
+			*args,
+			_final = True,
+			_subcommand = self._sub.unprocessed,
+			_starter_regular = "regular",
+			**kwargs,
 		)
 		return args, kwargs
 

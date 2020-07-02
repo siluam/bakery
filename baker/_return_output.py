@@ -12,46 +12,73 @@ class Error(Exception):
 class stderr(Error):
 	pass
 
+################################################################################################
 
 class _return_output:
+	def _return_output(self, *args, _cls = self, _subcommand = "command", **kwargs):
+		self.__cls = _cls
+		self.__subcommand = _subcommand
 
-	def _return_output(self, args, kwargs):
+		self.__command = self._create_command(
+			*args,
+			_cls = self.__cls,
+			_subcommand = self.__subcommand,
+			**kwargs
+		)
 
-		self.__command = self._create_command(args, kwargs)
-
-		if self._str:
+		if self.__cls._str:
 			return self.__command()
 
 		output = self.__capture_output()
-
-		if self._capture == "run":
-			return self.__command() if output == 0 else output
-		else:
-			_peek_value, self.__stderr = peek(
-				self.__decode_std(self.__stderr), return_first=2
-			)
-
-			if _peek_value and not self._ignore_stderr:
-				raise stderr("\n".join(self.__decode_std(self.__stderr)))
-			else:
-				return self.__verbose_return() if self._return == "verbosity" else self.__regular_return()
 
 	def __capture_output(self):
 
 		if self._capture == "run":
 			run(self.__command())
-			return (
-				D(
-					{
-						"command" : self.__command(),
-						"gensing" : self.__command,
-						"args" : self._args,
-						"kwargs" : self._kwargs,
-					}
+			if self._verbosity in (1, 2):
+				_ = D({})
+				_.command = self.__command()
+				_.tea = self.__command
+				_.called.args.starter = D(
+					self.__cls._command.called[self.__subcommand].components.args.starter
 				)
-				if self._verbosity in (1, 2)
-				else 0
-			)
+				_.called.args.regular = D(
+					self.__cls._command.called[self.__subcommand].components.args.regular
+				)
+				_.called.kwargs.starter = D(
+					self.__cls._command.called[self.__subcommand].components.kwargs.starter
+				)
+				_.called.kwargs.regular = D(
+					self.__cls._command.called[self.__subcommand].components.kwargs.regular
+				)
+				_.baked.args.starter = D(
+					self.__cls._command.baked[self.__subcommand].components.args.starter
+				)
+				_.baked.args.regular = D(
+					self.__cls._command.baked[self.__subcommand].components.args.regular
+				)
+				_.baked.kwargs.starter = D(
+					self.__cls._command.baked[self.__subcommand].components.kwargs.starter
+				)
+				_.baked.kwargs.regular = D(
+					self.__cls._command.baked[self.__subcommand].components.kwargs.regular
+				)
+				_.final.args.starter = D(
+					self.__cls._command.final[self.__subcommand].components.args.starter
+				)
+				_.final.args.regular = D(
+					self.__cls._command.final[self.__subcommand].components.args.regular
+				)
+				_.final.kwargs.starter = D(
+					self.__cls._command.final[self.__subcommand].components.kwargs.starter
+				)
+				_.final.kwargs.regular = D(
+					self.__cls._command.final[self.__subcommand].components.kwargs.regular
+				)
+				return _
+			else:
+				return None
+
 		else:
 
 			_output = getattr(
@@ -78,6 +105,24 @@ class _return_output:
 			else line
 			for line in _std
 		)
+
+################################################################################################
+
+class _return_output:
+
+	def _return_output(self, args, kwargs):
+
+		if self._capture == "run":
+			return self.__command() if not output else output
+		else:
+			_peek_value, self.__stderr = peek(
+				self.__decode_std(self.__stderr), return_first=2
+			)
+
+			if _peek_value and not self._ignore_stderr:
+				raise stderr("\n".join(self.__decode_std(self.__stderr)))
+			else:
+				return self.__verbose_return() if self._return == "verbosity" else self.__regular_return()
 
 	def __verbose_return(self):
 
