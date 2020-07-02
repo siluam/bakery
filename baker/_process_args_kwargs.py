@@ -54,7 +54,22 @@ class _process_args_kwargs:
 						self.__cls._command[bcf][self.__subcommand].components[ak][sr] = tea()
 
 		if self.__final:
-			pass
+			self.__cls._command.final[self.__subcommand].components.args.starter.extend(
+				*self.__cls._command.baked[self.__subcommand].components.args.starter
+				*self.__cls._command.called[self.__subcommand].components.args.starter
+			)
+			self.__cls._command.final[self.__subcommand].components.args.regular.extend(
+				*self.__cls._command.baked[self.__subcommand].components.args.regular
+				*self.__cls._command.called[self.__subcommand].components.args.regular
+			)
+			self.__cls._command.final[self.__subcommand].components.kwargs.starter.extend(
+				*self.__cls._command.baked[self.__subcommand].components.kwargs.starter
+				*self.__cls._command.called[self.__subcommand].components.kwargs.starter
+			)
+			self.__cls._command.final[self.__subcommand].components.kwargs.regular.extend(
+				*self.__cls._command.baked[self.__subcommand].components.kwargs.regular
+				*self.__cls._command.called[self.__subcommand].components.kwargs.regular
+			)
 		else:
 			if self.__args:
 				self.__process_args()

@@ -9,15 +9,21 @@ from gensing import tea, frosting
 ################################################################################################
 
 class _run_frosting:
-	def _run_frosting(self):
-		pass
+	def _run_frosting(self, *args, _cls = self, _subcommand = "command", **kwargs):
+		self.__cls = _cls
+		self.__subcommand = _subcommand
+		try:
+			output = self._return_output(
+				*args,
+				_cls = _cls,
+				_subcommand = _subcommand,
+				**kwargs,
+			)
+		finally:
+			self._set(_reset = True)
 
 ################################################################################################
 
-class _run_frosting:
-	def _run_frosting(self, args, kwargs):
-		try:
-			output = self._return_output(args, kwargs)
 			if self._print:
 				print(output)
 			if self._frosting:
@@ -39,5 +45,3 @@ class _run_frosting:
 				return next(iter(output.values()))
 			else:
 				return output
-		finally:
-			self._set(_reset = True)
