@@ -210,6 +210,13 @@ class _milcery(*(mixinport(mixins))):
 	def add_shells_(self, *args):
 		self._shells = self._shells + list(args)
 
+	def __deepcopy__(self):
+		return self.__class__(
+			program,
+			_baked_commands = D(self._command.baked),
+			_baked_settings = D(self._settings.baked),
+		)
+
 	def __next__(self):
 		if self.n < len(self.__next_output):
 			self.n += 1

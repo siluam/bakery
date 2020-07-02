@@ -2,6 +2,7 @@
 import builtins
 
 # From Imports
+from addict import D
 from collections import namedtuple
 from functools import partial
 from gensing import tea
@@ -37,8 +38,8 @@ class i(_milcery):
 			self.__class__,
 			self.program,
 			*self._args,
-			_baked_commands = self._command.baked,
-			_baked_settings = self._settings.baked,
+			_baked_commands = D(self._command.baked),
+			_baked_settings = D(self._settings.baked),
 			**self._kwargs,
 		)
 

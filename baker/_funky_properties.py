@@ -1,18 +1,15 @@
+# Imports
+import pout
+
 # From Imports
 from addict import Dict as D
 from copy import deepcopy
 
-
 class _funky_properties:
 
 	@property
-	def chip_(self):
-		"""
-			Create an exact copy / snapshot of this instance
-		"""
-
-		# Change these
-		return deepcopy(self)
+	def debug_(self):
+		pout.v(self.cv_)
 
 	@property
 	def cv_(self):
@@ -23,18 +20,13 @@ class _funky_properties:
 
 		"""
 
-		return D({
-			key.replace(
-				"_bakery__",
-				"_"
-				if key.lstrip("_bakery__")
-				in self._kwarg_settings.keys()
-				else (
-					""
-					if key.lstrip("_bakery__")
-					in self._non_underscored_properties
-					else "__"
-				),
-			): value
-			for key, value in vars(self).items()
-		})
+		_ = D({})
+
+		_.program = self.program
+		_.attrs.self_class = f"{type(self)=}"
+		_.attrs.type_self = f"{self.__class__=}"
+		_._settings.defaults = self._settings.defaults
+		_._settings.baked = self._settings.baked
+		_._command.baked = self._command.baked
+
+		return _
