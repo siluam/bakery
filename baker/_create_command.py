@@ -20,16 +20,27 @@ class _create_command:
 		_command = tea(
 			self.__cls._run_as,
 			self.__cls.program,
-			*self.__cls._command.final[self.__subcommand].components.kwargs.starter
+			*self.__cls._command.baked[self.__subcommand].components.kwargs.starter
+			*self.__cls._command.called[self.__subcommand].components.kwargs.starter
 		)
 
+		if self._sub.processed and self._sub_before_shell:
+			_command.append(self._sub.processed)
+
+		# TODO: Do I put the subcommand before or after the glue?
 		if self.__cls._shell:
 			_command.glue(" -c '")
 
+		if self._sub.processed and not self._sub_before_shell:
+			_command.append(self._sub.processed)
+
 		_command.append(
-			*self.__cls._command.final[self.__subcommand].components.args.starter
-			*self.__cls._command.final[self.__subcommand].components.kwargs.regular
-			*self.__cls._command.final[self.__subcommand].components.args.regular
+			*self.__cls._command.baked[self.__subcommand].components.args.starter
+			*self.__cls._command.called[self.__subcommand].components.args.starter
+			*self.__cls._command.baked[self.__subcommand].components.kwargs.regular
+			*self.__cls._command.called[self.__subcommand].components.kwargs.regular
+			*self.__cls._command.baked[self.__subcommand].components.args.regular
+			*self.__cls._command.called[self.__subcommand].components.args.regular
 		)
 
 		if self.__cls._shell:

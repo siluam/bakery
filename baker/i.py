@@ -15,33 +15,8 @@ _milcery = module_installed(
 default: Tuple[None] = namedtuple("default", "")
 
 class i(_milcery):
-	def __init__(
-		self,
-		program: str,
-		*args,
-		_cake: Union[None, tea] = None,
-		_soufle: Union[None, tea] = None,
-		_after_cake: Union[None, tea] = None,
-		_ignore_check: bool = False,
-		_bake_args: MS[Any] = (),
-		_bake_kwargs: Dict[str, Any] = default(),
-		_bake_after_args: MS[Any] = (),
-		_bake_after_kwargs: Dict[str, Any] = default(),
-		**kwargs,
-	):
-		super().__init__(
-			program,
-			_cake,
-			_soufle,
-			_after_cake,
-			_ignore_check,
-			_bake_args,
-			_bake_kwargs._asdict() if isinstance(_bake_kwargs, default) else _bake_kwargs,
-			_bake_after_args,
-			_bake_after_kwargs._asdict() if isinstance(_bake_after_kwargs, default) else _bake_after_kwargs,
-			*args,
-			**kwargs,
-		)
+	def __init__(self, program: str):
+		super().__init__(program)
 		"""
 			Answer: https://stackoverflow.com/questions/11813287/insert-variable-into-global-namespace-from-within-a-function/39937010#39937010
 			User: https://stackoverflow.com/users/1397061/1
@@ -52,25 +27,20 @@ class i(_milcery):
 			builtins.bakeriy_stores = [self]
 
 	def _(self, *args, **kwargs):
-		return self._run_frosting(args, kwargs)
+		self._sub.unprocessed = "command"
+		args, kwargs = self._set_and_process(*args, **kwargs)
+		return self._return_frosted_output(*args, **kwargs)
 
 	@property
-	def __call__(self):
-		current_kwarg_settings: Dict[str, Any] = {}
-		for key, value in self._kwarg_settings.items():
-			if getattr(self, f"_{key}") != value:
-				current_kwarg_settings[f"_{key}"] = getattr(self, f"_{key}")
-
+	def __call__(self, *args, **kwargs):
 		return partial(
 			self.__class__,
 			self.program,
-			_cake = self.cake,
-			_soufle = self.soufle,
-			_after_cake = self.after_cake,
-			_bake_kwargs = current_kwarg_settings,
-			_partial = True,
+			*self._args,
+			_baked_commands = self._command.baked,
+			_baked_settings = self._settings.baked,
+			**self._kwargs,
 		)
-
 
 def __getattr__(program):
 	"""

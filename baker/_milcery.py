@@ -47,7 +47,6 @@ class _milcery(*(mixinport(mixins))):
 		program: str,
 		*args,
 		_ignore_check: bool = False,
-		_partial: bool = False,
 		_baked_commands: Dict[str, Any] = D({}),
 		_baked_settings: Dict[str, Any] = D({}),
 		**kwargs,
@@ -63,14 +62,21 @@ class _milcery(*(mixinport(mixins))):
 			A good way to debug commands is to see what the command actually was, using the "_str"
 			keyword argument.
 		"""
+		self.program: str = program
 		self._ignore_check: bool = _ignore_check
-
+		
 		self._command = D({})
-
-		"""
-
-		"""
+		self._command.baked = _baked_commands
+		
 		self._settings = D({})
+		self._settings.baked = _baked_settings
+		
+		self._args = args
+		self._kwargs = kwargs
+
+		"""
+
+		"""
 		self._settings.defaults: Dict[str, Any] = Box({
 			"_type": iter,
 			"_capture": "stdout",
@@ -116,16 +122,102 @@ class _milcery(*(mixinport(mixins))):
 			"str_",
 		)
 
-###############################################################################################
+		self._shells: List[str] = [
+			"zsh",
+			"bash",
+			"sh",
+			"fish",
+			"xonsh",
+			"elvish",
+			"tcsh",
+			"powershell",
+			"cmd",
+		]
+		self._shell = (
+			True if self.program in self._shells else False
+		)
 
-		_bake_args: MS[Any],
-		_bake_kwargs: Dict[str, Any],
-		_bake_after_args: MS[Any],
-		_bake_after_kwargs: Dict[str, Any],
-		_partial = False,
-		*args,
-		**kwargs,
-	):
+	# DONE: Something's wrong with this, or returning the generator created by this
+	# DONE: Always remember a generator is used up
+	def _convert_to_generator(self, input):
+		yield from input
+
+	def _convert_to_type(self, input, _type):
+		if _type.__name__ == "str":
+			return " ".join(input)
+		if _type.__name__ in ("generator", "iter"):
+			return self._convert_to_generator(input)
+		else:
+			return _type(input)
+
+	def __getattr__(self, subcommand):
+		def inner(*args, **kwargs):
+			self._sub.unprocessed = "command" if subcommand in self._settings.functions else subcommand
+			if not subcommand in self._settings.functions:
+				self._sub.processed = subcommand.replace("_", "-")
+			args, kwargs = self._set_and_process(*args, **kwargs)
+			return self._return_frosted_output(*args, **kwargs)
+		return inner
+
+	def _return_frosted_output(self, *args, **kwargs):
+		# DONE: Change to account for the new return methods
+		if isinstance(output := self._run_frosting(args, kwargs), (dict, tea, frosting)):
+			return frosting(output, self._capture)
+		else:
+			# DONE: _convert_to_type isn't working here because _run_frosting resets
+			#  all properties, including _type; find an alternative
+			return self._convert_to_type(frosting(output), type(output))
+
+	def _set_and_process(self, *args, **kwargs):
+		self._args, self._kwargs = self._set(
+			*self._args,
+			_calling = True,
+			_subcommand = self._sub.unprocessed,
+			**self._kwargs,
+		)
+		args, kwargs = self._set(
+			*args,
+			_calling = True,
+			_subcommand = self._sub.unprocessed,
+			**kwargs,
+		)
+		self._process_args_kwargs(
+			*self._args,
+			_calling = True,
+			_subcommand = self._sub.unprocessed,
+			_starter_regular = "starter",
+			**self._kwargs,
+		)
+		self._process_args_kwargs(
+			*args,
+			_calling = True,
+			_subcommand = self._sub.unprocessed,
+			_starter_regular = "regular",
+			**kwargs,
+		)
+		self._set(
+			_final = True,
+		)
+		self._set(
+			_subcommand = self._sub.unprocessed,
+			_apply = True,
+		)
+		return args, kwargs
+
+	def add_types_(self, *args):
+		self._allowed_type_names = self._allowed_type_names + list(args)
+
+	def add_shells_(self, *args):
+		self._shells = self._shells + list(args)
+
+	def __next__(self):
+		if self.n < len(self.__next_output):
+			self.n += 1
+			return self.__next_output[self.n - 1]
+		else:
+			raise StopIteration
+
+###############################################################################################
 
 		self._non_underscored_properties: Tuple[str] = (
 			"program",
@@ -143,17 +235,6 @@ class _milcery(*(mixinport(mixins))):
 			"both",
 			"run",
 		)
-		self._shells: List[str] = [
-			"zsh",
-			"bash",
-			"sh",
-			"fish",
-			"xonsh",
-			"elvish",
-			"tcsh",
-			"powershell",
-			"cmd",
-		]
 		self._return_categories: Tuple[str] = (
 			"stdout",
 			"stderr",
@@ -165,82 +246,6 @@ class _milcery(*(mixinport(mixins))):
 			"gensing",
 			"verbosity",
 		)
-		self.program: str = program
-
-		self.cake: type = tea() if _cake is None else _cake
-		if _partial:
-			self.remove_slice_(*args, **kwargs)
-			# self.remove_souslice_(*args, **kwargs)
-
-		self.soufle: type = tea() if _soufle is None else _soufle
-		self.after_cake: type = tea() if _after_cake is None else _after_cake
-		self.tiered: type = tea()
-
-		for key, value in self._kwarg_settings.items():
-			setattr(self, f"_{key}", value)
-			setattr(self, f"__temp_{key}", None)
-		self._shell = (
-			True if self.program in self._shells else False
-		)
-
-		if isinstance(_bake_args, (str, bytes, bytearray)):
-			_bake_args = (_bake_args,)
-		if isinstance(_bake_after_args, (str, bytes, bytearray)):
-			_bake_after_args = (_bake_after_args,)
-		self.bake_(*_bake_args, **_bake_kwargs)
-		self.bake_after_(*_bake_after_args, **_bake_after_kwargs)
-
-		self._command_kwargs = kwargs
-
-	def _debug_output(self, _key, __temp_key):
-		print(_key, ":", getattr(self, _key))
-		print(__temp_key, ":", getattr(self, __temp_key))
-
-	# DONE: Something's wrong with this, or returning the generator created by this
-	# DONE: Always remember a generator is used up
-	def __convert_to_generator(self, input):
-		yield from input
-
-	def _convert_to_type(self, input, _type):
-		if _type.__name__ == "str":
-			return " ".join(input)
-		if _type.__name__ in ("generator", "iter"):
-			return self.__convert_to_generator(input)
-		else:
-			return _type(input)
-
-	def __getattr__(self, subcommand):
-		def inner(*args, **kwargs):
-			self._sub.unprocessed = subcommand
-			# if subcommand == "pipe_":
-			# 	args = [f"| {_}" for _ in args]
-			if subcommand in self._settings.functions:
-				pass
-			else:
-				new_sub = subcommand.replace("_", "-")
-				if self._shell:
-					self._sub.processed = (
-						new_sub
-						if kwargs.get("_sub_before_shell", False)
-						else f"-c '{new_sub}"
-					)
-				else:
-					self._sub.processed = new_sub
-				if subcommand in set(chain(
-					self._command.baked.keys(),
-					self._settings.baked.keys()
-				)):
-					self._sub.baked = True
-
-			# DONE: Change to account for the new return methods
-			if isinstance(output := self._run_frosting(args, kwargs), (dict, tea, frosting)):
-				return frosting(output, self._capture)
-			else:
-				# DONE: _convert_to_type isn't working here because _run_frosting resets
-				#  all properties, including _type; find an alternative
-				return self._convert_to_type(frosting(output), type(output))
-
-		return inner
 
 	def __iter__(self):
 		self.n = 0
@@ -255,16 +260,3 @@ class _milcery(*(mixinport(mixins))):
 			self.__next_output = list(output)
 
 		return self
-
-	def __next__(self):
-		if self.n < len(self.__next_output):
-			self.n += 1
-			return self.__next_output[self.n - 1]
-		else:
-			raise StopIteration
-
-	def add_types_(self, *args):
-		self._allowed_type_names = self._allowed_type_names + list(args)
-
-	def add_shells_(self, *args):
-		self._shells = self._shells + list(args)

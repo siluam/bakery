@@ -52,7 +52,8 @@ class _process_args_kwargs:
 			self.__add_kwargs()
 			self.__process_kwargs()
 
-		return self.__cls
+		if self.__cls != self:
+			return self.__cls
 
 	def __quoting(self, quote_value: Union[bool, None], value: Any):
 		"""

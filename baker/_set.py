@@ -53,7 +53,11 @@ class _set:
 
 		else:
 			self.__set()
-			return self.__args, self.__kwargs, self.__cls
+
+			if self.__cls != self:
+				return self.__args, self.__kwargs, self.__cls
+			else:
+				return self.__args, self.__kwargs
 
 	def __set(self):
 
@@ -75,7 +79,7 @@ class _set:
 						"baked" if self.__baking else "called"
 					][self.__subcommand][key] = self.__kwargs.pop(key)
 
-		else:
+		elif self.__final:
 			self.__cls._settings.final[self.__subcommand].extend(
 				D(self.__cls._settings.defaults)
 			)
