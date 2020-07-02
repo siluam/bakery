@@ -2,6 +2,7 @@
 import builtins
 
 # From Imports
+from gensing import tea, frosting
 from nanite import check_type, fullpath
 from toml import load
 
@@ -14,6 +15,10 @@ class no_caps(Error):
 
 
 class too_verbose(Error):
+	pass
+
+
+class need_dict(Error):
 	pass
 
 
@@ -100,14 +105,6 @@ class _short_property_vars:
 		self.__verbosity = _
 
 	@property
-	def _from_file(self):
-		return self.__from_file
-
-	@_from_file.setter
-	def _from_file(self, value):
-		self.__from_file = load(fullpath(value)) if value else ""
-
-	@property
 	def _starter_args(self):
 		return self.__starter_args
 
@@ -120,3 +117,13 @@ class _short_property_vars:
 			self.__starter_args = [value.decode()]
 		else:
 			self.__starter_args = value
+
+	@property
+	def _starter_kwargs(self):
+		return self.__starter_args
+
+	@_starter_kwargs.setter
+	def _starter_kwargs(self, value):
+		if not isinstance(value, (dict, tea, frosting)):
+			raise need_dict('Sorry! "_starter_kwargs" needs to be a tea, frosting, or dict-like object!')
+		self.__starter_kwargs = value

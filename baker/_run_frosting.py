@@ -1,18 +1,21 @@
+# Imports
+import pout
+
 # From Imports
 from addict import Dict as D
 from nanite import module_installed
 from gensing import tea, frosting
 
-# Debug Imports
-pout = module_installed("pout")
+################################################################################################
+
+class _run_frosting:
+	def _run_frosting(self):
+		pass
+
+################################################################################################
 
 class _run_frosting:
 	def _run_frosting(self, args, kwargs):
-		self._args = D({"old_args": args})
-		self._kwargs = D({"old_kwargs": kwargs})
-		args, kwargs = self._set(self, args, kwargs)
-		self._args.new_args = args
-		self._kwargs.new_kwargs = kwargs
 		try:
 			output = self._return_output(args, kwargs)
 			if self._print:
@@ -31,11 +34,10 @@ class _run_frosting:
 						else:
 							for line in output[cat]:
 								print(line)
-			if pout:
-				pout.v(output)
+			pout.v(output)
 			if isinstance(output, (dict, tea, frosting)) and len(output) == 1:
 				return next(iter(output.values()))
 			else:
 				return output
 		finally:
-			self._reset_all()
+			self._set(_reset = True)
