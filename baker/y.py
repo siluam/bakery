@@ -28,8 +28,8 @@ class y(_milcery):
 
 	def __call__(self, *args, **kwargs):
 		self._sub.unprocessed = "command"
-		args, kwargs = self._set_and_process(*args, **kwargs)
-		return self._return_frosted_output(*args, **kwargs)
+		self._set_and_process(*args, **kwargs)
+		return self._return_frosted_output()
 
 	@property
 	def _(self, *args, **kwargs):

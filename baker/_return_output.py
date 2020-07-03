@@ -14,15 +14,13 @@ class stderr(Error):
 
 
 class _return_output:
-	def _return_output(self, *args, _cls = None, _subcommand = "command", **kwargs):
+	def _return_output(self, _cls = None, _subcommand = "command"):
 		self.__cls = _cls if _cls is not None else self
 		self.__subcommand = _subcommand
 
 		self.__command = self._create_command(
-			*args,
 			_cls = self.__cls,
 			_subcommand = self.__subcommand,
-			**kwargs
 		)
 
 		if self.__cls._str:
@@ -138,8 +136,8 @@ class _return_output:
 	def __regular_return(self):
 
 		_tup = (
-			self._convert_to_type(self.__decode_std(self.__stdout), self._type),
-			self._convert_to_type(self.__decode_std(self.__stderr), self._type),
+			self._convert_to_type(self.__decode_std(self.__stdout), self.__cls._type),
+			self._convert_to_type(self.__decode_std(self.__stderr), self.__cls._type),
 			self.__return_code,
 			self.__return_codes,
 			self.__command(),

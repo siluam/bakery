@@ -75,11 +75,17 @@ class _set:
 
 		if self.__baking or self.__calling:
 
+			_ = dict()
+
 			for key in self.__kwargs.keys():
 				if key[0] == "_":
 					self.__cls._settings[
 						"baked" if self.__baking else "called"
-					][self.__subcommand][key] = self.__kwargs.pop(key)
+					][self.__subcommand][key] = self.__kwargs[key]
+				else:
+					_[key] = self.__kwargs[key]
+
+			self.__kwargs = D(_)
 
 		elif self.__final:
 			self.__cls._settings.final[self.__subcommand].update(
@@ -89,7 +95,7 @@ class _set:
 			# Careful! The order of the categories here matters!
 			for category in (
 				"baked",
-				"category",
+				"called",
 			):
 				self.__cls._settings.final[self.__subcommand].update(
 					D(self.__cls._settings[category][self.__subcommand])

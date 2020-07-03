@@ -10,10 +10,8 @@ class tbr_not_equal_to_args(Error):
 
 
 class _create_command:
-	def _create_command(self, *args, _cls = None, _subcommand = "command", **kwargs):
+	def _create_command(self, _cls = None, _subcommand = "command"):
 
-		self.__args = args
-		self.__kwargs = kwargs
 		self.__cls = _cls if _cls is not None else self
 		self.__subcommand = _subcommand
 

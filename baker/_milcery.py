@@ -1,5 +1,6 @@
 # From Imports
 from addict import Dict as D
+from functools import partial
 from gensing import tea, frosting
 from itertools import chain
 from nanite import (
@@ -175,59 +176,69 @@ class _milcery(*(mixinport(mixins))):
 			self._sub.unprocessed = "command" if subcommand in self._settings.functions else subcommand
 			if not subcommand in self._settings.functions:
 				self._sub.processed = subcommand.replace("_", "-")
-			args, kwargs = self._set_and_process(*args, **kwargs)
-			return self._return_frosted_output(*args, **kwargs)
+			self._set_and_process(*args, **kwargs)
+			return self._return_frosted_output()
 		return inner
 
-	def _return_frosted_output(self, *args, **kwargs):
+	def _return_frosted_output(self):
 		# DONE: Change to account for the new return methods
-		if isinstance(output := self._run_frosting(args, kwargs), (dict, tea, frosting)):
+		if isinstance(output := self._run_frosting(
+			_subcommand = self._sub.unprocessed,
+		), (dict, tea, frosting)):
 			return frosting(output, self._capture)
 		else:
 			# DONE: _convert_to_type isn't working here because _run_frosting resets
-			#  all properties, including _type; find an alternative
+			# all properties, including _type; find an alternative
 			return self._convert_to_type(frosting(output), type(output))
 
 	def _set_and_process(self, *args, **kwargs):
+
 		self._set(_setup = True)
-		self._args, self._kwargs = self._set(
+
+		set_with_sub = partial(self._set, _subcommand = self._sub.unprocessed)
+
+		self._args, self._kwargs = set_with_sub(
 			*self._args,
 			_calling = True,
-			_subcommand = self._sub.unprocessed,
 			**self._kwargs,
 		)
-		args, kwargs = self._set(
+
+		args, kwargs = set_with_sub(
 			*args,
 			_calling = True,
-			_subcommand = self._sub.unprocessed,
 			**kwargs,
 		)
-		self._set(
+
+		set_with_sub(
 			_final = True,
 		)
-		self._set(
-			_subcommand = self._sub.unprocessed,
+
+		set_with_sub(
 			_apply = True,
 		)
-		self._process_args_kwargs(
+		
+		process_with_sub = partial(
+			self._process_args_kwargs,
+			_subcommand = self._sub.unprocessed,
+		)
+
+		process_with_sub(
 			*self._args,
 			_calling = True,
-			_subcommand = self._sub.unprocessed,
 			_starter_regular = "starter",
 			**self._kwargs,
 		)
-		self._process_args_kwargs(
+		
+		process_with_sub(
 			*args,
 			_calling = True,
-			_subcommand = self._sub.unprocessed,
 			_starter_regular = "regular",
 			**kwargs,
 		)
-		self._process_args_kwargs(
+		
+		process_with_sub(
 			_final = True,
-			_subcommand = self._sub.unprocessed,
 		)
-		return args, kwargs
 
 	def add_types_(self, *args):
 		self._allowed_type_names = self._allowed_type_names + list(args)
@@ -246,7 +257,9 @@ class _milcery(*(mixinport(mixins))):
 		self.n = 0
 
 		# TODO: Change to account for the new return methods
-		if isinstance(output := self._run_frosting([], {}), (dict, tea, frosting)):
+		if isinstance(output := self._run_frosting(
+			_subcommand = self._sub.unprocessed,
+		), (dict, tea, frosting)):
 			self.__next_output = list(getattr(
 				output,
 				"stderr" if self._capture == "stderr" else "stdout"

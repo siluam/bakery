@@ -10,7 +10,7 @@ from gensing import tea, frosting
 
 class _run_frosting:
 
-	def _run_frosting(self, *args, _cls = None, _subcommand = "command", **kwargs):
+	def _run_frosting(self, _cls = None, _subcommand = "command"):
 
 		self.__cls = _cls if _cls is not None else self
 		self.__subcommand = _subcommand
@@ -18,10 +18,8 @@ class _run_frosting:
 		try:
 
 			output = self.__cls._return_output(
-				*args,
 				_cls = _cls,
 				_subcommand = _subcommand,
-				**kwargs,
 			)
 
 			if self.__cls._print:
