@@ -10,17 +10,17 @@ class tbr_not_equal_to_args(Error):
 
 
 class _create_command:
-	def _create_command(self, *args, _cls = self, _subcommand = "command", **kwargs):
+	def _create_command(self, *args, _cls = None, _subcommand = "command", **kwargs):
 
 		self.__args = args
 		self.__kwargs = kwargs
-		self.__cls = _cls
+		self.__cls = _cls if _cls is not None else self
 		self.__subcommand = _subcommand
 
 		_command = tea(
 			self.__cls._run_as,
 			self.__cls.program,
-			*self.__cls._command.final[self.__subcommand].components.kwargs.starter
+			*self.__cls._command.final[self.__subcommand].components.kwargs.starter,
 		)
 
 		if self.__cls._sub.processed and self.__cls._sub_before_shell:
@@ -34,9 +34,9 @@ class _create_command:
 			_command.append(self.__cls._sub.processed)
 
 		_command.extend(
-			*self.__cls._command.final[self.__subcommand].components.args.starter
-			*self.__cls._command.final[self.__subcommand].components.kwargs.regular
-			*self.__cls._command.final[self.__subcommand].components.args.regular
+			*self.__cls._command.final[self.__subcommand].components.args.starter,
+			*self.__cls._command.final[self.__subcommand].components.kwargs.regular,
+			*self.__cls._command.final[self.__subcommand].components.args.regular,
 		)
 
 		if self.__cls._shell:

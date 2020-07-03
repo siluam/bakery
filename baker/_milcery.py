@@ -1,6 +1,5 @@
 # From Imports
 from addict import Dict as D
-from box import Box
 from gensing import tea, frosting
 from itertools import chain
 from nanite import (
@@ -30,7 +29,6 @@ mixins: Generator[str, None, None] = (fullpath(f"{mixin}.py", f_back = 2) for mi
 	"_set",
 	"_short_property_vars",
 	"baking_",
-	"tier_",
 ))
 
 class _milcery(*(mixinport(mixins))):
@@ -68,6 +66,8 @@ class _milcery(*(mixinport(mixins))):
 		
 		self._settings = D({})
 		self._settings.baked = _baked_settings
+
+		self._sub = D({})
 		
 		self._args = args
 		self._kwargs = kwargs
@@ -75,7 +75,7 @@ class _milcery(*(mixinport(mixins))):
 		"""
 
 		"""
-		self._settings.defaults: Dict[str, Any] = Box({
+		self._settings.defaults: Dict[str, Any] = D({
 			"_type": iter,
 			"_capture": "stdout",
 			"_starter_args": [],
@@ -98,6 +98,7 @@ class _milcery(*(mixinport(mixins))):
 			"_kwarg_one_dash": False,
 			"_fixed_key": False,
 			"_print": False,
+			"_tiered": False,
 
 			# If set to "verbosity", this setting will trigger a verbose return with as much
 			# information as dictated by the "_verbosity" setting;
@@ -109,10 +110,10 @@ class _milcery(*(mixinport(mixins))):
 			# This setting will use a single forward slash instead of a dash for options
 			"_dos": False,
 
-		}, frozen_box = True)
+		})
 		for key, value in self._settings.defaults.items():
-			if getattr(self.__cls, key, None) != value:
-				setattr(self.__cls, key, value)
+			if getattr(self, key, None) != value:
+				setattr(self, key, value)
 		self._settings.functions = (
 			"frosting_",
 			"f_",

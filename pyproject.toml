@@ -12,7 +12,6 @@ include = [
 python = "^3.8"
 addict = "*"
 pout = "*"
-python-box = "*"
 sarge = "*"
 toml = "*"
 nanite = {git = "https://gitlab.com/picotech/nanotech/nanite.git", branch = "master"}

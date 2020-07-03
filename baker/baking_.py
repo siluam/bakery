@@ -21,7 +21,7 @@ class baking_:
 	def bake_(
 		self,
 		*args,
-		_cls = self,
+		_cls = None,
 		_akar = "add",
 		_sar = "add",
 		_sc = "command",
@@ -44,6 +44,8 @@ class baking_:
 			_sr: starter or regular args and / or kwargs
 
 		"""
+
+		_cls = _cls if _cls is not None else self
 
 		if _akar == "replace":
 			_cls._command.baked[_subcommand] = tea()
@@ -73,7 +75,7 @@ class baking_:
 	def bake_all_(
 		self,
 		*args,
-		_cls = self,
+		_cls = None,
 		_akar = "add",
 		_sar = "add",
 		_sc = "command",

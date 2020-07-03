@@ -21,7 +21,7 @@ class _process_args_kwargs:
 	def _process_args_kwargs(
 		self,
 		*args,
-		_cls = self,
+		_cls = None,
 		_baking = False,
 		_calling = False,
 		_final = False,
@@ -31,7 +31,7 @@ class _process_args_kwargs:
 	):
 		self.__args = args
 		self.__kwargs = kwargs
-		self.__cls = _cls
+		self.__cls = _cls if _cls is not None else self
 		self.__baking = _baking
 		self.__calling = _calling
 		self.__final = _final
@@ -55,20 +55,20 @@ class _process_args_kwargs:
 
 		if self.__final:
 			self.__cls._command.final[self.__subcommand].components.args.starter.extend(
-				*self.__cls._command.baked[self.__subcommand].components.args.starter
-				*self.__cls._command.called[self.__subcommand].components.args.starter
+				*self.__cls._command.baked[self.__subcommand].components.args.starter,
+				*self.__cls._command.called[self.__subcommand].components.args.starter,
 			)
 			self.__cls._command.final[self.__subcommand].components.args.regular.extend(
-				*self.__cls._command.baked[self.__subcommand].components.args.regular
-				*self.__cls._command.called[self.__subcommand].components.args.regular
+				*self.__cls._command.baked[self.__subcommand].components.args.regular,
+				*self.__cls._command.called[self.__subcommand].components.args.regular,
 			)
 			self.__cls._command.final[self.__subcommand].components.kwargs.starter.extend(
-				*self.__cls._command.baked[self.__subcommand].components.kwargs.starter
-				*self.__cls._command.called[self.__subcommand].components.kwargs.starter
+				*self.__cls._command.baked[self.__subcommand].components.kwargs.starter,
+				*self.__cls._command.called[self.__subcommand].components.kwargs.starter,
 			)
 			self.__cls._command.final[self.__subcommand].components.kwargs.regular.extend(
-				*self.__cls._command.baked[self.__subcommand].components.kwargs.regular
-				*self.__cls._command.called[self.__subcommand].components.kwargs.regular
+				*self.__cls._command.baked[self.__subcommand].components.kwargs.regular,
+				*self.__cls._command.called[self.__subcommand].components.kwargs.regular,
 			)
 		else:
 			if self.__args:
@@ -77,8 +77,7 @@ class _process_args_kwargs:
 				self.__add_kwargs()
 				self.__process_kwargs()
 
-		if self.__cls != self:
-			return self.__cls
+		return self.__cls
 
 	def __quoting(self, quote_value: Union[bool, None], value: Any):
 		"""

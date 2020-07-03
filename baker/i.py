@@ -2,7 +2,7 @@
 import builtins
 
 # From Imports
-from addict import D
+from addict import Dict as D
 from collections import namedtuple
 from functools import partial
 from gensing import tea

@@ -2,7 +2,7 @@
 import builtins
 
 # From Imports
-from addict import D
+from addict import Dict as D
 from collections import namedtuple
 from functools import partial
 from gensing import tea
@@ -11,7 +11,7 @@ from typing import MutableSequence as MS, Dict, Any, Tuple, Union
 
 _milcery = module_installed(fullpath("_milcery.py", f_back = 2))._milcery
 i = module_installed(fullpath("i.py", f_back = 2)).i
-bakeri_menu = module_installed(fullpath("_bakeri_menu.py.py", f_back = 2)).bakeri_menu
+bakeri_menu = module_installed(fullpath("_bakeri_menu.py", f_back = 2)).bakeri_menu
 
 default: Tuple[None] = namedtuple("default", "")
 

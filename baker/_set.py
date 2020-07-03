@@ -14,7 +14,7 @@ class _set:
 	def _set(
 		self,
 		*args,
-		_cls = self,
+		_cls = None,
 		_baking = False,
 		_calling = False,
 		_final = False,
@@ -25,7 +25,7 @@ class _set:
 	):
 		self.__args = args
 		self.__kwargs = kwargs
-		self.__cls = _cls
+		self.__cls = _cls if _cls is not None else self
 		self.__subcommand = _subcommand
 		self.__baking = _baking
 		self.__calling = _calling
@@ -33,10 +33,10 @@ class _set:
 
 		if _reset:
 
-			del self.__cls._sub
+			self.__cls._sub = D({})
 			for c1 in ("_settings", "_command"):
 				for c2 in ("called", "final"):
-					del getattr(self.__cls, c1)[c2]
+					getattr(self.__cls, c1)[c2] = D({})
 			for key, value in self.__cls._settings.defaults.items():
 				if getattr(self.__cls, key, None) != value:
 					setattr(self.__cls, key, value)
@@ -76,7 +76,7 @@ class _set:
 					][self.__subcommand][key] = self.__kwargs.pop(key)
 
 		elif self.__final:
-			self.__cls._settings.final[self.__subcommand].extend(
+			self.__cls._settings.final[self.__subcommand].update(
 				D(self.__cls._settings.defaults)
 			)
 
@@ -85,7 +85,7 @@ class _set:
 				"baked",
 				"category",
 			):
-				self.__cls._settings.final[self.__subcommand].extend(
+				self.__cls._settings.final[self.__subcommand].update(
 					D(self.__cls._settings[category][self.__subcommand])
 				)
 
@@ -99,22 +99,14 @@ class _set:
 		if self.__kwargs.get("_print", False):
 			self.__kwargs["_str"] = bool(self.__kwargs.get("_print", False))
 
-		if self.__kwargs.get("_starter_args", []):
+		if self.__kwargs.get("_starter_args", []) or self.__kwargs.get("_starter_kwargs", {}):
 			self.__cls = self._process_args_kwargs(
-				*self.__kwargs.pop("_starter_args"),
+				*self.__kwargs.pop("_starter_args", []),
 				_cls = self.__cls,
 				_calling = True,
 				_subcommand = self.__subcommand,
 				_starter_regular = "starter",
-			)
-
-		if self.__kwargs.get("_starter_kwargs", {}):
-			self.__cls = self._process_args_kwargs(
-				_cls = self.__cls,
-				_calling = True,
-				_subcommand = self.__subcommand,
-				_starter_regular = "starter",
-				**self.__kwargs.pop("_starter_kwargs"),
+				**self.__kwargs.pop("_starter_kwargs", {}),
 			)
 
 	def __frosting(self):
