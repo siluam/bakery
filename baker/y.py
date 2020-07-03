@@ -11,7 +11,6 @@ from typing import MutableSequence as MS, Dict, Any, Tuple, Union
 
 _milcery = module_installed(fullpath("_milcery.py", f_back = 2))._milcery
 i = module_installed(fullpath("i.py", f_back = 2)).i
-bakeri_menu = module_installed(fullpath("_bakeri_menu.py", f_back = 2)).bakeri_menu
 
 default: Tuple[None] = namedtuple("default", "")
 
@@ -33,14 +32,14 @@ class y(_milcery):
 		return self._return_frosted_output(*args, **kwargs)
 
 	@property
-	def _(self):
+	def _(self, *args, **kwargs):
 		return partial(
 			self.__class__,
 			self.program,
-			*self._args,
+			*args,
 			_baked_commands = D(self._command.baked),
 			_baked_settings = D(self._settings.baked),
-			**self._kwargs,
+			**kwargs,
 		)
 
 def __getattr__(program):
@@ -56,9 +55,13 @@ def __getattr__(program):
 	if program == "__path__":
 		raise AttributeError
 
+	bakeri_menu = (
+        "git",
+    )
+
 	bakeriy = i if program in bakeri_menu else y
 
 	try:
 		return bakeriy(program)
 	except Exception as e:
-		return e
+		return ("y sent to i" if program in bakeri_menu else "y", e)

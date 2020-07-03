@@ -75,7 +75,7 @@ class _milcery(*(mixinport(mixins))):
 		"""
 
 		"""
-		self._settings.defaults: Dict[str, Any] = D({
+		self._settings.defaults: Dict[str, Any] = {
 			"_type": iter,
 			"_capture": "stdout",
 			"_starter_args": [],
@@ -110,10 +110,7 @@ class _milcery(*(mixinport(mixins))):
 			# This setting will use a single forward slash instead of a dash for options
 			"_dos": False,
 
-		})
-		for key, value in self._settings.defaults.items():
-			if getattr(self, key, None) != value:
-				setattr(self, key, value)
+		}
 		self._settings.functions = (
 			"frosting_",
 			"f_",
@@ -192,6 +189,7 @@ class _milcery(*(mixinport(mixins))):
 			return self._convert_to_type(frosting(output), type(output))
 
 	def _set_and_process(self, *args, **kwargs):
+		self._set(_setup = True)
 		self._args, self._kwargs = self._set(
 			*self._args,
 			_calling = True,

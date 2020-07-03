@@ -19,6 +19,7 @@ class _set:
 		_calling = False,
 		_final = False,
 		_subcommand = "command",
+		_setup = False,
 		_reset = False,
 		_apply = False,
 		**kwargs,
@@ -31,21 +32,22 @@ class _set:
 		self.__calling = _calling
 		self.__final = _final
 
-		if _reset:
+		if _setup:
+
+			self.__set_defaults()
+
+		elif _reset:
 
 			self.__cls._sub = D({})
 			for c1 in ("_settings", "_command"):
 				for c2 in ("called", "final"):
 					getattr(self.__cls, c1)[c2] = D({})
-			for key, value in self.__cls._settings.defaults.items():
-				if getattr(self.__cls, key, None) != value:
-					setattr(self.__cls, key, value)
+			self.__set_defaults()
 
 		elif _apply:
 
-			for key, value in self._settings.final[self.__subcommand].items():
-				if getattr(self.__cls, key, None) != value:
-					setattr(self.__cls, key, value)
+			for key, value in self.__cls._settings.final[self.__subcommand].items():
+				setattr(self.__cls, key, value)
 
 		else:
 			self.__set()
@@ -54,6 +56,10 @@ class _set:
 				return self.__args, self.__kwargs, self.__cls
 			else:
 				return self.__args, self.__kwargs
+
+	def __set_defaults(self):
+		for key, value in self.__cls._settings.defaults.items():
+			setattr(self.__cls, key, value)
 
 	def __set(self):
 

@@ -82,7 +82,7 @@ class baking_:
 		_sr = "regular",
 		**kwargs
 	):
-		for store in self.stores:
+		for store in _cls.stores:
 			store.bake_(
 				*args,
 				_cls = _cls,
@@ -95,6 +95,7 @@ class baking_:
 
 	def splat_(
 		self,
+		_cls = None,
 		_all = False,
 		_all_subcommands = False,
 		_subcommands = ["command"],
@@ -118,16 +119,19 @@ class baking_:
 				Eg: git.splat_(_subcommands = ["command"])
 
 		"""
+
+		_cls = _cls if _cls is not None else self
+
 		def inner(category):
 			if _all:
-				delattr(getattr(self, category), baked)
+				getattr(_cls, category).baked = D({})
 			elif _all_subcommands:
-				for key in getattr(self, category).baked.keys():
+				for key in getattr(_cls, category).baked.keys():
 					if key != "command":
-						delattr(getattr(self, category).baked, key)
+						getattr(_cls, category).baked[key] = D({})
 			else:
 				for sub in _subcommands:
-					delattr(getattr(self, category).baked, sub)
+					getattr(_cls, category).baked[sub] = D({})
 
 		if _settings and _args_kwargs:
 			for category in ("_settings", "_command"):
@@ -137,14 +141,16 @@ class baking_:
 
 	def splat_all_(
 		self,
+		_cls = None,
 		_all = False,
 		_all_subcommands = False,
 		_subcommands = ["command"],
 		_settings = False,
 		_args_kwargs = False,
 	):
-		for store in self.stores:
+		for store in _cls.stores:
 			store.splat_(
+				_cls = _cls,
 				_all = _all,
 				_all_subcommands = _all_subcommands,
 				_subcommands = _subcommands,

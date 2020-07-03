@@ -37,10 +37,10 @@ class i(_milcery):
 		return partial(
 			self.__class__,
 			self.program,
-			*self._args,
+			*args,
 			_baked_commands = D(self._command.baked),
 			_baked_settings = D(self._settings.baked),
-			**self._kwargs,
+			**kwargs,
 		)
 
 def __getattr__(program):
@@ -59,4 +59,4 @@ def __getattr__(program):
 	try:
 		return i(program)
 	except Exception as e:
-		return e
+		return ("i", e)
