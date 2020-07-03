@@ -6,10 +6,6 @@ class Error(Exception):
 	pass
 
 
-class cannot_frost_and_run(Error):
-	pass
-
-
 class cannot_set_multiple(Error):
 	pass
 
@@ -125,14 +121,6 @@ class _set:
 		if self.__cls._sub.unprocessed in ("frosting_", "f_"):
 			if self.__kwargs.get("_frosting", False):
 				self.__kwargs["_frosting"] = True
-
-		if self.__kwargs.get("_frosting", False):
-			if (
-				self.__kwargs.get("_capture", "stdout") == "run" or
-				self.__cls._capture == "run"
-			):
-				raise cannot_frost_and_run('Sorry! You can\'t use both the "capture = run" and "frosting" options!')
-
 			self.__kwargs["_type"] = iter
 
 	def __subcommand_based(self):

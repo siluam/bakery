@@ -33,8 +33,6 @@ mixins: Generator[str, None, None] = (fullpath(f"{mixin}.py", f_back = 2) for mi
 	"tier_",
 ))
 
-###############################################################################################
-
 class _milcery(*(mixinport(mixins))):
 
 	"""
@@ -137,6 +135,30 @@ class _milcery(*(mixinport(mixins))):
 			True if self.program in self._shells else False
 		)
 
+		# Returns the default allowed types and adds "str" as well
+		self._allowed_type_names: List[str] = check_type(
+			lst=True
+		) + ["str"]
+
+		self._captures: Tuple[str] = (
+			"stdout",
+			"stderr",
+			"both",
+			"run",
+		)
+		
+		self._return_categories: Tuple[str] = (
+			"stdout",
+			"stderr",
+			"return_code",
+			"return_codes",
+			"command",
+			"args",
+			"kwargs",
+			"gensing",
+			"verbosity",
+		)
+
 	# DONE: Something's wrong with this, or returning the generator created by this
 	# DONE: Always remember a generator is used up
 	def _convert_to_generator(self, input):
@@ -221,43 +243,6 @@ class _milcery(*(mixinport(mixins))):
 			_baked_settings = D(self._settings.baked),
 		)
 
-	def __next__(self):
-		if self.n < len(self.__next_output):
-			self.n += 1
-			return self.__next_output[self.n - 1]
-		else:
-			raise StopIteration
-
-###############################################################################################
-
-		self._non_underscored_properties: Tuple[str] = (
-			"program",
-			"stores",
-		)
-
-		# Returns the default allowed types and adds "str" as well
-		self._allowed_type_names: List[str] = check_type(
-			lst=True
-		) + ["str"]
-
-		self._captures: Tuple[str] = (
-			"stdout",
-			"stderr",
-			"both",
-			"run",
-		)
-		self._return_categories: Tuple[str] = (
-			"stdout",
-			"stderr",
-			"return_code",
-			"return_codes",
-			"command",
-			"args",
-			"kwargs",
-			"gensing",
-			"verbosity",
-		)
-
 	def __iter__(self):
 		self.n = 0
 
@@ -271,3 +256,10 @@ class _milcery(*(mixinport(mixins))):
 			self.__next_output = list(output)
 
 		return self
+
+	def __next__(self):
+		if self.n < len(self.__next_output):
+			self.n += 1
+			return self.__next_output[self.n - 1]
+		else:
+			raise StopIteration
