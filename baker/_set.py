@@ -112,8 +112,9 @@ class _set:
 			self.__kwargs["_str"] = bool(self.__kwargs.get("_print", False))
 
 		if self.__kwargs.get("_starter_args", []) or self.__kwargs.get("_starter_kwargs", {}):
+			sa = self.__kwargs.pop("_starter_args", [])
 			self.__cls = self._process_args_kwargs(
-				*self.__kwargs.pop("_starter_args", []),
+				*[sa] if isinstance(sa, (str, bytes, bytearray)) else sa,
 				_cls = self.__cls,
 				_calling = True,
 				_subcommand = self.__subcommand,

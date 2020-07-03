@@ -105,20 +105,6 @@ class _short_property_vars:
 		self.__verbosity = _
 
 	@property
-	def _starter_args(self):
-		return self.__starter_args
-
-	@_starter_args.setter
-	def _starter_args(self, value):
-		# If the arg value is a string, we'll convert it into a list
-		if isinstance(value, str):
-			self.__starter_args = [value]
-		elif isinstance(value, (bytes, bytearray)):
-			self.__starter_args = [value.decode()]
-		else:
-			self.__starter_args = value
-
-	@property
 	def _starter_kwargs(self):
 		return self.__starter_args
 

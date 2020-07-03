@@ -16,8 +16,21 @@ _milcery = module_installed(
 default: Tuple[None] = namedtuple("default", "")
 
 class i(_milcery):
-	def __init__(self, program: str):
-		super().__init__(program)
+	def __init__(
+		self,
+		program: str,
+		*args,
+		_baked_commands = D({}),
+		_baked_settings = D({}),
+		**kwargs,
+	):
+		super().__init__(
+			program,
+			*args,
+			_baked_commands = _baked_commands,
+			_baked_settings = _baked_settings,
+			**kwargs,
+		)
 		"""
 			Answer: https://stackoverflow.com/questions/11813287/insert-variable-into-global-namespace-from-within-a-function/39937010#39937010
 			User: https://stackoverflow.com/users/1397061/1

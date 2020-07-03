@@ -79,8 +79,6 @@ class _milcery(*(mixinport(mixins))):
 		self._settings.defaults: Dict[str, Any] = {
 			"_type": iter,
 			"_capture": "stdout",
-			"_starter_args": [],
-			"_starter_kwargs": {},
 			"_shell": False,
 			"_frosting": False,
 			"_str": False,
