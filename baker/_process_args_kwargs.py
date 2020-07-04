@@ -1,4 +1,5 @@
 # From Imports
+from addict import Dict as D
 from itertools import chain
 from os import name as os_name
 from typing import Union, Any
@@ -129,7 +130,7 @@ class _process_args_kwargs:
 		# Resets or initializes the unprocessed kwargs
 		self.__cls._command[self.__boc][
 			self.__subcommand
-		].components.kwargs.unprocessed = tea()
+		].components.kwargs.unprocessed = D({})
 
 		for key, value in self.__kwargs.items():
 			"""
@@ -201,7 +202,7 @@ class _process_args_kwargs:
 					]
 					self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
 						self.__starter_regular
-					].append(
+					].extend(
 						chain(
 							*zip(
 								[final_key]

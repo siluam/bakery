@@ -111,17 +111,6 @@ class _set:
 		if self.__kwargs.get("_print", False):
 			self.__kwargs["_str"] = bool(self.__kwargs.get("_print", False))
 
-		if self.__kwargs.get("_starter_args", []) or self.__kwargs.get("_starter_kwargs", {}):
-			sa = self.__kwargs.pop("_starter_args", [])
-			self.__cls = self._process_args_kwargs(
-				*[sa] if isinstance(sa, (str, bytes, bytearray)) else sa,
-				_cls = self.__cls,
-				_calling = True,
-				_subcommand = self.__subcommand,
-				_starter_regular = "starter",
-				**self.__kwargs.pop("_starter_kwargs", {}),
-			)
-
 	def __frosting(self):
 		if self.__cls._sub.unprocessed in ("frosting_", "f_"):
 			if self.__kwargs.get("_frosting", False):

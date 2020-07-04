@@ -46,6 +46,7 @@ class _milcery(*(mixinport(mixins))):
 		_ignore_check: bool = False,
 		_baked_commands: Dict[str, Any] = D({}),
 		_baked_settings: Dict[str, Any] = D({}),
+		_ = 0,
 		**kwargs,
 	):
 		"""
@@ -61,7 +62,7 @@ class _milcery(*(mixinport(mixins))):
 		"""
 		self.program: str = program
 		self._ignore_check: bool = _ignore_check
-		
+
 		self._command = D({})
 		self._command.baked = _baked_commands
 		
@@ -69,9 +70,6 @@ class _milcery(*(mixinport(mixins))):
 		self._settings.baked = _baked_settings
 
 		self._sub = D({})
-		
-		self._args = args
-		self._kwargs = kwargs
 
 		"""
 
@@ -155,6 +153,21 @@ class _milcery(*(mixinport(mixins))):
 			"gensing",
 			"verbosity",
 		)
+
+		sa = kwargs.pop("_starter_args", [])
+		sa = [sa] if isinstance(sa, (str, bytes, bytearray)) else list(sa)
+		ska = kwargs.pop("_starter_kwargs", dict())
+		if _:
+			print(1)
+			self._args = sa
+			self._kwargs = ska
+			self._sub.unprocessed = "command"
+			self._set_and_process(*args, **kwargs)
+			return self._return_frosted_output()
+		else:
+			self._args = list(args) + list(sa)
+			kwargs.update(ska)
+			self._kwargs = kwargs
 
 	# DONE: Something's wrong with this, or returning the generator created by this
 	# DONE: Always remember a generator is used up
