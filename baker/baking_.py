@@ -48,10 +48,10 @@ class baking_:
 		_cls = _cls if _cls is not None else self
 
 		if _akar == "replace":
-			_cls._command.baked[_subcommand] = tea()
+			_cls._command.baked[_subcommand] = D({})
 
 		if _sar == "replace":
-			_cls._settings.baked[_subcommand] = tea()
+			_cls._settings.baked[_subcommand] = D({})
 
 		args, kwargs, _cls = self._set(
 			*args,
