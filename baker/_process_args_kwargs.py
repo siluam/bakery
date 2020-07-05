@@ -67,6 +67,14 @@ class _process_args_kwargs:
 				*self.__cls._command.baked[self.__subcommand].components.kwargs.starter,
 				*self.__cls._command.called[self.__subcommand].components.kwargs.starter,
 			)
+
+			if self.__subcommand != "command":
+				if not self.__cls._command.baked.command.components.kwargs.starter:
+					self.__cls._command.baked.command.components.kwargs.starter = tea()
+				self.__cls._command.final[self.__subcommand].components.kwargs.starter.extend(
+					*self.__cls._command.baked.command.components.kwargs.starter,
+				)
+
 			self.__cls._command.final[self.__subcommand].components.kwargs.regular.extend(
 				*self.__cls._command.baked[self.__subcommand].components.kwargs.regular,
 				*self.__cls._command.called[self.__subcommand].components.kwargs.regular,

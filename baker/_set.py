@@ -91,6 +91,10 @@ class _set:
 			self.__cls._settings.final[self.__subcommand].update(
 				D(self.__cls._settings.defaults)
 			)
+			if self.__subcommand != "command":
+				self.__cls._settings.final[self.__subcommand].update(
+					D(self.__cls._settings.baked.command)
+				)
 
 			# Careful! The order of the categories here matters!
 			for category in (
