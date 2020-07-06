@@ -21,7 +21,6 @@ class y(_milcery):
 		*args,
 		_baked_commands = D({}),
 		_baked_settings = D({}),
-		_ = 0,
 		**kwargs,
 	):
 		super().__init__(
@@ -29,7 +28,6 @@ class y(_milcery):
 			*args,
 			_baked_commands = _baked_commands,
 			_baked_settings = _baked_settings,
-			_ = _,
 			**kwargs,
 		)
 		"""
@@ -47,14 +45,13 @@ class y(_milcery):
 		return self._return_frosted_output()
 
 	@property
-	def _(self, *args, _ = 0, **kwargs):
+	def _(self, *args, **kwargs):
 		return partial(
 			self.__class__,
 			self.program,
 			*args,
 			_baked_commands = D(self._command.baked),
 			_baked_settings = D(self._settings.baked),
-			_ = _,
 			**kwargs,
 		)
 
