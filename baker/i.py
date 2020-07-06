@@ -43,7 +43,7 @@ class i(_milcery):
 			builtins.bakeriy_stores = [self]
 
 	def _(self, *args, **kwargs):
-		self._subcommand_check(kwargs.pop("_subcommand", "command"))
+		self._subcommand_check(kwargs.pop("_subcommand", "supercalifragilisticexpialidocious"))
 		self._set_and_process(*args, **kwargs)
 		return self._return_frosted_output()
 

@@ -26,7 +26,7 @@ class _process_args_kwargs:
 		_baking = False,
 		_calling = False,
 		_final = False,
-		_subcommand = "command",
+		_subcommand = "supercalifragilisticexpialidocious",
 		_starter_regular = "regular",
 		**kwargs,
 	):
@@ -68,11 +68,11 @@ class _process_args_kwargs:
 				*self.__cls._command.called[self.__subcommand].components.kwargs.starter,
 			)
 
-			if self.__subcommand != "command":
-				if not self.__cls._command.baked.command.components.kwargs.starter:
-					self.__cls._command.baked.command.components.kwargs.starter = tea()
+			if self.__subcommand != "supercalifragilisticexpialidocious":
+				if not self.__cls._command.baked.supercalifragilisticexpialidocious.components.kwargs.starter:
+					self.__cls._command.baked.supercalifragilisticexpialidocious.components.kwargs.starter = tea()
 				self.__cls._command.final[self.__subcommand].components.kwargs.starter.extend(
-					*self.__cls._command.baked.command.components.kwargs.starter,
+					*self.__cls._command.baked.supercalifragilisticexpialidocious.components.kwargs.starter,
 				)
 
 			self.__cls._command.final[self.__subcommand].components.kwargs.regular.extend(

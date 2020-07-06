@@ -18,7 +18,7 @@ class _set:
 		_baking = False,
 		_calling = False,
 		_final = False,
-		_subcommand = "command",
+		_subcommand = "supercalifragilisticexpialidocious",
 		_setup = False,
 		_reset = False,
 		_apply = False,
@@ -91,9 +91,9 @@ class _set:
 			self.__cls._settings.final[self.__subcommand].update(
 				D(self.__cls._settings.defaults)
 			)
-			if self.__subcommand != "command":
+			if self.__subcommand != "supercalifragilisticexpialidocious":
 				self.__cls._settings.final[self.__subcommand].update(
-					D(self.__cls._settings.baked.command)
+					D(self.__cls._settings.baked.supercalifragilisticexpialidocious)
 				)
 
 			# Careful! The order of the categories here matters!

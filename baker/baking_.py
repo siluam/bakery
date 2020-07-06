@@ -24,7 +24,7 @@ class baking_:
 		_cls = None,
 		_akar = "add",
 		_sar = "add",
-		_sc = "command",
+		_sc = "supercalifragilisticexpialidocious",
 		_sr = "regular",
 		**kwargs
 	):
@@ -39,7 +39,7 @@ class baking_:
 				* replace: replaces the currently baked settings
 
 			_sc: subcommand
-				* command: will act on the main command
+				* supercalifragilisticexpialidocious: will act on the main command
 			
 			_sr: starter or regular args and / or kwargs
 
@@ -78,7 +78,7 @@ class baking_:
 		_cls = None,
 		_akar = "add",
 		_sar = "add",
-		_sc = "command",
+		_sc = "supercalifragilisticexpialidocious",
 		_sr = "regular",
 		**kwargs
 	):
@@ -98,7 +98,7 @@ class baking_:
 		_cls = None,
 		_all = False,
 		_all_subcommands = False,
-		_subcommands = ["command"],
+		_subcommands = ["supercalifragilisticexpialidocious"],
 		_settings = False,
 		_args_kwargs = False,
 	):
@@ -114,9 +114,9 @@ class baking_:
 				in the list
 				Eg: git.splat_(_subcommands = ["status"])
 
-			splat(_subcommands = ["command"]):
+			splat(_subcommands = ["supercalifragilisticexpialidocious"]):
 				The default; removes all baked args, kwargs, and settings for the main command
-				Eg: git.splat_(_subcommands = ["command"])
+				Eg: git.splat_(_subcommands = ["supercalifragilisticexpialidocious"])
 
 		"""
 
@@ -127,7 +127,7 @@ class baking_:
 				getattr(_cls, category).baked = D({})
 			elif _all_subcommands:
 				for key in getattr(_cls, category).baked.keys():
-					if key != "command":
+					if key != "supercalifragilisticexpialidocious":
 						getattr(_cls, category).baked[key] = D({})
 			else:
 				for sub in _subcommands:
@@ -144,7 +144,7 @@ class baking_:
 		_cls = None,
 		_all = False,
 		_all_subcommands = False,
-		_subcommands = ["command"],
+		_subcommands = ["supercalifragilisticexpialidocious"],
 		_settings = False,
 		_args_kwargs = False,
 	):

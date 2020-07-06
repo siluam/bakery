@@ -14,7 +14,7 @@ class stderr(Error):
 
 
 class _return_output:
-	def _return_output(self, _cls = None, _subcommand = "command"):
+	def _return_output(self, _cls = None, _subcommand = "supercalifragilisticexpialidocious"):
 		self.__cls = _cls if _cls is not None else self
 		self.__subcommand = _subcommand
 

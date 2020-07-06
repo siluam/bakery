@@ -141,16 +141,15 @@ class _milcery(*(mixinport(mixins))):
 			"both",
 			"run",
 		)
-		
+
+		# Update these
 		self._return_categories: Tuple[str] = (
 			"stdout",
 			"stderr",
 			"return_code",
 			"return_codes",
 			"command",
-			"args",
-			"kwargs",
-			"gensing",
+			"tea",
 			"verbosity",
 		)
 
@@ -161,7 +160,7 @@ class _milcery(*(mixinport(mixins))):
 			print(1)
 			self._args = sa
 			self._kwargs = ska
-			self._sub.unprocessed = "command"
+			self._sub.unprocessed = "supercalifragilisticexpialidocious"
 			self._set_and_process(*args, **kwargs)
 			return self._return_frosted_output()
 		else:
@@ -182,13 +181,13 @@ class _milcery(*(mixinport(mixins))):
 		else:
 			return _type(input)
 
-    def _subcommand_check(self, subcommand):
-	    if (
-	        subcommand in self._settings.functions or
-	        subcommand == "command"
-        ):
-	        self._sub.unprocessed = "command"
-        else:
+	def _subcommand_check(self, subcommand):
+		if (
+			subcommand in self._settings.functions or
+			subcommand == "supercalifragilisticexpialidocious"
+		):
+			self._sub.unprocessed = "supercalifragilisticexpialidocious"
+		else:
 			self._sub.unprocessed = subcommand
 			self._sub.processed = subcommand.replace("_", "-")
 
