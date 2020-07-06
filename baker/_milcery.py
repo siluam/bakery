@@ -183,7 +183,10 @@ class _milcery(*(mixinport(mixins))):
 			return _type(input)
 
     def _subcommand_check(self, subcommand):
-	    if subcommand in self._settings.functions:
+	    if (
+	        subcommand in self._settings.functions or
+	        subcommand == "command"
+        ):
 	        self._sub.unprocessed = "command"
         else:
 			self._sub.unprocessed = subcommand
