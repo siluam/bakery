@@ -24,16 +24,17 @@ class _set:
 		_apply = False,
 		**kwargs,
 	):
+
 		self.__args = args
 		self.__kwargs = kwargs
-		self.__cls = _cls if _cls is not None else self
+		self.__cls = self._cls_check(_cls)
 		self.__subcommand = _subcommand
 		self.__baking = _baking
 		self.__calling = _calling
 		self.__final = _final
 
 		if _setup:
-
+			
 			self.__set_defaults()
 
 		elif _reset:

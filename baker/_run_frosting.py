@@ -12,7 +12,7 @@ class _run_frosting:
 
 	def _run_frosting(self, _cls = None, _subcommand = "supercalifragilisticexpialidocious"):
 
-		self.__cls = _cls if _cls is not None else self
+		self.__cls = self._cls_check(_cls)
 		self.__subcommand = _subcommand
 
 		try:

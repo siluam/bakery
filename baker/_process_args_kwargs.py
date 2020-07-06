@@ -32,7 +32,7 @@ class _process_args_kwargs:
 	):
 		self.__args = args
 		self.__kwargs = kwargs
-		self.__cls = _cls if _cls is not None else self
+		self.__cls = self._cls_check(_cls)
 		self.__baking = _baking
 		self.__calling = _calling
 		self.__final = _final
@@ -232,21 +232,17 @@ class _process_args_kwargs:
 					)
 
 			else:
+				if self.__cls._dos:
+					dash = "/"
+				else:
+					dash = "-" if self.__cls._kwarg_one_dash or len(key) == 1 else "--"
+
+				final_key = key if self.__cls._fixed_key else key.replace("_", "-")
+
 				self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
 					self.__starter_regular
-				].append(
-					"/" if self.__cls._dos else (
-						"-"
-						if self.__cls._kwarg_one_dash
-						or len(key) == 1
-						else "--"
-					)
-					+ (
-						key
-						if self.__cls._fixed_key
-						else key.replace("_", "-")
-					)
-				)
+				].append(dash + final_key)
+
 				self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
 					self.__starter_regular
 				].append(

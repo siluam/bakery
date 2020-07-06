@@ -2,6 +2,7 @@
 import builtins
 
 # From Imports
+from addict import Dict as D
 from copy import deepcopy
 from functools import partial
 from gensing import tea
@@ -46,13 +47,15 @@ class baking_:
 
 		"""
 
-		_cls = self.__cls_check(_cls)
+		_cls = self._cls_check(_cls)
 
 		if _akar == "replace":
 			_cls._command.baked[_subcommand] = D({})
 
 		if _sar == "replace":
 			_cls._settings.baked[_subcommand] = D({})
+
+		self._set(_setup = True)
 
 		self_set = partial(
 			self._set,
@@ -62,6 +65,13 @@ class baking_:
 			_subcommand = _sc,
 			**kwargs,
 		)
+
+		# Since args, kwargs, and potentially _cls are modified, and then unpacked into the following
+		# partial, this and the similar check below said partial must remain separate.
+		if _cls == self:
+			args, kwargs = self_set()
+		else:
+			args, kwargs, _cls = self_set()
 
 		self_pak = partial(
 			self._process_args_kwargs,
@@ -74,10 +84,8 @@ class baking_:
 		)
 
 		if _cls == self:
-			args, kwargs = self_set()
 			self_pak()
 		else:
-			args, kwargs, _cls = self_set()
 			_cls = self_pak()
 			return _cls
 
@@ -91,7 +99,7 @@ class baking_:
 		_sr = "regular",
 		**kwargs
 	):
-		_cls = self.__cls_check(_cls)
+		_cls = self._cls_check(_cls)
 		for store in _cls.stores:
 			store.bake_(
 				*args,
@@ -130,7 +138,7 @@ class baking_:
 
 		"""
 
-		_cls = self.__cls_check(_cls)
+		_cls = self._cls_check(_cls)
 
 		def inner(category):
 			if _all:
@@ -158,7 +166,7 @@ class baking_:
 		_settings = False,
 		_args_kwargs = False,
 	):
-		_cls = self.__cls_check(_cls)
+		_cls = self._cls_check(_cls)
 		for store in _cls.stores:
 			store.splat_(
 				_cls = _cls,
@@ -169,5 +177,5 @@ class baking_:
 				_args_kwargs = _args_kwargs,
 			)
 
-	def __cls_check(self, _cls):
+	def _cls_check(self, _cls):
 		return _cls if _cls is not None else self
