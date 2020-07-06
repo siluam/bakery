@@ -3,6 +3,7 @@ import builtins
 
 # From Imports
 from copy import deepcopy
+from functools import partial
 from gensing import tea
 from typing import Dict, Union, Tuple
 
@@ -45,7 +46,7 @@ class baking_:
 
 		"""
 
-		_cls = _cls if _cls is not None else self
+		_cls = self.__cls_check(_cls)
 
 		if _akar == "replace":
 			_cls._command.baked[_subcommand] = D({})
@@ -53,7 +54,8 @@ class baking_:
 		if _sar == "replace":
 			_cls._settings.baked[_subcommand] = D({})
 
-		args, kwargs, _cls = self._set(
+		self_set = partial(
+			self._set,
 			*args,
 			_cls = _cls,
 			_baking = True,
@@ -61,7 +63,8 @@ class baking_:
 			**kwargs,
 		)
 
-		_cls = self._process_args_kwargs(
+		self_pak = partial(
+			self._process_args_kwargs,
 			*args,
 			_cls = _cls,
 			_baking = True,
@@ -70,7 +73,13 @@ class baking_:
 			**kwargs,
 		)
 
-		return _cls
+		if _cls == self:
+			args, kwargs = self_set()
+			self_pak()
+		else:
+			args, kwargs, _cls = self_set()
+			_cls = self_pak()
+			return _cls
 
 	def bake_all_(
 		self,
@@ -82,7 +91,7 @@ class baking_:
 		_sr = "regular",
 		**kwargs
 	):
-		_cls = _cls if _cls is not None else self
+		_cls = self.__cls_check(_cls)
 		for store in _cls.stores:
 			store.bake_(
 				*args,
@@ -121,7 +130,7 @@ class baking_:
 
 		"""
 
-		_cls = _cls if _cls is not None else self
+		_cls = self.__cls_check(_cls)
 
 		def inner(category):
 			if _all:
@@ -149,7 +158,7 @@ class baking_:
 		_settings = False,
 		_args_kwargs = False,
 	):
-		_cls = _cls if _cls is not None else self
+		_cls = self.__cls_check(_cls)
 		for store in _cls.stores:
 			store.splat_(
 				_cls = _cls,
@@ -159,3 +168,6 @@ class baking_:
 				_settings = _settings,
 				_args_kwargs = _args_kwargs,
 			)
+
+	def __cls_check(self, _cls):
+		return _cls if _cls is not None else self

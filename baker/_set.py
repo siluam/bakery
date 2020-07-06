@@ -51,7 +51,11 @@ class _set:
 
 		else:
 			self.__set()
-			return self.__args, self.__kwargs, self.__cls
+
+			if self.__cls == self:
+				return self.__args, self.__kwargs
+			else:
+				return self.__args, self.__kwargs, self.__cls
 
 	def __set_defaults(self):
 		for key, value in self.__cls._settings.defaults.items():
