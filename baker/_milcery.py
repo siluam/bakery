@@ -109,8 +109,7 @@ class _milcery(*(mixinport(mixins))):
         self._settings.functions = (
             "frosting_",
             "f_",
-            "shell_",
-            "str_",
+            "print_",
         )
 
         self._shells: List[str] = [
@@ -186,13 +185,11 @@ class _milcery(*(mixinport(mixins))):
             return _type(input)
 
     def _subcommand_check(self, subcommand):
-        if (
-            subcommand in self._settings.functions
-            or subcommand == "supercalifragilisticexpialidocious"
-        ):
-            self._sub.unprocessed = (
-                "supercalifragilisticexpialidocious"
-            )
+        if subcommand in self._settings.functions:
+            self._sub.function = subcommand
+            self._sub.unprocessed = "supercalifragilisticexpialidocious"
+        elif subcommand == "supercalifragilisticexpialidocious":
+            self._sub.unprocessed = "supercalifragilisticexpialidocious"
         else:
             self._sub.unprocessed = subcommand
             self._sub.processed = subcommand.replace("_", "-")

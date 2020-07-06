@@ -102,26 +102,27 @@ class _set:
 				)
 
 	def __kwargs_mods(self):
-		self.__kwargs_based()
-		self.__subcommand_based()
-
-	def __kwargs_based(self):
 		self.__frosting()
+		self.__print()
 
-		if self.__kwargs.get("_print", False):
-			self.__kwargs["_str"] = bool(self.__kwargs.get("_print", False))
+	def __print(self):
+		if self.__cls._sub.function == "print_":
+			self.__kwargs["_print"] = True
+			self.__kwargs["_str"] = True
+		else:
+			if "_print" in self.__kwargs.keys():
+				if self.__kwargs.get("_print"):
+					self.__kwargs["_str"] = True
+				else:
+					self.__kwargs["_str"] = self.__kwargs.get("_str", False)
 
 	def __frosting(self):
-		if self.__cls._sub.unprocessed in ("frosting_", "f_"):
-			if self.__kwargs.get("_frosting", False):
-				self.__kwargs["_frosting"] = True
+		if self.__cls._sub.function in ("frosting_", "f_"):
+			self.__kwargs["_frosting"] = True
 			self.__kwargs["_type"] = iter
-
-	def __subcommand_based(self):
-		if self.__cls._sub.unprocessed == "shell_":
-			if self.__kwargs.get("_shell", False):
-				self.__kwargs["_shell"] = True
-
-		if self.__cls._sub.unprocessed == "str_":
-			if self.__kwargs.get("_str", False):
-				self.__kwargs["_str"] = True
+		else:
+			if "_frosting" in self.__kwargs.keys():
+				if self.__kwargs.get("_frosting"):
+					self.__kwargs["_type"] = iter
+				else:
+					self.__kwargs["_type"] = self.__kwargs.get("_type", iter)
