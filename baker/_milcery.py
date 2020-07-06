@@ -182,11 +182,16 @@ class _milcery(*(mixinport(mixins))):
 		else:
 			return _type(input)
 
+    def _subcommand_check(self, subcommand):
+	    if subcommand in self._settings.functions:
+	        self._sub.unprocessed = "command"
+        else:
+			self._sub.unprocessed = subcommand
+			self._sub.processed = subcommand.replace("_", "-")
+
 	def __getattr__(self, subcommand):
 		def inner(*args, **kwargs):
-			self._sub.unprocessed = "command" if subcommand in self._settings.functions else subcommand
-			if not subcommand in self._settings.functions:
-				self._sub.processed = subcommand.replace("_", "-")
+		    self._subcommand_check(subcommand)
 			self._set_and_process(*args, **kwargs)
 			return self._return_frosted_output()
 		return inner
