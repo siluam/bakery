@@ -229,11 +229,11 @@ class _milcery(*(mixinport(mixins))):
             self._set, _subcommand=self._sub.unprocessed
         )
 
-        self._args, self._kwargs = set_with_sub(
+        self._args, self._kwargs, self = set_with_sub(
             *self._args, _calling=True, **self._kwargs,
         )
 
-        args, kwargs = set_with_sub(
+        args, kwargs, self = set_with_sub(
             *args, _calling=True, **kwargs,
         )
 
