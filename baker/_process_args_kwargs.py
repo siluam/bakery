@@ -175,7 +175,7 @@ class _process_args_kwargs:
 					].components.kwargs.unprocessed[key] = value
 				else:
 					raise not_string_dict(
-						"Sorry! Value must be a string, integer, or dictionary!"
+						f'Sorry! Value "{value}" must be a string, integer, or dictionary!'
 					)
 
 	def __process_kwargs(self):
