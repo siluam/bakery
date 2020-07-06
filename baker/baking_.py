@@ -82,6 +82,7 @@ class baking_:
 		_sr = "regular",
 		**kwargs
 	):
+		_cls = _cls if _cls is not None else self
 		for store in _cls.stores:
 			store.bake_(
 				*args,
@@ -148,6 +149,7 @@ class baking_:
 		_settings = False,
 		_args_kwargs = False,
 	):
+		_cls = _cls if _cls is not None else self
 		for store in _cls.stores:
 			store.splat_(
 				_cls = _cls,
