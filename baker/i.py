@@ -18,17 +18,17 @@ default: Tuple[None] = namedtuple("default", "")
 class i(_milcery):
 	def __init__(
 		self,
-		program: str,
+		_program: str,
 		*args,
-		_baked_commands = D({}),
-		_baked_settings = D({}),
+		_baked_commands = None,
+		_baked_settings = None,
 		**kwargs,
 	):
 		super().__init__(
-			program,
+			_program,
 			*args,
-			_baked_commands = _baked_commands,
-			_baked_settings = _baked_settings,
+			_baked_commands = _baked_commands or D({}),
+			_baked_settings = _baked_settings or D({}),
 			**kwargs,
 		)
 		"""
@@ -49,14 +49,14 @@ class i(_milcery):
 	def __call__(self, *args, **kwargs):
 		return partial(
 			self.__class__,
-			self.program,
+			self._program,
 			*args,
 			_baked_commands = D(self._command.baked),
 			_baked_settings = D(self._settings.baked),
 			**kwargs,
 		)
 
-def __getattr__(program):
+def __getattr__(_program):
 	"""
 		Answer 1: https://stackoverflow.com/questions/56786604/import-modules-that-dont-exist-yet/56786875#56786875
 		User 1:   https://stackoverflow.com/users/1016216/l3viathan
@@ -66,10 +66,10 @@ def __getattr__(program):
 
 		Modified by me
 	"""
-	if program == "__path__":
+	if _program == "__path__":
 		raise AttributeError
 
 	try:
-		return i(program)
+		return i(_program)
 	except Exception as e:
 		return ("i", e)

@@ -9,7 +9,7 @@ from nanite import module_installed, fullpath
 i = module_installed(fullpath("i.py", f_back = 2))
 y = module_installed(fullpath("y.py", f_back = 2))
 
-def __getattr__(program):
+def __getattr__(_program):
 	"""
 		Answer 1: https://stackoverflow.com/questions/56786604/import-modules-that-dont-exist-yet/56786875#56786875
 		User 1:   https://stackoverflow.com/users/1016216/l3viathan
@@ -19,11 +19,11 @@ def __getattr__(program):
 
 		Modified by me
 	"""
-	if program == "__path__":
+	if _program == "__path__":
 		raise AttributeError
 
 	extension = module_installed(fullpath("extensions.py", f_back = 1))
-	prog_parts = program.partition("_")
+	prog_parts = _program.partition("_")
 	bakeriy = i if prog_parts[2] == "i" else y
 
 	try:
@@ -32,6 +32,6 @@ def __getattr__(program):
 		elif prog_parts[0] == "baker":
 			return partial(extension.baker_, bakeriy)
 		else:
-			return y.y(program)
+			return y.y(_program)
 	except Exception as e:
 		return e

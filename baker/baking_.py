@@ -91,8 +91,8 @@ class baking_:
 
 	def bake_all_(
 		self,
-		*args,
 		_cls = None,
+		*args,
 		_akar = "add",
 		_sar = "add",
 		_sc = "supercalifragilisticexpialidocious",
@@ -100,10 +100,10 @@ class baking_:
 		**kwargs
 	):
 		_cls = self._cls_check(_cls)
-		for store in _cls.stores:
+		for store in _cls._stores:
 			store.bake_(
 				*args,
-				_cls = _cls,
+				_cls = store,
 				_akar = _akar,
 				_sar = _sar,
 				_sc = _sc,
@@ -155,7 +155,7 @@ class baking_:
 			for category in ("_settings", "_command"):
 				inner(category)
 		else:
-			inner(_settings if _settings else _args_kwargs)
+			inner(_settings or _args_kwargs)
 
 	def splat_all_(
 		self,
@@ -167,9 +167,9 @@ class baking_:
 		_args_kwargs = False,
 	):
 		_cls = self._cls_check(_cls)
-		for store in _cls.stores:
+		for store in _cls._stores:
 			store.splat_(
-				_cls = _cls,
+				_cls = store,
 				_all = _all,
 				_all_subcommands = _all_subcommands,
 				_subcommands = _subcommands,
@@ -178,4 +178,4 @@ class baking_:
 			)
 
 	def _cls_check(self, _cls):
-		return _cls if _cls is not None else self
+		return _cls or self

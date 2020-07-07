@@ -25,7 +25,7 @@ class need_dict(Error):
 class _short_property_vars:
 
 	@property
-	def stores(self):
+	def _stores(self):
 		return builtins.bakeriy_stores
 
 	@property

@@ -17,17 +17,17 @@ default: Tuple[None] = namedtuple("default", "")
 class y(_milcery):
 	def __init__(
 		self,
-		program: str,
+		_program: str,
 		*args,
-		_baked_commands = D({}),
-		_baked_settings = D({}),
+		_baked_commands = None,
+		_baked_settings = None,
 		**kwargs,
 	):
 		super().__init__(
-			program,
+			_program,
 			*args,
-			_baked_commands = _baked_commands,
-			_baked_settings = _baked_settings,
+			_baked_commands = _baked_commands or D({}),
+			_baked_settings = _baked_settings or D({}),
 			**kwargs,
 		)
 		"""
@@ -48,14 +48,14 @@ class y(_milcery):
 	def _(self, *args, **kwargs):
 		return partial(
 			self.__class__,
-			self.program,
+			self._program,
 			*args,
 			_baked_commands = D(self._command.baked),
 			_baked_settings = D(self._settings.baked),
 			**kwargs,
 		)
 
-def __getattr__(program):
+def __getattr__(_program):
 	"""
 		Answer 1: https://stackoverflow.com/questions/56786604/import-modules-that-dont-exist-yet/56786875#56786875
 		User 1:   https://stackoverflow.com/users/1016216/l3viathan
@@ -65,16 +65,16 @@ def __getattr__(program):
 
 		Modified by me
 	"""
-	if program == "__path__":
+	if _program == "__path__":
 		raise AttributeError
 
 	bakeri_menu = (
         "git",
     )
 
-	bakeriy = i if program in bakeri_menu else y
+	bakeriy = i if _program in bakeri_menu else y
 
 	try:
-		return bakeriy(program)
+		return bakeriy(_program)
 	except Exception as e:
-		return ("y sent to i" if program in bakeri_menu else "y", e)
+		return ("y sent to i" if _program in bakeri_menu else "y", e)

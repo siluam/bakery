@@ -17,7 +17,7 @@ class _create_command:
 
 		_command = tea(
 			self.__cls._run_as,
-			self.__cls.program,
+			self.__cls._program,
 			*self.__cls._command.final[self.__subcommand].components.kwargs.starter,
 		)
 

@@ -40,11 +40,11 @@ class verbosity_invalid(Error):
 class _long_property_vars:
 
 	@property
-	def program(self):
-		return self._program
+	def _program(self):
+		return self.__program
 
-	@program.setter
-	def program(self, value):
+	@_program.setter
+	def _program(self, value):
 		if isinstance(value, dict):
 			if not value["fixed"]:
 				value = value.replace("_", "-")
@@ -60,7 +60,7 @@ class _long_property_vars:
 				f'Sorry! "{value}" does not seem to exist in the path!'
 			)
 		else:
-			self._program = value
+			self.__program = value
 
 	@property
 	def _n_lines(self):

@@ -45,11 +45,11 @@ class _milcery(*(mixinport(mixins))):
 
     def __init__(
         self,
-        program: str,
+        _program: str,
         *args,
         _ignore_check: bool = False,
-        _baked_commands: Dict[str, Any] = D({}),
-        _baked_settings: Dict[str, Any] = D({}),
+        _baked_commands: Dict[str, Any] = None,
+        _baked_settings: Dict[str, Any] = None,
         **kwargs,
     ):
         """
@@ -63,14 +63,14 @@ class _milcery(*(mixinport(mixins))):
 			A good way to debug commands is to see what the command actually was, using the "_str"
 			keyword argument.
 		"""
-        self.program: str = program
+        self._program: str = _program
         self._ignore_check: bool = _ignore_check
 
         self._command = D({})
-        self._command.baked = _baked_commands
+        self._command.baked = _baked_commands or D({})
 
         self._settings = D({})
-        self._settings.baked = _baked_settings
+        self._settings.baked = _baked_settings or D({})
 
         self._sub = D({})
 
@@ -79,7 +79,7 @@ class _milcery(*(mixinport(mixins))):
 		"""
         self._settings.defaults: Dict[str, Any] = {
             "_type": iter,
-            "_capture": "stdout",
+            "_capture": "both",
             "_shell": False,
             "_frosting": False,
             "_str": False,
@@ -124,7 +124,7 @@ class _milcery(*(mixinport(mixins))):
             "cmd",
         ]
         self._shell = (
-            True if self.program in self._shells else False
+            True if self._program in self._shells else False
         )
 
         # Returns the default allowed types and adds "str" as well
@@ -254,7 +254,7 @@ class _milcery(*(mixinport(mixins))):
 
     def __deepcopy__(self):
         return self.__class__(
-            program,
+            _program,
             _baked_commands=D(self._command.baked),
             _baked_settings=D(self._settings.baked),
         )
