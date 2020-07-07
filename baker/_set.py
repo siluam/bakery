@@ -119,7 +119,7 @@ class _set:
 				if self.__kwargs.get("_print"):
 					self.__kwargs["_str"] = True
 				else:
-					self.__kwargs["_str"] = self.__kwargs.get("_str", False)
+					self.__kwargs["_str"] = self.__kwargs.get("_str", self._str)
 
 	def __frosting(self):
 		if self.__cls._sub.function in ("frosting_", "f_"):
@@ -130,4 +130,4 @@ class _set:
 				if self.__kwargs.get("_frosting"):
 					self.__kwargs["_type"] = iter
 				else:
-					self.__kwargs["_type"] = self.__kwargs.get("_type", iter)
+					self.__kwargs["_type"] = self.__kwargs.get("_type", self._type)
