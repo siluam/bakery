@@ -2,6 +2,7 @@
 from addict import Dict as D
 from functools import partial
 from nanite import peek, trim
+from sarge import Pipeline, Capture
 from typing import Dict, Any
 
 class Error(Exception):
@@ -41,48 +42,61 @@ class _return_output:
 
 	def __capture_output(self):
 
-		if self.__cls._capture == "run":
-			from sarge import run
+		stdout_capture = Capture(
+			timeout=self.__cls._timeout_stdout,
+			buffer_size=1 if self.__cls._capture = "run" else self.__cls._buffer_size_stdout
+		)
+		stderr_capture = Capture(
+			timeout=self.__cls._timeout_stderr,
+			buffer_size=1 if self.__cls._capture = "run" else self.__cls._buffer_size_stderr
+		)
 
-			run(self.__command())
+		p = Pipeline(self.__command(), stdout = stdout_capture, stderr = stderr_capture)
+		p.run()
 
-			# if 
-			# 	return None
-			# else:
+		if self.__cls._wait is None:
+
+			p.close()
+
+			return None
+
+		elif self.__cls._wait:
+
+			p.wait()
+
 			_ = D({})
-			_.command = self.__command()
-			_.tea = self.__command
-			_.sub = self.__cls._sub
+
+			if _capture in ("stdout", "stderr", "both"):
+				_.stdout = p.stdout
+				_.stderr = p.stderr
+			else:
+				_.return_code = p.returncode
+
 			if self.__cls._verbosity > 0:
-				_.final = D(self.__cls._command.final[self.__subcommand])
+				if not _.stdout:
+					_.stdout = p.stdout
+				if not _.stderr:
+					_.stderr = p.stderr
+				if not _.return_code:
+					_.return_code = p.returncode
+				_.return_codes = p.returncodes
+				_.command.bakeriy = self.__command()
+				_.command.sarge = p.commands
+
 			if self.__cls._verbosity > 1:
+				_.tea = self.__command
+				_.sub = self.__cls._sub
+				_.final = D(self.__cls._command.final[self.__subcommand])
 				_.baked = D(self.__cls._command.baked[self.__subcommand])
 				_.called = D(self.__cls._command.called[self.__subcommand])
+
+			p.close()
+
 			return _
 
 		else:
 
-			_output = getattr(
-				__import__("sarge"), f"capture_{self.__cls._capture}"
-			)(self.__command())
-
-			# if 
-			# 	pass
-			# else:
-			self.__return_code = _output.returncode
-			self.__return_codes = _output.returncodes
-
-			if self.__cls._capture == "stdout":
-				self.__stdout = _output.stdout
-				self.__stderr = ()
-			elif self.__cls._capture == "stderr":
-				self.__stdout = ()
-				self.__stderr = _output.stderr
-			else:
-				self.__stdout = _output.stdout
-				self.__stderr = _output.stderr
-			
-			return None
+			return p
 
 	def __decode_std(self, _std):
 		yield from (

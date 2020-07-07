@@ -32,7 +32,6 @@ mixins: Generator[str, None, None] = (
         "_set",
         "_short_property_vars",
         "baking_",
-        "wait_kill_"
     )
 )
 
@@ -105,9 +104,20 @@ class _milcery(*(mixinport(mixins))):
             "_return": "verbosity",
             # This setting will use a single forward slash instead of a dash for options
             "_dos": False,
+            # If set to True, _capture = "run" will wait for the process to finish before
+            # returning an addict dictionary of values depending on "_return" and "_verbosity"
+            # If set to False, _capture = "run" will return the sarge Pipeline object
+            # If set to None, _capture = "run" will wait for the process to finish
+            # before returning None
             "_wait": False,
-            "_bg": False,
-            "_killable": False,
+            # If set to True, _capture set to "out", "err", or "both" will wait for user input
+            "_block": False,
+            "_timeout_stdout": None,
+            "_timeout_stderr": None,
+            "_block_stdout": False,
+            "_block_stderr": False,
+            "_buffer_size_stdout": 0,
+            "_buffer_size_stderr": 0,
         }
 
         self._settings.functions = (
