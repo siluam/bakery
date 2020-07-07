@@ -107,27 +107,11 @@ class _set:
 				)
 
 	def __kwargs_mods(self):
-		self.__frosting()
-		self.__print()
 
-	def __print(self):
-		if self.__cls._sub.function == "print_":
-			self.__kwargs["_print"] = True
-			self.__kwargs["_str"] = True
-		else:
-			if "_print" in self.__kwargs.keys():
-				if self.__kwargs.get("_print"):
-					self.__kwargs["_str"] = True
-				else:
-					self.__kwargs["_str"] = self.__kwargs.get("_str", self._str)
-
-	def __frosting(self):
 		if self.__cls._sub.function in ("frosting_", "f_"):
 			self.__kwargs["_frosting"] = True
 			self.__kwargs["_type"] = iter
-		else:
-			if "_frosting" in self.__kwargs.keys():
-				if self.__kwargs.get("_frosting"):
-					self.__kwargs["_type"] = iter
-				else:
-					self.__kwargs["_type"] = self.__kwargs.get("_type", self._type)
+
+		if self.__cls._sub.function == "print_":
+			self.__kwargs["_print"] = True
+			self.__kwargs["_str"] = True

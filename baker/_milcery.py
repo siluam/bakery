@@ -32,6 +32,7 @@ mixins: Generator[str, None, None] = (
         "_set",
         "_short_property_vars",
         "baking_",
+        "wait_kill_"
     )
 )
 
@@ -104,6 +105,9 @@ class _milcery(*(mixinport(mixins))):
             "_return": "verbosity",
             # This setting will use a single forward slash instead of a dash for options
             "_dos": False,
+            "_wait": False,
+            "_bg": False,
+            "_killable": False,
         }
 
         self._settings.functions = (

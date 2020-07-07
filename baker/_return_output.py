@@ -2,7 +2,6 @@
 from addict import Dict as D
 from functools import partial
 from nanite import peek, trim
-from sarge import run
 from typing import Dict, Any
 
 class Error(Exception):
@@ -43,8 +42,13 @@ class _return_output:
 	def __capture_output(self):
 
 		if self.__cls._capture == "run":
+			from sarge import run
 
 			run(self.__command())
+
+			# if 
+			# 	return None
+			# else:
 			_ = D({})
 			_.command = self.__command()
 			_.tea = self.__command
@@ -62,6 +66,9 @@ class _return_output:
 				__import__("sarge"), f"capture_{self.__cls._capture}"
 			)(self.__command())
 
+			# if 
+			# 	pass
+			# else:
 			self.__return_code = _output.returncode
 			self.__return_codes = _output.returncodes
 

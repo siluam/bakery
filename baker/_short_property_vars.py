@@ -52,44 +52,24 @@ class _short_property_vars:
 		self.__capture = value
 
 	@property
-	def _frosting(self):
-		return self.__frosting
-
-	@_frosting.setter
-	def _frosting(self, value):
-		self.__frosting = bool(value)
-
-	@property
-	def _shell(self):
-		return self.__shell
-
-	@_shell.setter
-	def _shell(self, value):
-		self.__shell = bool(value)
-
-	@property
-	def _str(self):
-		return self.__str
-
-	@_str.setter
-	def _str(self, value):
-		self.__str = bool(value)
-
-	@property
 	def _print(self):
 		return self.__print
 
 	@_print.setter
 	def _print(self, value):
 		self.__print = bool(value)
+		if value:
+			self.__str = True
 
 	@property
-	def _ignore_stderr(self):
-		return self.__ignore_stderr
+	def _frosting(self):
+		return self.__frosting
 
-	@_ignore_stderr.setter
-	def _ignore_stderr(self, value):
-		self.__ignore_stderr = bool(value)
+	@_frosting.setter
+	def _frosting(self, value):
+		self.__frosting = bool(value)
+		if value:
+			self.__type = iter
 
 	@property
 	def _verbosity(self):
