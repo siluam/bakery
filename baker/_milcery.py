@@ -167,7 +167,11 @@ class _milcery(*(mixinport(mixins))):
 
         sa = kwargs.pop("_starter_args", [])
         ska = kwargs.pop("_starter_kwargs", dict())
-        self._args = list(args) + list([sa] if isinstance(sa, (str, bytes, bytearray)) else list(sa))
+        self._args = list(args) + list(
+            [sa]
+            if isinstance(sa, (str, bytes, bytearray))
+            else list(sa)
+        )
         kwargs.update(ska)
         self._kwargs = kwargs
 
@@ -187,9 +191,13 @@ class _milcery(*(mixinport(mixins))):
     def _subcommand_check(self, subcommand):
         if subcommand in self._settings.functions:
             self._sub.function = subcommand
-            self._sub.unprocessed = "supercalifragilisticexpialidocious"
+            self._sub.unprocessed = (
+                "supercalifragilisticexpialidocious"
+            )
         elif subcommand == "supercalifragilisticexpialidocious":
-            self._sub.unprocessed = "supercalifragilisticexpialidocious"
+            self._sub.unprocessed = (
+                "supercalifragilisticexpialidocious"
+            )
         else:
             self._sub.unprocessed = subcommand
             self._sub.processed = subcommand.replace("_", "-")
@@ -201,7 +209,8 @@ class _milcery(*(mixinport(mixins))):
                 self._set_and_process(*args, **kwargs)
                 return self._return_frosted_output()
             finally:
-    			self._set(_reset = True)
+                self._set(_reset=True)
+
         return inner
 
     def _return_frosted_output(self):

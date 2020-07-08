@@ -6,8 +6,6 @@ from addict import Dict as D
 from nanite import module_installed
 from gensing import tea, frosting
 
-################################################################################################
-
 class _run_frosting:
 
 	def _run_frosting(self, _cls = None, _subcommand = "supercalifragilisticexpialidocious"):
