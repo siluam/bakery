@@ -95,37 +95,3 @@ class _long_property_vars:
 			value["std"] = "out"
 
 		self.__n_lines = D(value)
-
-	@property
-	def _return(self):
-		return self.__return
-
-	@_return.setter
-	def _return(self, value):
-		if isinstance(value, (str, bytes, bytearray)):
-			if value not in self._return_categories:
-				raise no_category(
-					f'Sorry! {value} is not an acceptable category! Please choose from: [{", ".join(self._return_categories)}]'
-				)
-			else:
-				self.__return = value
-		else:
-			try:
-				iter(value)
-			except TypeError:
-				raise not_iterable(
-					'Sorry! The given value is not an iterable! "_return" must be a string or an iterable!'
-				)
-			else:
-				if "verbosity" in value:
-					raise verbosity_invalid(
-						f'Sorry! "verbosity" cannot be used with other category values! Please choose from [{", ".join((cat for cat in self._return_categories if cat != "verbosity"))}]'
-					)
-				if all(
-					(i in self._return_categories for i in value)
-				):
-					self.__return = value
-				else:
-					raise no_category(
-						f'Sorry! The given value contains an unacceptable category! Please choose from: [{", ".join((cat for cat in self._return_categories if cat != "verbosity"))}]'
-					)

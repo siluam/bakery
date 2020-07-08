@@ -97,11 +97,6 @@ class _milcery(*(mixinport(mixins))):
             "_fixed_key": False,
             "_print": False,
             "_tiered": False,
-            # If set to "verbosity", this setting will trigger a verbose return with as much
-            # information as dictated by the "_verbosity" setting;
-            # otherwise, this will trigger a regular return, returning just one category, such as
-            # standard out, standard error, etc.
-            "_return": "verbosity",
             # This setting will use a single forward slash instead of a dash for options
             "_dos": False,
             # If set to True, _capture = "run" will wait for the process to finish before
@@ -118,6 +113,12 @@ class _milcery(*(mixinport(mixins))):
             "_block_stderr": False,
             "_buffer_size_stdout": 0,
             "_buffer_size_stderr": 0,
+            "_chunk_size_stdout": -1,
+            "_chunk_size_stderr": -1,
+            "_input": None,
+            "_posix": True,
+            "_async": False,
+            "_stop_threads": False,
         }
 
         self._settings.functions = (
@@ -195,10 +196,12 @@ class _milcery(*(mixinport(mixins))):
 
     def __getattr__(self, subcommand):
         def inner(*args, **kwargs):
-            self._subcommand_check(subcommand)
-            self._set_and_process(*args, **kwargs)
-            return self._return_frosted_output()
-
+            try:
+                self._subcommand_check(subcommand)
+                self._set_and_process(*args, **kwargs)
+                return self._return_frosted_output()
+            finally:
+    			self._set(_reset = True)
         return inner
 
     def _return_frosted_output(self):

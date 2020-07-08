@@ -72,19 +72,6 @@ class _short_property_vars:
 			self.__type = iter
 
 	@property
-	def _verbosity(self):
-		return self.__verbosity
-
-	@_verbosity.setter
-	def _verbosity(self, value):
-		_ = int(value)
-		if not 0 <= value <= 2:
-			raise too_verbose(
-				"Sorry! No verbosity levels greater than 2 or less than 0!"
-			)
-		self.__verbosity = _
-
-	@property
 	def _starter_kwargs(self):
 		return self.__starter_args
 
