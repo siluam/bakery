@@ -90,7 +90,7 @@ class _milcery(*(mixinport(mixins))):
                 {
                     "ordinal": "first",
                     "number": None,
-                    "std": "out",
+                    "std": "stdout",
                 }
             ),
             "_kwarg_one_dash": False,

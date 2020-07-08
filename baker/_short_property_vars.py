@@ -59,7 +59,7 @@ class _short_property_vars:
 	def _print(self, value):
 		self.__print = bool(value)
 		if value:
-			self.__str = True
+			self._str = True
 
 	@property
 	def _frosting(self):
@@ -69,7 +69,7 @@ class _short_property_vars:
 	def _frosting(self, value):
 		self.__frosting = bool(value)
 		if value:
-			self.__type = iter
+			self._type = iter
 
 	@property
 	def _starter_kwargs(self):
