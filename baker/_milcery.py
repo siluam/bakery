@@ -180,7 +180,7 @@ class _milcery(*(mixinport(mixins))):
 
 	def _convert_to_type(self, input, _type):
 		if isinstance(input, frosting):
-			input = [line for line in input()[0].split("\n")][:-1]
+			input = [line.split("\t") for line in input()[0].split("\n")][:-1]
 		if _type.__name__ == "str":
 			return " ".join(input)
 		if _type.__name__ in ("generator", "iter"):
