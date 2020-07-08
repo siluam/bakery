@@ -10,6 +10,7 @@ from nanite import (
 	mixinport,
 )
 from os import environ
+from textwrap import TextWrapper
 from typing import (
 	List,
 	Tuple,
@@ -180,7 +181,11 @@ class _milcery(*(mixinport(mixins))):
 
 	def _convert_to_type(self, input, _type):
 		if isinstance(input, frosting):
-			input = [line.split("\t") for line in input()[0].split("\n")][:-1]
+			input = [
+				TextWrapper(
+					break_long_words = False,
+				).fill(line) for line in input()[0].split("\n")
+			][:-1]
 		if _type.__name__ == "str":
 			return " ".join(input)
 		if _type.__name__ in ("generator", "iter"):
@@ -272,21 +277,16 @@ class _milcery(*(mixinport(mixins))):
 	def __iter__(self):
 		self.n = 0
 
-		# TODO: Change to account for the new return methods
+		self._subcommand_check("supercalifragilisticexpialidocious")
+		self._set_and_process()
+
 		if isinstance(
-			output := self._run_frosting(
-				_subcommand=self._sub.unprocessed,
-			),
-			(dict, tea, frosting),
+			output := self._return_frosted_output(),
+			dict,
 		):
-			self.__next_output = list(
-				getattr(
-					output,
-					"stderr"
-					if self._capture == "stderr"
-					else "stdout",
-				)
-			)
+			self.__next_output = list(output["stderr" if self._capture == "stderr" else "stdout"])
+		elif isinstance(output, (str, bytes, bytearray)):
+			self.__next_output = [output]
 		else:
 			self.__next_output = list(output)
 
