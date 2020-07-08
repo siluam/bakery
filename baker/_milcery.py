@@ -213,22 +213,6 @@ class _milcery(*(mixinport(mixins))):
 
         return inner
 
-    def _return_frosted_output(self):
-        # DONE: Change to account for the new return methods
-        if isinstance(
-            output := self._run_frosting(
-                _subcommand=self._sub.unprocessed,
-            ),
-            (dict, tea, frosting),
-        ):
-            return frosting(output, self._capture)
-        else:
-            # DONE: _convert_to_type isn't working here because _run_frosting resets
-            # all properties, including _type; find an alternative
-            return self._convert_to_type(
-                frosting(output), type(output)
-            )
-
     def _set_and_process(self, *args, **kwargs):
 
         self._set(_setup=True)
