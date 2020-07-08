@@ -87,11 +87,11 @@ class _long_property_vars:
 			value["number"] = None
 
 		if value.get("std", False):
-			if value["std"] not in (stds := ("out", "err", "both")):
+			if value["std"] not in (stds := ("stdout", "stderr", "both")):
 				raise n_lines_std(
 					f'Sorry! You must choose from: [{(", ").join(stds)}]'
 				)
 		else:
-			value["std"] = "out"
+			value["std"] = "stdout"
 
 		self.__n_lines = D(value)

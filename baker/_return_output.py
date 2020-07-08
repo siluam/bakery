@@ -2,166 +2,184 @@
 from addict import Dict as D
 from functools import partial
 from nanite import peek, trim
-from sarge import Pipeline, Capture
 from typing import Dict, Any
 
 
 class Error(Exception):
-	pass
+    pass
 
 
 class stderr(Error):
-	pass
+    pass
 
 
 class _return_output:
-	def _return_output(
-		self,
-		_cls=None,
-		_subcommand="supercalifragilisticexpialidocious",
-	):
-		self.__cls = self._cls_check(_cls)
-		self.__subcommand = _subcommand
+    def _return_output(
+        self,
+        _cls=None,
+        _subcommand="supercalifragilisticexpialidocious",
+    ):
+        self.__cls = self._cls_check(_cls)
+        self.__subcommand = _subcommand
 
-		self.__command = self._create_command(
-			_cls=self.__cls, _subcommand=self.__subcommand,
-		)
+        self.__command = self._create_command(
+            _cls=self.__cls, _subcommand=self.__subcommand,
+        )
 
-		if self.__cls._str:
-			return self.__command()
+        if self.__cls._str:
+            return self.__command()
 
-		output = self.__capture_output()
+        output = self.__capture_output()
 
-		if isinstance(output, dict):
-			if output.stderr:
-				_peek_value, output.stderr = peek(
-					output.stderr, return_first=2
-				)
-				if _peek_value and not self.__cls._ignore_stderr:
-					raise stderr("\n".join(output.stderr))
+        if isinstance(output, dict):
+            if output.stderr:
+                _peek_value, output.stderr = peek(
+                    output.stderr, return_first=2
+                )
+                if _peek_value and not self.__cls._ignore_stderr:
+                    raise stderr("\n".join(output.stderr))
 
-		return output
+        return output
 
-	def __capture_output(self):
+    def __capture_output(self):
 
-		stdout_capture = Capture(
-			timeout=self.__cls._timeout_stdout,
-			buffer_size=1
-			if self.__cls._capture == "run"
-			else self.__cls._buffer_size_stdout,
-		)
-		stderr_capture = Capture(
-			timeout=self.__cls._timeout_stderr,
-			buffer_size=1
-			if self.__cls._capture == "run"
-			else self.__cls._buffer_size_stderr,
-		)
+        if self.__cls._capture == "run":
 
-		p = Pipeline(
-			self.__command(),
-			posix=self.__cls._posix,
-			stdout=stdout_capture,
-			stderr=stderr_capture,
-		)
-		p.run(
-			input=self.__cls._input, async_=self.__cls._async,
-		)
+            from sarge import run
 
-		if self.__cls._wait is None:
+            p = run(
+                self.__command(),
+                input=self.__cls._input,
+                async_=self.__cls._async,
+            )
 
-			p.close()
+        else:
 
-			return None
+            from sarge import Pipeline, Capture
 
-		elif self.__cls._wait:
+            stdout_capture = Capture(
+                timeout=self.__cls._timeout_stdout,
+                buffer_size=1
+                if self.__cls._capture == "run"
+                else self.__cls._buffer_size_stdout,
+            )
+            stderr_capture = Capture(
+                timeout=self.__cls._timeout_stderr,
+                buffer_size=1
+                if self.__cls._capture == "run"
+                else self.__cls._buffer_size_stderr,
+            )
 
-			p.wait()
+            p = Pipeline(
+                self.__command(),
+                posix=self.__cls._posix,
+                stdout=stdout_capture,
+                stderr=stderr_capture,
+            )
+            p.run(
+                input=self.__cls._input,
+                async_=self.__cls._async,
+            )
 
-			_ = D({})
+        if self.__cls._wait is None:
 
-			if _capture in ("stdout", "stderr", "both"):
-				_.stdout = self.__cls._convert_to_type(
-					self.__decode_std(p.stdout, "stdout"),
-					self.__cls._type,
-				)
-				_.stderr = self.__cls._convert_to_type(
-					self.__decode_std(p.stderr, "stderr"),
-					self.__cls._type,
-				)
-			else:
-				_.returns.code = p.returncode
+            p.close()
 
-			if self.__cls._verbosity > 0:
-				if not _.stdout:
-					_.stdout = self.__decode_std(
-						p.stdout, "stdout"
-					)
-				if not _.stderr:
-					_.stderr = self.__decode_std(
-						p.stderr, "stderr"
-					)
-				if not _.returns.code:
-					_.returns.code = p.returncode
-				_.returns.codes = p.returncodes
-				_.command.bakeriy = self.__command()
-				_.command.sarge = p.commands
+            return None
 
-			if self.__cls._verbosity > 1:
-				_.capture.stdout = p.stdout
-				_.capture.stderr = p.stderr
-				_.tea = self.__command
-				_.sub = self.__cls._sub
-				_.final = D(
-					self.__cls._command.final[self.__subcommand]
-				)
-				_.baked = D(
-					self.__cls._command.baked[self.__subcommand]
-				)
-				_.called = D(
-					self.__cls._command.called[self.__subcommand]
-				)
+        elif self.__cls._wait:
 
-			if (
-				self.__cls._n_lines.number is not None
-				and self.__cls._type.__name__ != "str"
-			):
-				trim_part = partial(
-					trim,
-					ordinal=self.__cls._n_lines.ordinal,
-					number=self.__cls._n_lines.number,
-					_type=self.__cls._type,
-					ignore_check=True,
-				)
+            p.wait()
 
-				if self.__cls._n_lines.std in ("out", "both"):
-					_.stdout = trim_part(iterable=_.stdout)
+            _ = D({})
 
-				if self.__cls._n_lines.std in ("err", "both"):
-					_.stderr = trim_part(iterable=_.stderr)
+            if self.__cls._capture == "run":
+                _.returns.code = p.returncode
+            else:
+                if self.__cls._capture in ("stdout", "both"):
+                    _.stdout = self.__cls._convert_to_type(
+                        self.__decode_std(p.stdout, "stdout"),
+                        self.__cls._type,
+                    )
+                if self.__cls._capture in ("stderr", "both"):
+                    _.stderr = self.__cls._convert_to_type(
+                        self.__decode_std(p.stderr, "stderr"),
+                        self.__cls._type,
+                    )
 
-			p.close()
+            if self.__cls._verbosity > 0:
+                if self.__cls._capture != "run":
+                    if not _.stdout:
+                        _.stdout = self.__decode_std(
+                            p.stdout, "stdout"
+                        )
+                    if not _.stderr:
+                        _.stderr = self.__decode_std(
+                            p.stderr, "stderr"
+                        )
+                if not _.returns.code:
+                    _.returns.code = p.returncode
+                _.returns.codes = p.returncodes
+                _.command.bakeriy = self.__command()
+                _.command.sarge = p.commands
 
-			return _
+            if self.__cls._verbosity > 1:
+                if self.__cls._capture != "run":
+                    _.capture.stdout = p.stdout
+                    _.capture.stderr = p.stderr
+                _.tea = self.__command
+                _.sub = self.__cls._sub
+                _.final = D(
+                    self.__cls._command.final[self.__subcommand]
+                )
+                _.baked = D(
+                    self.__cls._command.baked[self.__subcommand]
+                )
+                _.called = D(
+                    self.__cls._command.called[self.__subcommand]
+                )
 
-		else:
+            if (
+                self.__cls._n_lines.number is not None
+                and self.__cls._type.__name__ != "str"
+                and self.__cls._capture != "run"
+            ):
+                trim_part = partial(
+                    trim,
+                    ordinal=self.__cls._n_lines.ordinal,
+                    number=self.__cls._n_lines.number,
+                    _type=self.__cls._type,
+                    ignore_check=True,
+                )
 
-			return p
+                if self.__cls._n_lines.std in ("stdout", "both"):
+                    _.stdout = trim_part(iterable=_.stdout)
 
-	def __decode_std(self, std, std_str):
-		"""
+                if self.__cls._n_lines.std in ("stderr", "both"):
+                    _.stderr = trim_part(iterable=_.stderr)
+
+            p.close()
+
+            return _
+
+        else:
+
+            return p
+
+    def __decode_std(self, std, std_str):
+        """
 			Answer: https://stackoverflow.com/a/519653
 			User: https://stackoverflow.com/users/17160/nosklo
 		"""
-		while True:
-			chunk = std.read(
-				size=getattr(
-					self.__cls, f"_chunk_size_{std_str}"
-				),
-				block=getattr(self.__cls, f"_block_{std_str}"),
-			)
-			if not chunk:
-				break
-			yield chunk.decode("utf-8") if isinstance(
-				chunk, (bytes, bytearray)
-			) else chunk
-			std.close(stop_threads=self.__cls._stop_threads)
+        while True:
+            chunk = std.read(
+                size=getattr(
+                    self.__cls, f"_chunk_size_{std_str}"
+                ),
+            )
+            if not chunk:
+                break
+            yield chunk.decode("utf-8") if isinstance(
+                chunk, (bytes, bytearray)
+            ) else chunk
+            std.close(stop_threads=self.__cls._stop_threads)

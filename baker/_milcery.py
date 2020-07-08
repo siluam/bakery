@@ -79,7 +79,7 @@ class _milcery(*(mixinport(mixins))):
 		"""
         self._settings.defaults: Dict[str, Any] = {
             "_type": iter,
-            "_capture": "both",
+            "_capture": "stdout",
             "_shell": False,
             "_frosting": False,
             "_str": False,
@@ -104,13 +104,11 @@ class _milcery(*(mixinport(mixins))):
             # If set to False, _capture = "run" will return the sarge Pipeline object
             # If set to None, _capture = "run" will wait for the process to finish
             # before returning None
-            "_wait": False,
+            "_wait": True,
             # If set to True, _capture set to "out", "err", or "both" will wait for user input
             "_block": False,
             "_timeout_stdout": None,
             "_timeout_stderr": None,
-            "_block_stdout": False,
-            "_block_stderr": False,
             "_buffer_size_stdout": 0,
             "_buffer_size_stderr": 0,
             "_chunk_size_stdout": -1,
