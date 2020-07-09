@@ -38,6 +38,10 @@ class _return_output:
                 )
                 if _peek_value and not self.__cls._ignore_stderr:
                     raise stderr("\n".join(output.stderr))
+            if self.__cls._capture == "stdout":
+                del output.stderr
+            if self.__cls._capture == "stderr":
+                del output.stdout
 
         return output
 
@@ -96,16 +100,14 @@ class _return_output:
             if self.__cls._capture == "run":
                 _.returns.code = p.returncode
             else:
-                if self.__cls._capture in ("stdout", "both"):
-                    _.stdout = self.__cls._convert_to_type(
-                        self.__decode_std(p.stdout, "stdout"),
-                        self.__cls._type,
-                    )
-                if self.__cls._capture in ("stderr", "both"):
-                    _.stderr = self.__cls._convert_to_type(
-                        self.__decode_std(p.stderr, "stderr"),
-                        self.__cls._type,
-                    )
+                _.stdout = self.__cls._convert_to_type(
+                    self.__decode_std(p.stdout, "stdout"),
+                    self.__cls._type,
+                )
+                _.stderr = self.__cls._convert_to_type(
+                    self.__decode_std(p.stderr, "stderr"),
+                    self.__cls._type,
+                )
 
             if self.__cls._verbosity > 0:
                 if self.__cls._capture != "run":
