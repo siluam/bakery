@@ -180,12 +180,17 @@ class _milcery(*(mixinport(mixins))):
 		yield from input
 
 	def _convert_to_type(self, input, _type):
-		if isinstance(input, frosting):
-			input = [
-				TextWrapper(
-					break_long_words = False,
-				).fill(line) for line in input()[0].split("\n")
-			][:-1]
+		if input and isinstance(input, frosting):
+			if isinstance(input(), (str, bytes, bytearray))
+				input = [TextWrapper(break_long_words = False).fill(input())]
+			elif input() is None:
+				return None
+			else:
+				input = [
+					TextWrapper(
+						break_long_words = False,
+					).fill(line) for line in input()[0].split("\n")
+				][:-1]
 		if _type.__name__ == "str":
 			return " ".join(input)
 		if _type.__name__ in ("generator", "iter"):
