@@ -106,6 +106,7 @@
     * Piping
     * Redirection
     * Buffers
+    * Sudo
 
 ***
 
