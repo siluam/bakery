@@ -44,7 +44,17 @@
     )
     ```
 
+* While I'm not sure how different the following behavious is, you can iterate over the `bakery` object to get its output:
+    ```python
+    from baker.y import ls
 
+    # And no, I didn't miss the brackets;
+    # that's what I was confused about initially.
+
+    # ls
+    for item in ls:
+        print(item)
+    ```
 
 ***
 
