@@ -26,7 +26,7 @@
     # git -C working_directory status
     git(C = working_directory).status()
     ```
-    Note that, because `git` is in a list called `bakeriy_menu`, it can be imported with the ability to set program options when imported using `baker.y`; if not in the `menu`, or imported using `baker.i`, programs will not have this ability.
+    `Note:` Because `git` is in a list called `bakeriy_menu`, it can be imported with the ability to set program options when imported using `baker.y`; if not in the `menu`, or imported using `baker.i`, programs will not have this ability.
 
 * Arguments are appended to the end of the command; however, arguments can be set at the beginning by using the kwarg setting `_starter_args`, which can be a string or an iterable:
     ```python
