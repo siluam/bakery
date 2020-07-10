@@ -4,7 +4,6 @@ from functools import partial
 from gensing import tea, frosting
 from itertools import chain
 from nanite import (
-	check_type,
 	module_installed,
 	fullpath,
 	mixinport,
@@ -81,7 +80,7 @@ class _milcery(*(mixinport(mixins))):
 		self._settings.defaults: Dict[str, Any] = {
 			"_type": iter,
 			"_capture": "stdout",
-			"_shell": False,
+			"_shell": None,
 			"_frosting": False,
 			"_str": False,
 			"_ignore_stderr": False,
@@ -125,26 +124,6 @@ class _milcery(*(mixinport(mixins))):
 			"f_",
 			"print_",
 		)
-
-		self._shells: List[str] = [
-			"zsh",
-			"bash",
-			"sh",
-			"fish",
-			"xonsh",
-			"elvish",
-			"tcsh",
-			"powershell",
-			"cmd",
-		]
-		self._shell = (
-			True if self._program in self._shells else False
-		)
-
-		# Returns the default allowed types and adds "str" as well
-		self._allowed_type_names: List[str] = check_type(
-			lst=True
-		) + ["str"]
 
 		self._captures: Tuple[str] = (
 			"stdout",
@@ -263,14 +242,6 @@ class _milcery(*(mixinport(mixins))):
 		)
 
 		process_with_sub(_final=True,)
-
-	def add_types_(self, *args):
-		self._allowed_type_names = (
-			self._allowed_type_names + list(args)
-		)
-
-	def add_shells_(self, *args):
-		self._shells = self._shells + list(args)
 
 	def __deepcopy__(self):
 		return self.__class__(

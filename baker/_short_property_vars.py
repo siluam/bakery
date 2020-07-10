@@ -29,17 +29,6 @@ class _short_property_vars:
 		return builtins.bakeriy_stores
 
 	@property
-	def _type(self):
-		return self.__type
-
-	@_type.setter
-	def _type(self, value):
-		self.__type = check_type(
-			_type=value,
-			allowed_type_names=self._allowed_type_names,
-		)
-
-	@property
 	def _capture(self):
 		return self.__capture
 
@@ -47,7 +36,7 @@ class _short_property_vars:
 	def _capture(self, value):
 		if value not in self._captures:
 			raise no_caps(
-				f'Sorry! Type "{value}" is not permitted! Choose from one of: [{(", ").join(self._captures)}]'
+				f'Sorry! Capture type "{value}" is not permitted! Choose from one of: [{(", ").join(self._captures)}]'
 			)
 		self.__capture = value
 

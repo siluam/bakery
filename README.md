@@ -44,7 +44,7 @@
     )
     ```
 
-* While I'm not sure how different the following behavious is, you can iterate over the `bakery` object to get its output:
+* While I'm not sure how different the following behavious is, you can iterate over the `bakery` object itself to get its output:
     ```python
     from baker.y import ls
 
@@ -54,6 +54,34 @@
     # ls
     for item in ls:
         print(item)
+    ```
+
+* You can use specific shells to run commands as well:
+    ```python
+    from baker.y import ls
+
+    # bash -c 'ls'
+    ls(_shell = "bash")
+    ```
+
+* Want to get the the command you're about to run?
+    ```python
+    from baker.y import ls
+
+    # This time literally
+
+    # bash -c 'ls'
+    ls(_shell = "bash", _str = True)
+    ```
+
+* Want to *see* the the command you're about to run?
+    ```python
+    from baker.y import ls
+
+    # This time literally
+
+    # bash -c 'ls'
+    ls(_shell = "bash", _print = True)
     ```
 
 ***

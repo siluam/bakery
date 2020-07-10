@@ -15,27 +15,27 @@ class _create_command:
 		self.__cls = self._cls_check(_cls)
 		self.__subcommand = _subcommand
 
-		_command = tea(
-			self.__cls._run_as,
-			self.__cls._program,
-			*self.__cls._command.final[self.__subcommand].components.kwargs.starter,
-		)
-
-		if self.__cls._sub.processed and self.__cls._sub_before_shell:
-			_command.append(self.__cls._sub.processed)
-
-		# DONE: Do I put the subcommand before or after the glue?
 		if self.__cls._shell:
-			_command.glue(" -c '")
+			_command = tea(self.__cls._shell + " -c")
+			_command.append("'")
+			if self.__cls._run_as:
+				_command.glue(self.__cls._run_as)
+				_command.append(self.__cls._program)
+			else:
+				_command.glue(self.__cls._program)
+		else:
+			_command = tea(
+				self.__cls._run_as,
+				self.__cls._program,
+			)
 
-		if self.__cls._sub.processed and not self.__cls._sub_before_shell:
+		if self.__cls._sub.processed:
 			_command.append(self.__cls._sub.processed)
 
-		_command.extend(
-			*self.__cls._command.final[self.__subcommand].components.args.starter,
-			*self.__cls._command.final[self.__subcommand].components.kwargs.regular,
-			*self.__cls._command.final[self.__subcommand].components.args.regular,
-		)
+		# CAREFUL! The order must not change here!
+		for c1 in ("starter", "regular"):
+			for c2 in ("kwargs", "args"):
+				_command.extend(*self.__cls._command.final[self.__subcommand].components[c2][c1])
 
 		if self.__cls._shell:
 			_command.glue("'")
