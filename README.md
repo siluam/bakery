@@ -1,47 +1,73 @@
+#!/usr/bin/env mdsh
 # bakery
 
 ***
 
-## TODO
+## Welcome to the `bakery`! May I wrap your program?
+
+&nbsp;&nbsp;&nbsp;&nbsp; `bakery` is a python module heavily inspired by [`sh`](https://amoffat.github.io/sh/), written by [`Andrew Moffat / amoffat`](https://github.com/amoffat); I loved the concept of `baking` a command so much that I created an entire module based on it.
+
+&nbsp;&nbsp;&nbsp;&nbsp; While amoffat's `sh` runs only Unix-based systems at the moment, `bakery's` use of [`sarge`](https://sarge.readthedocs.io/en/latest/), written by [`Vinay Sajip / vsajip`](https://github.com/vsajip), allows it to run on DOS-based systems, such as `Microsoft Windows`, as well. Here are a few more differences:
+* Subcommands cannot be passed in as arguments, only as attributes or as `kwarg settings`, such as the following:
+    ```python
+    from baker.y import git, zpool
+
+    # git status
+    git.status()
+
+    # zpool import -f pool_name
+    zpool(pool_name, f = True, _subcommand = "import")
+    ```
+
+* Program options can be directly set without baking them in first (heresy, I know):
+    ```python
+    from baker.i import git
+
+    # git -C working_directory status
+    git(C = working_directory).status()
+    ```
+    Note that, because `git` is in a list called `bakeriy_menu`, it can be imported with the ability to set program options when imported using `baker.y`; if not in the `menu`, or imported using `baker.i`, programs will not have this ability.
+
+* Arguments are appended to the end of the command; however, arguments can be set at the beginning by using the kwarg setting `_starter_args`, which can be a string or an iterable:
+    ```python
+    from baker.y import ls, find
+
+    # ls -l -a ~
+    ls("~", l = True, a = True)
+
+    # find . -name bakery
+    find(
+        "bakery",
+        name = True,
+        _kwarg_one_dash = True,
+        _starter_args = "."
+    )
+    ```
 
 
-
-***
-
-## Links
-
-
-
-***
-
-## Tags
-
-[![](tags/project/bakery.svg)](https://github.com/shadowrylander/bakery)
-
-| Platform | Type | Language | Modules Used |
-| - | - | - | - |
-| ![](tags/platform/all.svg) | ![](tags/type/module.svg) | [![](tags/language/python3.6.0.svg)](https://www.python.org/downloads/release/python-360/) | [![](tags/modules_used/addict.svg)](https://github.com/mewwts/addict) |
-|  |  |  | [![](tags/modules_used/functools.svg)](https://docs.python.org/3/library/functools.html) |
-|  |  |  | [![](tags/modules_used/io.svg)](https://docs.python.org/3/library/functools.html)
-|  |  |  | [![](tags/modules_used/itertools.svg)](https://docs.python.org/3/library/itertools.html)
-|  |  |  | [![](tags/modules_used/os.svg)](https://docs.python.org/3/library/os.html) |
-|  |  |  | [![](tags/modules_used/pout.svg)](https://github.com/Jaymon/pout) |
-|  |  |  | [![](tags/modules_used/sarge.svg)](https://bitbucket.org/vinay.sajip/sarge/src/default/) |
-|  |  |  | [![](tags/modules_used/sys.svg)](https://docs.python.org/3/library/sys.html) |
-|  |  |  | [![](tags/modules_used/toml.svg)](https://github.com/toml-lang/toml) |
-|  |  |  | [![](tags/modules_used/typing.svg)](https://docs.python.org/3/library/typing.html) |
 
 ***
 
 ## Notes
 
-*
+* 
 
 ***
 
-## Content
+## Links
 
+* 
 
+***
+
+## TODO
+
+* Comment
+* Documentation
+* Implement
+    * Piping
+    * Redirection
+    * Buffers
 
 ***
 
@@ -51,7 +77,11 @@
 
 ### install
 
-    python3 -m pip install .
+    /usr/bin/env python3 -m pip install .
+
+### upgrade
+
+    /usr/bin/env python3 -m pip install --upgrade .
 
 <!-- saku end -->
 
