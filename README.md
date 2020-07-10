@@ -5,6 +5,13 @@
 
 ### Running [mdsh](https://github.com/bashup/mdsh), by [bashup](https://github.com/bashup)
 
+If you have `mdsh`, you can run this README on your own machine!
+```bash !
+sudo chmod +x README.md
+./README.md
+```
+
+`Note:` The following is to initialize the python3.8 processor for `mdsh`; *the above is the command to run this README!*
 ```bash @mdsh
 mdsh-lang-python() { /usr/bin/env python3.8; }
 ```
@@ -17,11 +24,15 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
 
 &nbsp;&nbsp;&nbsp;&nbsp; While amoffat's `sh` runs only Unix-based systems at the moment, `bakery's` use of [`sarge`](https://sarge.readthedocs.io/en/latest/), written by [`Vinay Sajip / vsajip`](https://github.com/vsajip), allows it to run on DOS-based systems, such as `Microsoft Windows`, as well. Here are a few more differences:
 * Subcommands cannot be passed in as arguments, only as attributes or as `kwarg settings`, such as the following:
-    ```python !
-    from baker.y import git, zpool
+    ```python
+    from baker.y import git
 
     # git status
     git.status()
+    ```
+
+    ```python !
+    from baker.y import zpool
 
     # zpool import -f pool_name
     zpool(pool_name, f = True, _subcommand = "import")
@@ -119,6 +130,8 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
 ***
 
 ## [Saku](https://github.com/kt3k/saku), by [Yoshiya Hinosawa](https://github.com/kt3k)
+
+`Saku` can use this README as well, both to install the module and to upgrade it, as well as for anything else added later on. To do so, run `saku [task]`, such as `saku install`.
 
 <!-- saku start -->
 
