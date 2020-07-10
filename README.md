@@ -3,13 +3,21 @@
 
 ***
 
+### Running [mdsh](https://github.com/bashup/mdsh), by [bashup](https://github.com/bashup)
+
+```bash @mdsh
+mdsh-lang-python() { /usr/bin/env python3.8; }
+```
+
+***
+
 ## Welcome to the `bakery`! May I wrap your program?
 
 &nbsp;&nbsp;&nbsp;&nbsp; `bakery` is a python module heavily inspired by [`sh`](https://amoffat.github.io/sh/), written by [`Andrew Moffat / amoffat`](https://github.com/amoffat); I loved the concept of `baking` a command so much that I created an entire module based on it.
 
 &nbsp;&nbsp;&nbsp;&nbsp; While amoffat's `sh` runs only Unix-based systems at the moment, `bakery's` use of [`sarge`](https://sarge.readthedocs.io/en/latest/), written by [`Vinay Sajip / vsajip`](https://github.com/vsajip), allows it to run on DOS-based systems, such as `Microsoft Windows`, as well. Here are a few more differences:
 * Subcommands cannot be passed in as arguments, only as attributes or as `kwarg settings`, such as the following:
-    ```python
+    ```python !
     from baker.y import git, zpool
 
     # git status
@@ -20,7 +28,7 @@
     ```
 
 * Program options can be directly set without baking them in first (heresy, I know):
-    ```python
+    ```python !
     from baker.i import git
 
     # git -C working_directory status
@@ -35,9 +43,9 @@
     # ls -l -a ~
     ls("~", l = True, a = True)
 
-    # find . -name bakery
+    # find . -name hello
     find(
-        "bakery",
+        "hello",
         name = True,
         _kwarg_one_dash = True,
         _starter_args = "."
@@ -110,7 +118,7 @@
 
 ***
 
-## Saku
+## [Saku](https://github.com/kt3k/saku), by [Yoshiya Hinosawa](https://github.com/kt3k)
 
 <!-- saku start -->
 
