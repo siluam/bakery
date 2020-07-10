@@ -5,7 +5,7 @@
 
 ### Running [mdsh](https://github.com/bashup/mdsh), by [bashup](https://github.com/bashup)
 
-If you have `mdsh`, you can run this README on your own machine!
+If you have `mdsh`, you can run this README on your own machine! Note, however, that the code blocks completely greyed out will not be run, as they are case-specific.
 ```bash !
 sudo chmod +x README.md
 ./README.md
