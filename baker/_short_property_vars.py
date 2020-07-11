@@ -61,6 +61,18 @@ class _short_property_vars:
 			self._type = iter
 
 	@property
+	def _sudo(self):
+		return self.__sudo
+
+	@_sudo.setter
+	def _sudo(self, value):
+		if not isinstance(value, (dict, tea, frosting)):
+			raise need_dict('Sorry! "_sudo" needs to be a tea, frosting, or dict-like object!')
+		self.__sudo = value
+		if value:
+			self._capture = "run"
+
+	@property
 	def _starter_kwargs(self):
 		return self.__starter_args
 

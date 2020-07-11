@@ -98,7 +98,7 @@ class _return_output:
             _ = D({})
 
             if self.__cls._capture == "run":
-                _.returns.code = p.returncode
+                _.returns_code = p.returncode
             else:
                 _.stdout = self.__cls._convert_to_type(
                     self.__decode_std(p.stdout, "stdout"),
@@ -119,8 +119,9 @@ class _return_output:
                         _.stderr = self.__decode_std(
                             p.stderr, "stderr"
                         )
-                if not _.returns.code:
-                    _.returns.code = p.returncode
+                if _.returns_code:
+                    del _.returns_code
+                _.returns.code = p.returncode
                 _.returns.codes = p.returncodes
                 _.command.bakeriy = self.__command()
                 _.command.sarge = p.commands

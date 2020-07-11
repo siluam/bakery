@@ -15,8 +15,15 @@ class _create_command:
 		self.__cls = self._cls_check(_cls)
 		self.__subcommand = _subcommand
 
+		_command = tea()
+
+		if self.__cls._sudo:
+			_command.append(
+				f"sudo -{next(iter(self.__cls._sudo.keys()))} -u {next(iter(self.__cls._sudo.values()))}"
+			)
+
 		if self.__cls._shell:
-			_command = tea(self.__cls._shell + " -c")
+			_command.append(self.__cls._shell + " -c")
 			_command.append("'")
 			if self.__cls._run_as:
 				_command.glue(self.__cls._run_as)
@@ -24,7 +31,7 @@ class _create_command:
 			else:
 				_command.glue(self.__cls._program)
 		else:
-			_command = tea(
+			_command.extend(
 				self.__cls._run_as,
 				self.__cls._program,
 			)

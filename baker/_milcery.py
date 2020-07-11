@@ -117,6 +117,7 @@ class _milcery(*(mixinport(mixins))):
 			"_posix": True,
 			"_async": False,
 			"_stop_threads": False,
+			"_sudo": {},
 		}
 
 		self._settings.functions = (
