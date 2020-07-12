@@ -165,6 +165,8 @@ class _milcery(*(mixinport(mixins))):
 				input = [TextWrapper(break_long_words = False, break_on_hyphens = False).fill(input())]
 			elif input() is None:
 				return None
+                        elif isinstance(input(), int):
+                                return input()
 			else:
 				input = [
 					TextWrapper(
