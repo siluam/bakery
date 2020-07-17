@@ -159,7 +159,7 @@ class _milcery(*(mixinport(mixins))):
 	def _convert_to_generator(self, input):
 		yield from input
 
-	def _convert_to_type(self, input, _type):
+	def _convert_to_type(self, input, _type = iter):
 		if input and isinstance(input, frosting):
 			if isinstance(input(), (str, bytes, bytearray)):
 				input = [TextWrapper(break_long_words = False, break_on_hyphens = False).fill(input())]

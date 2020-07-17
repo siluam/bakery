@@ -58,4 +58,4 @@ class _run_frosting:
 		elif not _cls._wait:
 			return output
 		else:
-			return _cls._convert_to_type(frosting(output, _cls._capture), type(output))
+			return _cls._convert_to_type(frosting(output, _cls._capture), _type = type(output))
