@@ -113,7 +113,6 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     # sudo -s -u root ls /
     ls("/", _sudo = dict(s = "root"))
     ```
-    `Note:` You can't capture the output here; instead, you can run the script as a superuser and not use the `_sudo` kwarg setting.
 
 ***
 

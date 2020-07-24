@@ -2,6 +2,7 @@
 from addict import Dict as D
 from functools import partial
 from nanite import peek, trim
+from sarge import Pipeline, Capture
 from typing import Dict, Any
 
 
@@ -48,7 +49,6 @@ class _return_output:
                 del output.stderr
                 output.stdout = conversion_partial(output.stdout)
             if self.__cls._capture == "stderr":
-                del output.stdout
                 output.stderr = conversion_partial(output.stderr)
             if self.__cls._capture == "both":
                 output.stdout = conversion_partial(output.stdout)
@@ -58,43 +58,39 @@ class _return_output:
 
     def __capture_output(self):
 
-        if self.__cls._capture == "run":
-
-            from sarge import run
-
-            p = run(
-                self.__command(),
-                input=self.__cls._input,
-                async_=self.__cls._async,
-            )
-
-        else:
-
-            from sarge import Pipeline, Capture
-
+        if self.__cls._capture in ("both", "stdout"):
             stdout_capture = Capture(
                 timeout=self.__cls._timeout_stdout,
                 buffer_size=1
                 if self.__cls._capture == "run"
                 else self.__cls._buffer_size_stdout,
             )
-            stderr_capture = Capture(
-                timeout=self.__cls._timeout_stderr,
-                buffer_size=1
-                if self.__cls._capture == "run"
-                else self.__cls._buffer_size_stderr,
-            )
 
-            p = Pipeline(
-                self.__command(),
-                posix=self.__cls._posix,
+        stderr_capture = Capture(
+            timeout=self.__cls._timeout_stderr,
+            buffer_size=1
+            if self.__cls._capture == "run"
+            else self.__cls._buffer_size_stderr,
+        )
+
+        partial_Pipeline = partial(
+            Pipeline,
+            self.__command(),
+            posix=self.__cls._posix,
+            stderr=stderr_capture,
+        )
+
+        if self.__cls._capture in ("both", "stdout"):
+            p = partial_Pipeline(
                 stdout=stdout_capture,
-                stderr=stderr_capture,
             )
-            p.run(
-                input=self.__cls._input,
-                async_=self.__cls._async,
-            )
+        else:
+            p = partial_Pipeline()
+
+        p.run(
+            input=self.__cls._input,
+            async_=self.__cls._async,
+        )
 
         if self.__cls._wait is None:
 
@@ -108,33 +104,23 @@ class _return_output:
 
             _ = D({})
 
-            if self.__cls._capture == "run":
-                _.returns_code = p.returncode
-            else:
+            if self.__cls._capture in ("both", "stdout"):
                 _.stdout = self.__decode_std(p.stdout, "stdout")
-                _.stderr = self.__decode_std(p.stderr, "stderr")
+
+            _.stderr = self.__decode_std(p.stderr, "stderr")
 
             if self.__cls._verbosity > 0:
-                if self.__cls._capture != "run":
-                    if not _.stdout:
-                        _.stdout = self.__decode_std(
-                            p.stdout, "stdout"
-                        )
-                    if not _.stderr:
-                        _.stderr = self.__decode_std(
-                            p.stderr, "stderr"
-                        )
-                if _.returns_code:
-                    del _.returns_code
+                if not _.stdout:
+                    _.stdout = self.__decode_std(p.stdout, "stdout")
                 _.returns.code = p.returncode
                 _.returns.codes = p.returncodes
                 _.command.bakeriy = self.__command()
                 _.command.sarge = p.commands
 
             if self.__cls._verbosity > 1:
-                if self.__cls._capture != "run":
+                if not _.capture.stdout:
                     _.capture.stdout = p.stdout
-                    _.capture.stderr = p.stderr
+                _.capture.stderr = p.stderr
                 _.tea = self.__command
                 _.sub = self.__cls._sub
                 _.final = D(

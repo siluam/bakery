@@ -22,6 +22,14 @@ class need_dict(Error):
 	pass
 
 
+class too_many_items(Error):
+	pass
+
+
+class no_is(Error):
+	pass
+
+
 class _short_property_vars:
 
 	@property
@@ -68,9 +76,14 @@ class _short_property_vars:
 	def _sudo(self, value):
 		if not isinstance(value, (dict, tea, frosting)):
 			raise need_dict('Sorry! "_sudo" needs to be a tea, frosting, or dict-like object!')
+		if len(value) > 1:
+			raise too_many_items('Sorry! The "_sudo" object can only have a single key-value item!')
+		if (
+			value and
+			next(iter(value.keys())) not in ("i", "s")
+		):
+			raise no_is('Sorry! The "_sudo" object can only take "i" or "s" as a key!')
 		self.__sudo = value
-		if value:
-			self._capture = "run"
 
 	@property
 	def _starter_kwargs(self):

@@ -117,6 +117,8 @@ class _milcery(*(mixinport(mixins))):
 			"_posix": True,
 			"_async": False,
 			"_stop_threads": False,
+			# Dict must be in the form {"i" : user} or {"s" : user}, to use or not use the
+			# configuration files of the specified user
 			"_sudo": {},
 		}
 
