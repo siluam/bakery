@@ -114,6 +114,25 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     ls("/", _sudo = dict(s = "root"))
     ```
 
+* If you want visible prompts, use the kwarg setting `_capture = "run"`; otherwise, prompts will be captured in the output, while the process still halts for input.
+    ```python !
+    from baker.y import zfs
+
+    # Will show input prompt
+
+    # zfs load-key pool
+    zfs.load_key(pool, _capture = "run")
+
+
+
+    # Will NOT show input prompt
+
+    # zfs load-key pool
+    zfs.load_key(pool)
+    ```
+    `Note:` This does not happen with the use of `sudo`, or the `_sudo` kwarg setting; the password prompt will still be shown, and input will still be passed to `sudo`.
+
+
 ***
 
 ## Notes
