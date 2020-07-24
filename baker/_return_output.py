@@ -58,14 +58,6 @@ class _return_output:
 
     def __capture_output(self):
 
-        if self.__cls._capture in ("both", "stdout"):
-            stdout_capture = Capture(
-                timeout=self.__cls._timeout_stdout,
-                buffer_size=1
-                if self.__cls._capture == "run"
-                else self.__cls._buffer_size_stdout,
-            )
-
         stderr_capture = Capture(
             timeout=self.__cls._timeout_stderr,
             buffer_size=1
@@ -81,9 +73,12 @@ class _return_output:
         )
 
         if self.__cls._capture in ("both", "stdout"):
-            p = partial_Pipeline(
-                stdout=stdout_capture,
-            )
+            p = partial_Pipeline(stdout= Capture(
+                timeout=self.__cls._timeout_stdout,
+                buffer_size=1
+                if self.__cls._capture == "run"
+                else self.__cls._buffer_size_stdout,
+            ))
         else:
             p = partial_Pipeline()
 
