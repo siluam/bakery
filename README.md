@@ -153,13 +153,46 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
 
 * Piping and Redirection is implemented through the use of frozen `bakery` objects and strings, as well as through the `_pipe` and `_redirect` kwarg settings:
     ```python
+    from os import devnull
     from baker.y import ls, tail
 
     # Piping using frozen objects
+
+    # ls | tail
     tails = ls([]) | tail([])
-    tails = "ls" | tails([])
-    tails = ls([]) | "tails"
+    tails = "ls" | tail([])
+    tails = ls([]) | "tail"
     tails()
+
+    # Redirection using frozen objects
+
+    # ls > /dev/null
+    nulls = ls([]) >> devnull
+    nulls()
+
+    # ls 2> /dev/null
+    nulls = ls([]) >> (2, devnull)
+    nulls()
+
+    # ls >1 /dev/null
+    nulls = ls([]) >> (devnull, 1)
+
+    # ls &> /dev/null
+    nulls = ls([]) >> ("&", devnull)
+    nulls()
+
+    # ls >&1 /dev/null
+    nulls = ls([]) >> (devnull, "&1")
+    nulls()
+
+    # ls 2>&1 /dev/null
+    nulls = ls([]) >> (2, devnull, "&1")
+
+    # ls < /dev/null
+    nulls = ls([]) << devnull
+
+    # ls >> /dev/null
+    nulls = ls([]) + devnull
     ```
 
 

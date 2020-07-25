@@ -338,7 +338,7 @@ class _milcery(*(mixinport(mixins))):
 				elif len(value) == 1:
 					processed_value = inner(value[0])
 				elif len(value) == 2:
-					if isinstance(value[0], int) or value[0] == "&":
+					if isinstance(value[0], int) or "&" in value[0]:
 						processed_value = inner(value[1])
 						pr = str(value[0]) + pr
 					else:
