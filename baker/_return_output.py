@@ -27,15 +27,15 @@ class _return_output:
             _cls=self.__cls, _subcommand=self.__subcommand,
         )
 
-        if self.__cls._str:
-            return self.__command()
-
         if self.__cls._frozen:
 
             self.__cls._program = self.__command()
             return self
 
         else:
+
+            if self.__cls._str:
+                return self.__command()
 
             output = self.__capture_output()
 

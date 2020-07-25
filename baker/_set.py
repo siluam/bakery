@@ -79,14 +79,16 @@ class _set:
 
 			_ = dict()
 
-			for arg in self.__args:
+			for index, arg in enumerate(self.__args):
 				if not isinstance(
 					arg,
 					(str, bytes, bytearray, int, dict, tea, frosting)
 				) and not arg:
 					self.__cls._settings[
 						"baked" if self.__baking else "called"
-					][self.__subcommand]._frosting = True
+					][self.__subcommand]._frozen = True
+					self.__args = list(self.__args)
+					del self.__args[index]
 
 			for key in self.__kwargs.keys():
 				if key[0] == "_":

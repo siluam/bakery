@@ -53,8 +53,8 @@ class _milcery(*(mixinport(mixins))):
 
     def __init__(
         self,
-        _program: str,
         *args,
+        _program: str = None,
         _ignore_check: bool = False,
         _baked_commands: Dict[str, Any] = None,
         _baked_settings: Dict[str, Any] = None,
@@ -71,7 +71,7 @@ class _milcery(*(mixinport(mixins))):
 			A good way to debug commands is to see what the command actually was, using the "_str"
 			keyword argument.
 		"""
-        self._program: str = _program
+        self._program: str = _program or ""
         self._ignore_check: bool = _ignore_check
 
         self._command = D({})
@@ -269,7 +269,7 @@ class _milcery(*(mixinport(mixins))):
 
     def __deepcopy__(self):
         return self.__class__(
-            self._program,
+            _program = self._program,
             _ignore_check=self._ignore_check,
             _baked_commands=D(self._command.baked),
             _baked_settings=D(self._settings.baked),
@@ -320,7 +320,7 @@ class _milcery(*(mixinport(mixins))):
         else:
             try:
                 assert (
-                    getattr(value, _is_bakery_object, False)
+                    getattr(value, "_is_bakery_object", False)
                     is True
                 )
             except AssertionError:
@@ -343,7 +343,7 @@ class _milcery(*(mixinport(mixins))):
                 None, processed_value, pr, frozen._program,
             )
         else:
-            frozen = partially_frozen(None, pr, processed_value,)
+            frozen = partially_frozen(None, pr, processed_value)
 
         return (
             frozen.__(_frozen=True)
@@ -372,7 +372,7 @@ class _milcery(*(mixinport(mixins))):
     def _partial_class(self, *args, **kwargs):
         return partial(
             self.__class__,
-            self._program,
+            _program = self._program,
             *args,
             _baked_commands=D(self._command.baked),
             _baked_settings=D(self._settings.baked),

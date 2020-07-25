@@ -15,15 +15,15 @@ default: Tuple[None] = namedtuple("default", "")
 class y(_milcery):
 	def __init__(
 		self,
-		_program: str,
 		*args,
+		_program: str = None,
 		_baked_commands = None,
 		_baked_settings = None,
 		**kwargs,
 	):
 		super().__init__(
-			_program,
 			*args,
+			_program = _program or "",
 			_baked_commands = _baked_commands or D({}),
 			_baked_settings = _baked_settings or D({}),
 			**kwargs,
@@ -84,6 +84,6 @@ def __getattr__(_program):
 	bakeriy = i if _program in bakeri_menu else y
 
 	try:
-		return bakeriy(_program)
+		return bakeriy(_program = _program)
 	except Exception as e:
 		return ("y sent to i" if _program in bakeri_menu else "y", e)

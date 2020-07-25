@@ -16,15 +16,15 @@ default: Tuple[None] = namedtuple("default", "")
 class i(_milcery):
 	def __init__(
 		self,
-		_program: str,
 		*args,
+		_program: str = None,
 		_baked_commands = None,
 		_baked_settings = None,
 		**kwargs,
 	):
 		super().__init__(
-			_program,
 			*args,
+			_program = _program or "",
 			_baked_commands = _baked_commands or D({}),
 			_baked_settings = _baked_settings or D({}),
 			**kwargs,
@@ -74,6 +74,6 @@ def __getattr__(_program):
 		raise AttributeError
 
 	try:
-		return i(_program)
+		return i(_program = _program)
 	except Exception as e:
 		return ("i", e)

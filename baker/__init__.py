@@ -32,6 +32,6 @@ def __getattr__(_program):
 		elif prog_parts[0] == "baker":
 			return partial(extension.baker_, bakeriy)
 		else:
-			return y.y(_program)
+			return y.y(_program = _program)
 	except Exception as e:
 		return e
