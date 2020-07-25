@@ -42,7 +42,7 @@ class y(_milcery):
 		self.__output = None
 
 	def __enter__(self):
-		return self.__output := self.__class(*args, **kwargs)
+		return self.__output := self._class(*args, **kwargs)
 
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		try:
@@ -57,13 +57,13 @@ class y(_milcery):
 
 	def __call__(self, *args, **kwargs):
 		try:
-			return self.__class(*args, **kwargs)
+			return self._class(*args, **kwargs)
 		finally:
 			self._set(_reset = True)
 
 	@property
-	def _(self, *args, **kwargs):
-		return self.__partial_class(*args, **kwargs)
+	def __(self, *args, **kwargs):
+		return self._partial_class(*args, **kwargs)
 
 def __getattr__(_program):
 	"""

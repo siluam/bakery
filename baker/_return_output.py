@@ -30,31 +30,38 @@ class _return_output:
         if self.__cls._str:
             return self.__command()
 
-        output = self.__capture_output()
+        if self.__cls._:
 
-        if isinstance(output, dict):
-            if output.stderr:
-                _peek_value, output.stderr = peek(
-                    output.stderr, return_first=2
+            self.__cls._program = self.__command()
+            return self
+
+        else:
+
+            output = self.__capture_output()
+
+            if isinstance(output, dict):
+                if output.stderr:
+                    _peek_value, output.stderr = peek(
+                        output.stderr, return_first=2
+                    )
+                    if _peek_value and not self.__cls._ignore_stderr:
+                        raise stderr("\n".join(output.stderr))
+
+                conversion_partial = partial(
+                    self.__cls._convert_to_type,
+                    _type = self.__cls._type,
                 )
-                if _peek_value and not self.__cls._ignore_stderr:
-                    raise stderr("\n".join(output.stderr))
 
-            conversion_partial = partial(
-                self.__cls._convert_to_type,
-                _type = self.__cls._type,
-            )
+                if self.__cls._capture == "stdout":
+                    del output.stderr
+                    output.stdout = conversion_partial(output.stdout)
+                if self.__cls._capture == "stderr":
+                    output.stderr = conversion_partial(output.stderr)
+                if self.__cls._capture == "both":
+                    output.stdout = conversion_partial(output.stdout)
+                    output.stderr = conversion_partial(output.stderr)
 
-            if self.__cls._capture == "stdout":
-                del output.stderr
-                output.stdout = conversion_partial(output.stdout)
-            if self.__cls._capture == "stderr":
-                output.stderr = conversion_partial(output.stderr)
-            if self.__cls._capture == "both":
-                output.stdout = conversion_partial(output.stdout)
-                output.stderr = conversion_partial(output.stderr)
-
-        return output
+            return output
 
     def __capture_output(self):
 

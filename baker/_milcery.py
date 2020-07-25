@@ -35,6 +35,13 @@ mixins: Generator[str, None, None] = (
 	)
 )
 
+class Error(Exception):
+	pass
+
+
+class not_stb(Error):
+	pass
+
 
 class _milcery(*(mixinport(mixins))):
 
@@ -73,6 +80,8 @@ class _milcery(*(mixinport(mixins))):
 		self._settings.baked = _baked_settings or D({})
 
 		self._sub = D({})
+
+		self._is_bakeriy_object = True
 
 		"""
 
@@ -120,6 +129,9 @@ class _milcery(*(mixinport(mixins))):
 			# Dict must be in the form {"i" : user} or {"s" : user}, to use or not use the
 			# configuration files of the specified user
 			"_sudo": {},
+			# If "_" has a truthy value, freeze this bakeriy object such that another bakeriy object
+			# may act on it; else keep it active
+			"_": 0,
 		}
 
 		self._settings.functions = (
@@ -199,12 +211,9 @@ class _milcery(*(mixinport(mixins))):
 	def __getattr__(self, subcommand):
 		def inner(*args, **kwargs):
 			try:
-				self._subcommand_check(subcommand)
-				self._set_and_process(*args, **kwargs)
-				return self._return_frosted_output()
+				self._class(*args, **kwargs, _subcommand = subcommand)
 			finally:
 				self._set(_reset=True)
-
 		return inner
 
 	def _set_and_process(self, *args, **kwargs):
@@ -250,7 +259,8 @@ class _milcery(*(mixinport(mixins))):
 
 	def __deepcopy__(self):
 		return self.__class__(
-			_program,
+			self._program,
+			_ignore_check = self._ignore_check,
 			_baked_commands=D(self._command.baked),
 			_baked_settings=D(self._settings.baked),
 		)
@@ -280,7 +290,169 @@ class _milcery(*(mixinport(mixins))):
 		else:
 			raise StopIteration
 
-	def __partial_class(self, *args, **kwargs):
+	def __or__(self, value):
+
+		# Remember: A frozen class has already had its "_program" value added with its full command
+		# Since "value" is already frozen, its own "_program" value has also already been modified
+
+		frozen_class =  self.__class__(
+			self._program, # Already modified
+			_ignore_check = True,
+			_baked_commands=D(self._command.baked),
+			_baked_settings=D(self._settings.baked),
+		)
+		frozen_class._ = True
+
+		if isinstance(value, (str, bytes, bytearray)):
+			frozen._program += f" | {value}"
+		elif isinstance(value, (tea, frosting)):
+			frozen._program += f" | {value()}"
+		else:
+			try:
+				assert getattr(value, _is_bakeriy_object, False) is True
+			except AssertionError:
+				raise not_stb(f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!")
+			else:
+				frozen._program += f" | {value._program}"
+
+		return frozen
+
+	def __ror__(self, value):
+
+		# Remember: A frozen class has already had its "_program" value added with its full command
+		# Since "value" is already frozen, its own "_program" value has also already been modified
+
+		frozen_class =  self.__class__(
+			self._program, # Already modified
+			_ignore_check = True,
+			_baked_commands=D(self._command.baked),
+			_baked_settings=D(self._settings.baked),
+		)
+		frozen_class._ = True
+
+		if isinstance(value, (str, bytes, bytearray)):
+			frozen._program = f"{value} | {frozen._program}"
+		elif isinstance(value, (tea, frosting)):
+			frozen._program = f"{value()} | {frozen._program}"
+		else:
+			try:
+				assert getattr(value, _is_bakeriy_object, False) is True
+			except AssertionError:
+				raise not_stb(f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!")
+			else:
+				frozen._program = f"{value._program} | {frozen._program}"
+
+		return frozen
+
+	def __lt__(self, value):
+
+		# Remember: A frozen class has already had its "_program" value added with its full command
+		# Since "value" is already frozen, its own "_program" value has also already been modified
+
+		frozen_class =  self.__class__(
+			self._program, # Already modified
+			_ignore_check = True,
+			_baked_commands=D(self._command.baked),
+			_baked_settings=D(self._settings.baked),
+		)
+		frozen_class._ = True
+
+		if isinstance(value, (str, bytes, bytearray)):
+			frozen._program += f" < {value}"
+		elif isinstance(value, (tea, frosting)):
+			frozen._program += f" < {value()}"
+		else:
+			try:
+				assert getattr(value, _is_bakeriy_object, False) is True
+			except AssertionError:
+				raise not_stb(f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!")
+			else:
+				frozen._program += f" < {value._program}"
+
+		return frozen
+
+	def __le__(self, value):
+
+		# Remember: A frozen class has already had its "_program" value added with its full command
+		# Since "value" is already frozen, its own "_program" value has also already been modified
+
+		frozen_class =  self.__class__(
+			self._program, # Already modified
+			_ignore_check = True,
+			_baked_commands=D(self._command.baked),
+			_baked_settings=D(self._settings.baked),
+		)
+		frozen_class._ = True
+
+		if isinstance(value, (str, bytes, bytearray)):
+			frozen._program = f"{value} < {frozen._program}"
+		elif isinstance(value, (tea, frosting)):
+			frozen._program = f"{value()} < {frozen._program}"
+		else:
+			try:
+				assert getattr(value, _is_bakeriy_object, False) is True
+			except AssertionError:
+				raise not_stb(f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!")
+			else:
+				frozen._program = f"{value._program} < {frozen._program}"
+
+		return frozen
+
+	def __gt__(self, value):
+
+		# Remember: A frozen class has already had its "_program" value added with its full command
+		# Since "value" is already frozen, its own "_program" value has also already been modified
+
+		frozen_class =  self.__class__(
+			self._program, # Already modified
+			_ignore_check = True,
+			_baked_commands=D(self._command.baked),
+			_baked_settings=D(self._settings.baked),
+		)
+		frozen_class._ = True
+
+		if isinstance(value, (str, bytes, bytearray)):
+			frozen._program += f" > {value}"
+		elif isinstance(value, (tea, frosting)):
+			frozen._program += f" > {value()}"
+		else:
+			try:
+				assert getattr(value, _is_bakeriy_object, False) is True
+			except AssertionError:
+				raise not_stb(f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!")
+			else:
+				frozen._program += f" > {value._program}"
+
+		return frozen
+
+	def __ge__(self, value):
+
+		# Remember: A frozen class has already had its "_program" value added with its full command
+		# Since "value" is already frozen, its own "_program" value has also already been modified
+
+		frozen_class =  self.__class__(
+			self._program, # Already modified
+			_ignore_check = True,
+			_baked_commands=D(self._command.baked),
+			_baked_settings=D(self._settings.baked),
+		)
+		frozen_class._ = True
+
+		if isinstance(value, (str, bytes, bytearray)):
+			frozen._program = f"{value} > {frozen._program}"
+		elif isinstance(value, (tea, frosting)):
+			frozen._program = f"{value()} > {frozen._program}"
+		else:
+			try:
+				assert getattr(value, _is_bakeriy_object, False) is True
+			except AssertionError:
+				raise not_stb(f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!")
+			else:
+				frozen._program = f"{value._program} > {frozen._program}"
+
+		return frozen
+
+	def _partial_class(self, *args, **kwargs):
 		return partial(
 			self.__class__,
 			self._program,
@@ -290,7 +462,7 @@ class _milcery(*(mixinport(mixins))):
 			**kwargs,
 		)
 
-	def __class(self, *args, **kwargs):
-		self._subcommand_check(kwargs.pop("_subcommand", "supercalifragilisticexpialidocious"))
+	def _class(self, *args, **kwargs, _subcommand = "supercalifragilisticexpialidocious"):
+		self._subcommand_check(kwargs.pop("_subcommand", _subcommand))
 		self._set_and_process(*args, **kwargs)
 		return self._return_frosted_output()
