@@ -131,7 +131,7 @@ class _milcery(*(mixinport(mixins))):
 			"_sudo": {},
 			# If "_" has a truthy value, freeze this bakeriy object such that another bakeriy object
 			# may act on it; else keep it active
-			"_": 0,
+			"_frozen": False,
 		}
 
 		self._settings.functions = (
@@ -344,7 +344,7 @@ class _milcery(*(mixinport(mixins))):
 
 		return frozen
 
-	def __lt__(self, value):
+	def __lshift__(self, value):
 
 		# Remember: A frozen class has already had its "_program" value added with its full command
 		# Since "value" is already frozen, its own "_program" value has also already been modified
@@ -371,7 +371,7 @@ class _milcery(*(mixinport(mixins))):
 
 		return frozen
 
-	def __le__(self, value):
+	def __rlshift__(self, value):
 
 		# Remember: A frozen class has already had its "_program" value added with its full command
 		# Since "value" is already frozen, its own "_program" value has also already been modified
@@ -398,7 +398,7 @@ class _milcery(*(mixinport(mixins))):
 
 		return frozen
 
-	def __gt__(self, value):
+	def __rshift__(self, value):
 
 		# Remember: A frozen class has already had its "_program" value added with its full command
 		# Since "value" is already frozen, its own "_program" value has also already been modified
@@ -425,7 +425,7 @@ class _milcery(*(mixinport(mixins))):
 
 		return frozen
 
-	def __ge__(self, value):
+	def __rrshift__(self, value):
 
 		# Remember: A frozen class has already had its "_program" value added with its full command
 		# Since "value" is already frozen, its own "_program" value has also already been modified

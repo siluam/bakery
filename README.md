@@ -132,6 +132,34 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     ```
     `Note:` This does not happen with the use of `sudo`, or the `_sudo` kwarg setting; the password prompt will still be shown, and input will still be passed to `sudo`.
 
+* One can "freeze" bakeriy objects, allowing other bakeriy objects to act on them; a frozen bakeriy object has its program replaced by the command, after which `self` is returned:
+    ```python !
+    from baker.y import ls
+
+    # Freeze using a non-truthy value, not including strings or integers
+
+    # ls
+    ls({})
+
+    # Some Alternatives
+    ls(None)
+    ls([])
+    ls(False)
+    ls(bool(0))
+    ls(bool(""))
+
+    # Freeze using the keyword (but it's longer; why would you want to do that? :P)
+    ls(_frozen = True)
+
+    ```
+
+* Piping and Redirection is implemented through the use of frozen bakeriy objects and strings:
+    ```python
+    from baker.y import ls, tail
+
+
+    ```
+
 
 ***
 
@@ -152,8 +180,6 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
 * Comment
 * Documentation
 * Implement
-    * Piping
-    * Redirection
     * Buffers
 
 ***

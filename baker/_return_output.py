@@ -30,7 +30,7 @@ class _return_output:
         if self.__cls._str:
             return self.__command()
 
-        if self.__cls._:
+        if self.__cls._frozen:
 
             self.__cls._program = self.__command()
             return self
