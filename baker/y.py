@@ -4,8 +4,6 @@ import builtins
 # From Imports
 from addict import Dict as D
 from collections import namedtuple
-from functools import partial
-from gensing import tea
 from nanite import module_installed, fullpath
 from typing import MutableSequence as MS, Dict, Any, Tuple, Union
 

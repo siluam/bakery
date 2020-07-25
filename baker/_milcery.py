@@ -313,28 +313,11 @@ class _milcery(*(mixinport(mixins))):
         # Since "value" has already been frozen, but is no longer so,
         # its own "_program" attribute has also already been modified
 
-        frozen = self.__class__(
-            self._program,  # Already modified
-            _ignore_check=True,
-            _baked_commands=D(self._command.baked),
-            _baked_settings=D(self._settings.baked),
-        )
-
         if isinstance(value, (str, bytes, bytearray)):
-            if reversed:
-                frozen._program = (
-                    f"{value} {pr} {frozen._program}"
-                )
-            else:
-                frozen._program += f" {pr} {value}"
+			processed_value = value
         elif isinstance(value, (tea, frosting)):
-            if reversed:
-                frozen._program = (
-                    f"{value()} {pr} {frozen._program}"
-                )
-            else:
-                frozen._program += f" {pr} {value()}"
-        else:
+			processed_value = value()
+		else:
             try:
                 assert (
                     getattr(value, _is_bakery_object, False)
@@ -344,11 +327,30 @@ class _milcery(*(mixinport(mixins))):
                 raise not_stb(
                     f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!"
                 )
-            else:
-                if reversed:
-                    frozen._program = f"{value._program} {pr} {frozen._program}"
-                else:
-                    frozen._program += f" {pr} {value._program}"
+			else:
+				processed_value = value._program
+
+        partially_frozen = partial(
+			self.__class__,
+            _program = self._program,  # Already modified
+            _ignore_check=True,
+            _baked_commands=D(self._command.baked),
+            _baked_settings=D(self._settings.baked),
+        )
+
+		if reversed:
+			frozen = partially_frozen(
+				None,
+				processed_value,
+				pr,
+				frozen._program,
+			)
+		else:
+			frozen = partially_frozen(
+				None,
+				pr,
+				processed_value,
+			)
 
         return (
             frozen.__(_frozen=True)
