@@ -82,7 +82,7 @@ class _milcery(*(mixinport(mixins))):
 
         self._sub = D({})
 
-        self._is_bakeriy_object = True
+        self._is_bakery_object = True
 
         """
 
@@ -307,10 +307,11 @@ class _milcery(*(mixinport(mixins))):
         else:
             raise StopIteration
 
-    def __or__(self, value):
+    def __assign_to_frozen(self, pr, value, reversed=False):
 
-        # Remember: A frozen class has already had its "_program" value added with its full command
-        # Since "value" is already frozen, its own "_program" value has also already been modified
+        # Remember: "value" has already had its "_program" attribute added with its full command
+        # Since "value" has already been frozen, but is no longer so,
+        # its own "_program" attribute has also already been modified
 
         frozen = self.__class__(
             self._program,  # Already modified
@@ -320,13 +321,23 @@ class _milcery(*(mixinport(mixins))):
         )
 
         if isinstance(value, (str, bytes, bytearray)):
-            frozen._program += f" | {value}"
+            if reversed:
+                frozen._program = (
+                    f"{value} {pr} {frozen._program}"
+                )
+            else:
+                frozen._program += f" {pr} {value}"
         elif isinstance(value, (tea, frosting)):
-            frozen._program += f" | {value()}"
+            if reversed:
+                frozen._program = (
+                    f"{value()} {pr} {frozen._program}"
+                )
+            else:
+                frozen._program += f" {pr} {value()}"
         else:
             try:
                 assert (
-                    getattr(value, _is_bakeriy_object, False)
+                    getattr(value, _is_bakery_object, False)
                     is True
                 )
             except AssertionError:
@@ -334,194 +345,34 @@ class _milcery(*(mixinport(mixins))):
                     f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!"
                 )
             else:
-                frozen._program += f" | {value._program}"
+                if reversed:
+                    frozen._program = f"{value._program} {pr} {frozen._program}"
+                else:
+                    frozen._program += f" {pr} {value._program}"
 
         return (
             frozen.__(_frozen=True)
             if self.__class__.__name__ == "i"
             else frozen(_frozen=True)
         )
+
+    def __or__(self, value):
+        return self.__assign_to_frozen("|", value)
 
     def __ror__(self, value):
-
-        # Remember: A frozen class has already had its "_program" value added with its full command
-        # Since "value" is already frozen, its own "_program" value has also already been modified
-
-        frozen = self.__class__(
-            self._program,  # Already modified
-            _ignore_check=True,
-            _baked_commands=D(self._command.baked),
-            _baked_settings=D(self._settings.baked),
-        )
-
-        if isinstance(value, (str, bytes, bytearray)):
-            frozen._program = f"{value} | {frozen._program}"
-        elif isinstance(value, (tea, frosting)):
-            frozen._program = f"{value()} | {frozen._program}"
-        else:
-            try:
-                assert (
-                    getattr(value, _is_bakeriy_object, False)
-                    is True
-                )
-            except AssertionError:
-                raise not_stb(
-                    f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!"
-                )
-            else:
-                frozen._program = (
-                    f"{value._program} | {frozen._program}"
-                )
-
-        return (
-            frozen.__(_frozen=True)
-            if self.__class__.__name__ == "i"
-            else frozen(_frozen=True)
-        )
+        return self.__assign_to_frozen("|", value, reversed=True)
 
     def __lshift__(self, value):
-
-        # Remember: A frozen class has already had its "_program" value added with its full command
-        # Since "value" is already frozen, its own "_program" value has also already been modified
-
-        frozen = self.__class__(
-            self._program,  # Already modified
-            _ignore_check=True,
-            _baked_commands=D(self._command.baked),
-            _baked_settings=D(self._settings.baked),
-        )
-
-        if isinstance(value, (str, bytes, bytearray)):
-            frozen._program += f" < {value}"
-        elif isinstance(value, (tea, frosting)):
-            frozen._program += f" < {value()}"
-        else:
-            try:
-                assert (
-                    getattr(value, _is_bakeriy_object, False)
-                    is True
-                )
-            except AssertionError:
-                raise not_stb(
-                    f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!"
-                )
-            else:
-                frozen._program += f" < {value._program}"
-
-        return (
-            frozen.__(_frozen=True)
-            if self.__class__.__name__ == "i"
-            else frozen(_frozen=True)
-        )
+        return self.__assign_to_frozen("<", value)
 
     def __rlshift__(self, value):
-
-        # Remember: A frozen class has already had its "_program" value added with its full command
-        # Since "value" is already frozen, its own "_program" value has also already been modified
-
-        frozen = self.__class__(
-            self._program,  # Already modified
-            _ignore_check=True,
-            _baked_commands=D(self._command.baked),
-            _baked_settings=D(self._settings.baked),
-        )
-
-        if isinstance(value, (str, bytes, bytearray)):
-            frozen._program = f"{value} < {frozen._program}"
-        elif isinstance(value, (tea, frosting)):
-            frozen._program = f"{value()} < {frozen._program}"
-        else:
-            try:
-                assert (
-                    getattr(value, _is_bakeriy_object, False)
-                    is True
-                )
-            except AssertionError:
-                raise not_stb(
-                    f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!"
-                )
-            else:
-                frozen._program = (
-                    f"{value._program} < {frozen._program}"
-                )
-
-        return (
-            frozen.__(_frozen=True)
-            if self.__class__.__name__ == "i"
-            else frozen(_frozen=True)
-        )
+        return self.__assign_to_frozen("<", value, reversed=True)
 
     def __rshift__(self, value):
-
-        # Remember: A frozen class has already had its "_program" value added with its full command
-        # Since "value" is already frozen, its own "_program" value has also already been modified
-
-        frozen = self.__class__(
-            self._program,  # Already modified
-            _ignore_check=True,
-            _baked_commands=D(self._command.baked),
-            _baked_settings=D(self._settings.baked),
-        )
-
-        if isinstance(value, (str, bytes, bytearray)):
-            frozen._program += f" > {value}"
-        elif isinstance(value, (tea, frosting)):
-            frozen._program += f" > {value()}"
-        else:
-            try:
-                assert (
-                    getattr(value, _is_bakeriy_object, False)
-                    is True
-                )
-            except AssertionError:
-                raise not_stb(
-                    f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!"
-                )
-            else:
-                frozen._program += f" > {value._program}"
-
-        return (
-            frozen.__(_frozen=True)
-            if self.__class__.__name__ == "i"
-            else frozen(_frozen=True)
-        )
+        return self.__assign_to_frozen(">", value)
 
     def __rrshift__(self, value):
-
-        # Remember: A frozen class has already had its "_program" value added with its full command
-        # Since "value" is already frozen, its own "_program" value has also already been modified
-
-        frozen = self.__class__(
-            self._program,  # Already modified
-            _ignore_check=True,
-            _baked_commands=D(self._command.baked),
-            _baked_settings=D(self._settings.baked),
-        )
-
-        if isinstance(value, (str, bytes, bytearray)):
-            frozen._program = f"{value} > {frozen._program}"
-        elif isinstance(value, (tea, frosting)):
-            frozen._program = f"{value()} > {frozen._program}"
-        else:
-            try:
-                assert (
-                    getattr(value, _is_bakeriy_object, False)
-                    is True
-                )
-            except AssertionError:
-                raise not_stb(
-                    f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!"
-                )
-            else:
-                frozen._program = (
-                    f"{value._program} > {frozen._program}"
-                )
-
-        return (
-            frozen.__(_frozen=True)
-            if self.__class__.__name__ == "i"
-            else frozen(_frozen=True)
-        )
+        return self.__assign_to_frozen(">", value, reversed=True)
 
     def _partial_class(self, *args, **kwargs):
         return partial(
