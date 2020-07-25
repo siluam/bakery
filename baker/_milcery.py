@@ -279,3 +279,18 @@ class _milcery(*(mixinport(mixins))):
 			return self.__next_output[self.n - 1]
 		else:
 			raise StopIteration
+
+	def __partial_class(self, *args, **kwargs):
+		return partial(
+			self.__class__,
+			self._program,
+			*args,
+			_baked_commands = D(self._command.baked),
+			_baked_settings = D(self._settings.baked),
+			**kwargs,
+		)
+
+	def __class(self, *args, **kwargs):
+		self._subcommand_check(kwargs.pop("_subcommand", "supercalifragilisticexpialidocious"))
+		self._set_and_process(*args, **kwargs)
+		return self._return_frosted_output()

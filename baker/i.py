@@ -40,24 +40,26 @@ class i(_milcery):
 		except AttributeError:
 			builtins.bakeriy_stores = [self]
 
+		self.__output = None
+
+	def __enter__(self):
+		return self.__output := self.__partial_class(*args, **kwargs)
+
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		try:
+			pass
+		finally:
+			self.__output = None
+
 	def _(self, *args, **kwargs):
 		try:
-			self._subcommand_check(kwargs.pop("_subcommand", "supercalifragilisticexpialidocious"))
-			self._set_and_process(*args, **kwargs)
-			return self._return_frosted_output()
+			return self.__class(*args, **kwargs)
 		finally:
 			self._set(_reset = True)
 
 	@property
 	def __call__(self, *args, **kwargs):
-		return partial(
-			self.__class__,
-			self._program,
-			*args,
-			_baked_commands = D(self._command.baked),
-			_baked_settings = D(self._settings.baked),
-			**kwargs,
-		)
+		return self.__partial_class(*args, **kwargs)
 
 def __getattr__(_program):
 	"""
