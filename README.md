@@ -63,7 +63,7 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     )
     ```
 
-* While I'm not sure how different the following behavious is, you can iterate over the `bakery` object itself to get its output:
+* While I'm not sure how different the following behavious is, you can iterate over the `bakeriy` object itself to get its output:
     ```python
     from baker.y import ls
 
@@ -132,8 +132,8 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     ```
     `Note:` This does not happen with the use of `sudo`, or the `_sudo` kwarg setting; the password prompt will still be shown, and input will still be passed to `sudo`.
 
-* One can "freeze" bakeriy objects, allowing other bakeriy objects to act on them; a frozen bakeriy object has its program replaced by the command, after which `self` is returned:
-    ```python !
+* One can "freeze" `bakery` objects, allowing other `bakery` objects to act on them; a frozen `bakery` object has its program replaced by the command, after which `self` is returned:
+    ```python
     from baker.y import ls
 
     # Freeze using a non-truthy value, not including strings or integers
@@ -150,14 +150,15 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
 
     # Freeze using the keyword (but it's longer; why would you want to do that? :P)
     ls(_frozen = True)
-
     ```
 
-* Piping and Redirection is implemented through the use of frozen bakeriy objects and strings:
+* Piping and Redirection is implemented through the use of frozen `bakery` objects and strings, as well as through the `_pipe` and `_redirect` kwarg settings:
     ```python
     from baker.y import ls, tail
 
-
+    # Piping using frozen objects
+    tailed_list = ls({}) | tail({})
+    tailed_list()
     ```
 
 
