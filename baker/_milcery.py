@@ -313,22 +313,42 @@ class _milcery(*(mixinport(mixins))):
         # Since "value" has already been frozen, but is no longer so,
         # its own "_program" attribute has also already been modified
 
-        if isinstance(value, (str, bytes, bytearray)):
-            processed_value = value
-        elif isinstance(value, (tea, frosting)):
-            processed_value = value()
-        else:
-            try:
-                assert (
-                    getattr(value, "_is_bakery_object", False)
-                    is True
-                )
-            except AssertionError:
-                raise not_stb(
-                    f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!"
-                )
-            else:
-                processed_value = value._program
+		def inner(value):
+			if isinstance(value, (str, bytes, bytearray)):
+				return value
+			elif isinstance(value, (tea, frosting)):
+				return value()
+			else:
+				try:
+					assert (
+						getattr(value, "_is_bakery_object", False)
+						is True
+					)
+				except AssertionError:
+					raise not_stb(
+						f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!"
+					)
+				else:
+					return value._program
+
+		if isinstance(value, tuple):
+			if pr in ("<", ">", ">>"):
+				if len(value) == 0:
+					pass
+				elif len(value) == 1:
+					processed_value = inner(value[0])
+				elif len(value) == 2:
+					if isinstance(value[0], int):
+						processed_value = inner(value[1])
+						pr = value[0] + pr
+					else:
+						processed_value = inner(value[0])
+						pr += value[1]
+				else:
+					processed_value = inner(value[1])
+					pr = f"{value[0]}{pr}{value[2]}"
+		else:
+			processed_value = inner(value)
 
         partially_frozen = partial(
             self.__class__,
@@ -369,6 +389,12 @@ class _milcery(*(mixinport(mixins))):
 
     def __rrshift__(self, value):
         return self.__assign_to_frozen(">", value, reversed=True)
+
+    def __add__(self, value):
+        return self.__assign_to_frozen(">>", value)
+
+    def __radd__(self, value):
+        return self.__assign_to_frozen(">>", value, reversed=True)
 
     def _partial_class(self, *args, **kwargs):
         return partial(

@@ -156,8 +156,10 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     from baker.y import ls, tail
 
     # Piping using frozen objects
-    tailed_list = ls({}) | tail({})
-    tailed_list()
+    tails = ls([]) | tail([])
+    tails = "ls" | tails([])
+    tails = ls([]) | "tails"
+    tails()
     ```
 
 
