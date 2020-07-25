@@ -46,7 +46,7 @@ class _run_frosting:
 
 	def _return_frosted_output(self, _cls = None):
 		_cls = self._cls_check(_cls)
-		if _cls._:
+		if _cls._frosting:
 			return output
 		else:
 			if isinstance(

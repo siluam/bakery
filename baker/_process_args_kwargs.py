@@ -128,8 +128,6 @@ class _process_args_kwargs:
 				self.__cls._command[self.__boc][self.__subcommand].components.args[
 					self.__starter_regular
 				].append(arg)
-			elif not arg:
-				self.__cls._frozen = True
 			else:
 				raise not_string_dict(
 					f'Sorry! Value "{arg}" must be a string, integer, or dictionary!'

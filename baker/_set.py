@@ -1,5 +1,6 @@
 # From Imports
 from addict import Dict as D
+from gensing import tea, frosting
 from toml import load
 
 class Error(Exception):
@@ -77,6 +78,15 @@ class _set:
 		if self.__baking or self.__calling:
 
 			_ = dict()
+
+			for arg in self.__args:
+				if not isinstance(
+					arg,
+					(str, bytes, bytearray, int, dict, tea, frosting)
+				) and not arg:
+					self.__cls._settings[
+						"baked" if self.__baking else "called"
+					][self.__subcommand]._frosting = True
 
 			for key in self.__kwargs.keys():
 				if key[0] == "_":

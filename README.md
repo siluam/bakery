@@ -139,11 +139,10 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     # Freeze using a non-truthy value, not including strings or integers
 
     # ls
-    ls({})
+    ls([])
 
     # Some Alternatives
     ls(None)
-    ls([])
     ls(False)
     ls(bool(0))
     ls(bool(""))

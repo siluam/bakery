@@ -41,7 +41,8 @@ class i(_milcery):
 		self.__output = None
 
 	def __enter__(self):
-		return self.__output := self._partial_class(*args, **kwargs)
+		self.__output = self._partial_class(*args, **kwargs)
+		return self.__output
 
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		try:
