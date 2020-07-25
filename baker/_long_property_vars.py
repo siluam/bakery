@@ -51,10 +51,10 @@ class _long_property_vars:
 		else:
 			value = value.replace("_", "-")
 		if (
+			not self._ignore_check and
 			not get_stdout(
 				f'{"where.exe" if os.name == "nt" else "which"} {value}'
 			)
-			and not self._ignore_check
 		):
 			raise no_prog(
 				f'Sorry! "{value}" does not seem to exist in the path!'

@@ -31,7 +31,6 @@ def baker_(
 ):
     return bakeriy(
 		*args,
-		_program = "",
 		_ignore_check = True,
 		_baked_commands = _baked_commands or D({}),
 		_baked_settings = _baked_settings or D({}),
