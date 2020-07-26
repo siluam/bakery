@@ -38,11 +38,12 @@ class _run_frosting:
 			# 				print(line)
 			pout.v(output)
 
-		if isinstance(output, (dict, tea, frosting)) and len(output) == 1:
+		if isinstance(output, (dict, tea, frosting)) and len(output) == 0:
+			return None
+		elif isinstance(output, (dict, tea, frosting)) and len(output) == 1:
 			return next(iter(output.values()))
 		else:
 			return output
-
 
 	def _return_frosted_output(self, _cls = None):
 		_cls = self._cls_check(_cls)

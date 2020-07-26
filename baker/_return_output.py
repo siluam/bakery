@@ -53,7 +53,7 @@ class _return_output:
 				)
 
 				if self.__cls._capture == "stdout":
-					if not self.__cls._ignore_stderr:
+					if not output.dict and not isinstance(output.stderr, dict):
 						del output.stderr
 					if not self.__cls._ignore_stdout:
 						output.stdout = conversion_partial(output.stdout)
@@ -102,7 +102,7 @@ class _return_output:
 					if self.__cls._verbosity > 1:
 						_.capture.stderr = p.stderr
 			else:
-				if self.__cls._capture == "stder":
+				if self.__cls._capture == "stderr":
 					_.stderr = self.__decode_std(p.stderr, "stderr")
 					if self.__cls._verbosity > 1:
 						_.capture.stderr = p.stderr

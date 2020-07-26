@@ -180,6 +180,10 @@ class _milcery(*(mixinport(mixins))):
 		yield from input
 
 	def _convert_to_type(self, input, _type=iter):
+
+		if input is None:
+			return None
+
 		if input and isinstance(input, frosting):
 			if isinstance(input(), (str, bytes, bytearray)):
 				input = [
@@ -199,9 +203,10 @@ class _milcery(*(mixinport(mixins))):
 					)
 					for line in input()[0].split("\n")
 				][:-1]
+
 		if _type.__name__ == "str":
 			return " ".join(input)
-		if _type.__name__ in ("generator", "iter"):
+		elif _type.__name__ in ("generator", "iter"):
 			return self._convert_to_generator(input)
 		else:
 			return _type(input)
@@ -313,6 +318,12 @@ class _milcery(*(mixinport(mixins))):
 			return self.__next_output[self.n - 1]
 		else:
 			raise StopIteration
+
+	def __str__(self):
+		pass
+
+	def __repr__(self):
+		pass
 
 	def __assign_to_frozen(self, pr, value, reversed=False):
 
