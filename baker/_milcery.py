@@ -58,6 +58,8 @@ class _milcery(*(mixinport(mixins))):
 		_ignore_check: bool = False,
 		_baked_commands: Dict[str, Any] = None,
 		_baked_settings: Dict[str, Any] = None,
+		_global_commands: Dict[str, Any] = None,
+		_global_settings: Dict[str, Any] = None,
 		**kwargs,
 	):
 		"""
@@ -76,9 +78,11 @@ class _milcery(*(mixinport(mixins))):
 
 		self._command = D({})
 		self._command.baked = _baked_commands or D({})
+		self._command.planetary = _global_commands or D({})
 
 		self._settings = D({})
 		self._settings.baked = _baked_settings or D({})
+		self._settings.planetary = _globe_settings or D({})
 
 		self._sub = D({})
 

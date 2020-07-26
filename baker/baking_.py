@@ -28,6 +28,7 @@ class baking_:
 		_sar = "add",
 		_sc = "supercalifragilisticexpialidocious",
 		_sr = "regular",
+		_g = False,
 		**kwargs
 	):
 		"""
@@ -61,7 +62,8 @@ class baking_:
 			self._set,
 			*args,
 			_cls = _cls,
-			_baking = True,
+			_baking = not(_g),
+			_global = _g,
 			_subcommand = _sc,
 			**kwargs,
 		)
@@ -77,7 +79,8 @@ class baking_:
 			self._process_args_kwargs,
 			*args,
 			_cls = _cls,
-			_baking = True,
+			_baking = not(_g),
+			_global = _g,
 			_subcommand = _sc,
 			_starter_regular = _sr,
 			**kwargs,
@@ -103,6 +106,7 @@ class baking_:
 		for store in _cls._stores:
 			store.bake_(
 				*args,
+				_g = True,
 				_cls = store,
 				_akar = _akar,
 				_sar = _sar,
@@ -155,7 +159,7 @@ class baking_:
 			for category in ("_settings", "_command"):
 				inner(category)
 		else:
-			inner(_settings or _args_kwargs)
+			inner("_settings" if _settings else "_command")
 
 	def splat_all_(
 		self,

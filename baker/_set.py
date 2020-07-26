@@ -1,6 +1,8 @@
 # From Imports
 from addict import Dict as D
+from collections import OrderedDict
 from gensing import tea, frosting
+from itertools import product
 from toml import load
 
 class Error(Exception):
@@ -16,6 +18,7 @@ class _set:
 		self,
 		*args,
 		_cls = None,
+		_global = False,
 		_baking = False,
 		_calling = False,
 		_final = False,
@@ -30,6 +33,7 @@ class _set:
 		self.__kwargs = kwargs
 		self.__cls = self._cls_check(_cls)
 		self.__subcommand = _subcommand
+		self.__global = _global
 		self.__baking = _baking
 		self.__calling = _calling
 		self.__final = _final
@@ -65,36 +69,40 @@ class _set:
 
 	def __set(self):
 
-		if (
-			(self.__baking and self.__calling) or
-			(self.__baking and self.__final) or
-			(self.__calling and self.__final) or
-			(self.__baking and self.__calling and self.__final)
-		):
-			raise cannot_set_multiple('Sorry! No combination of _baking, _calling, or _final may be used! Please choose only a single category!')
+		categories = OrderedDict({
+			"_global" : "planetary",
+			"_baking" : "baked",
+			"_calling" : "called",
+			"_final" : "final",
+		})
+
+		c_count = (getattr(self, f"_{c}", False) for c in categories.keys()).count(True)
+
+		if c_count != 1:
+			raise cannot_set_multiple(f'Sorry! No combination of {", ".join(categories)} may be used! Please choose only a single category!')
 
 		self.__kwargs_mods()
 
-		if self.__baking or self.__calling:
+		if self.__baking or self.__calling or self.__global:
 
 			_ = dict()
+
+			for key, value in categories.items():
+				if getattr(self, f"_{key}", False):
+					cat = categories[key]
 
 			for index, arg in enumerate(self.__args):
 				if not isinstance(
 					arg,
 					(str, bytes, bytearray, int, dict, tea, frosting)
 				) and not arg:
-					self.__cls._settings[
-						"baked" if self.__baking else "called"
-					][self.__subcommand]._frozen = True
+					self.__cls._settings[cat][self.__subcommand]._frozen = True
 					self.__args = list(self.__args)
 					del self.__args[index]
 
 			for key in self.__kwargs.keys():
 				if key[0] == "_":
-					self.__cls._settings[
-						"baked" if self.__baking else "called"
-					][self.__subcommand][key] = self.__kwargs[key]
+					self.__cls._settings[cat][self.__subcommand][key] = self.__kwargs[key]
 				else:
 					_[key] = self.__kwargs[key]
 
@@ -110,10 +118,7 @@ class _set:
 				)
 
 			# Careful! The order of the categories here matters!
-			for category in (
-				"baked",
-				"called",
-			):
+			for category in tuple(categories.values())[:-1]:
 				self.__cls._settings.final[self.__subcommand].update(
 					D(self.__cls._settings[category][self.__subcommand])
 				)
@@ -122,8 +127,6 @@ class _set:
 
 		if self.__cls._sub.function in ("frosting_", "f_"):
 			self.__kwargs["_frosting"] = True
-			self.__kwargs["_type"] = iter
 
 		if self.__cls._sub.function == "print_":
 			self.__kwargs["_print"] = True
-			self.__kwargs["_str"] = True
