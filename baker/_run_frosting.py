@@ -10,18 +10,17 @@ class _run_frosting:
 
 	def _run_frosting(self, _cls = None, _subcommand = "supercalifragilisticexpialidocious"):
 
-		self.__cls = self._cls_check(_cls)
-		self.__subcommand = _subcommand
+		_cls = self._cls_check(_cls)
 
-		output = self.__cls._return_output(
+		output = _cls._return_output(
 			_cls = _cls,
 			_subcommand = _subcommand,
 		)
 
-		if self.__cls._print:
+		if _cls._print:
 			print(output)
 
-		if self.__cls._frosting:
+		if _cls._frosting:
 			# for category in output:
 			# 	if (
 			# 		isinstance(output[category], int) or
@@ -39,7 +38,7 @@ class _run_frosting:
 			pout.v(output)
 
 		if isinstance(output, (dict, tea, frosting)) and len(output) == 0:
-			return None
+			return "None" if _cls._type.__name__ in ("str", "repr") else None
 		elif isinstance(output, (dict, tea, frosting)) and len(output) == 1:
 			return next(iter(output.values()))
 		else:
@@ -54,7 +53,7 @@ class _run_frosting:
 			if isinstance(output, (dict, tea, frosting)):
 				return frosting(output, _cls._capture)
 			elif _cls._wait is None:
-				return None
+				return "None" if _cls._type.__name__ in ("str", "repr") else None
 			elif not _cls._wait:
 				return output
 			else:

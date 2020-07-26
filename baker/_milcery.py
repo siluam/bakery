@@ -182,7 +182,7 @@ class _milcery(*(mixinport(mixins))):
 	def _convert_to_type(self, input, _type=iter):
 
 		if input is None:
-			if _type.__name__ == "str":
+			if _type.__name__ in ("str", "repr"):
 				return "None"
 			else:
 				return None
@@ -196,13 +196,13 @@ class _milcery(*(mixinport(mixins))):
 					).fill(input())
 				]
 			elif input() is None:
-				if _type.__name__ == "str":
+				if _type.__name__ in ("str", "repr"):
 					return "None"
 				else:
 					return None
 			elif isinstance(input(), int):
-				if _type.__name__ == "str":
-					return str(input())
+				if _type.__name__ in ("str", "repr"):
+					return repr(input())
 				else:
 					return input()
 			else:
@@ -213,7 +213,7 @@ class _milcery(*(mixinport(mixins))):
 					for line in input()[0].split("\n")
 				][:-1]
 
-		if _type.__name__ == "str":
+		if _type.__name__ in ("str", "repr"):
 			return " ".join(input)
 		elif _type.__name__ in ("generator", "iter"):
 			return self._convert_to_generator(input)
@@ -336,7 +336,7 @@ class _milcery(*(mixinport(mixins))):
 
 	def __repr__(self):
 		try:
-			return self._class(_type = str)
+			return self._class(_type = repr)
 		finally:
 			self._set(_reset = True)
 
