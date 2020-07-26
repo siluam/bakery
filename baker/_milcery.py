@@ -319,8 +319,8 @@ class _milcery(*(mixinport(mixins))):
 		# Since "value" has already been frozen, but is no longer so,
 		# its own "_program" attribute has also already been modified
 
-		frozen_capture = self._settings.defaults._capture
-		frozen_ignore_stderr = self._settings.defaults._ignore_stderr
+		frozen_capture = self._settings.defaults["_capture"]
+		frozen_ignore_stderr = self._settings.defaults["_ignore_stderr"]
 
 		def inner(value):
 			if isinstance(value, (str, bytes, bytearray)):
