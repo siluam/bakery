@@ -182,7 +182,10 @@ class _milcery(*(mixinport(mixins))):
 	def _convert_to_type(self, input, _type=iter):
 
 		if input is None:
-			return None
+			if _type.__name__ == "str":
+				return "None"
+			else:
+				return None
 
 		if input and isinstance(input, frosting):
 			if isinstance(input(), (str, bytes, bytearray)):
@@ -193,9 +196,15 @@ class _milcery(*(mixinport(mixins))):
 					).fill(input())
 				]
 			elif input() is None:
-				return None
+				if _type.__name__ == "str":
+					return "None"
+				else:
+					return None
 			elif isinstance(input(), int):
-				return input()
+				if _type.__name__ == "str":
+					return str(input())
+				else:
+					return input()
 			else:
 				input = [
 					TextWrapper(break_long_words=False,).fill(
@@ -320,10 +329,16 @@ class _milcery(*(mixinport(mixins))):
 			raise StopIteration
 
 	def __str__(self):
-		pass
+		try:
+			return self._class(_type = str)
+		finally:
+			self._set(_reset = True)
 
 	def __repr__(self):
-		pass
+		try:
+			return self._class(_type = str)
+		finally:
+			self._set(_reset = True)
 
 	def __assign_to_frozen(self, pr, value, reversed=False):
 
