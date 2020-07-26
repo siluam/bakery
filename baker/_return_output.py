@@ -53,17 +53,30 @@ class _return_output:
 				)
 
 				if self.__cls._capture == "stdout":
-					del output.stderr
-					output.stdout = conversion_partial(output.stdout)
+					if not self.__cls._ignore_stderr:
+						del output.stderr
+					if not self.__cls._ignore_stdout:
+						output.stdout = conversion_partial(output.stdout)
 				if self.__cls._capture == "stderr":
-					output.stderr = conversion_partial(output.stderr)
+					if not self.__cls._ignore_stderr:
+						output.stderr = conversion_partial(output.stderr)
 				if self.__cls._capture == "both":
-					output.stdout = conversion_partial(output.stdout)
-					output.stderr = conversion_partial(output.stderr)
+					if not self.__cls._ignore_stdout:
+						output.stdout = conversion_partial(output.stdout)
+					if not self.__cls._ignore_stderr:
+						output.stderr = conversion_partial(output.stderr)
 
 			return output
 
 	def __capture_output(self):
+
+		if not self.__cls._ignore_stdout:
+			stdout_capture = Capture(
+				timeout=self.__cls._timeout_stdout,
+				buffer_size=1
+				if self.__cls._capture == "run"
+				else self.__cls._buffer_size_stdout,
+			)
 
 		if not self.__cls._ignore_stderr:
 			stderr_capture = Capture(
@@ -80,12 +93,6 @@ class _return_output:
 		)
 
 		if self.__cls._capture in ("both", "stdout"):
-			stdout_capture = Capture(
-				timeout=self.__cls._timeout_stdout,
-				buffer_size=1
-				if self.__cls._capture == "run"
-				else self.__cls._buffer_size_stdout,
-			)
 			if self.__cls._ignore_stderr:
 				p = partial_Pipeline(
 					stdout = stdout_capture,

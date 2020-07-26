@@ -98,6 +98,7 @@ class _milcery(*(mixinport(mixins))):
 			"_frosting": False,
 			"_str": False,
 			"_ignore_stderr": False,
+			"_ignore_stdout": False,
 			"_verbosity": int(environ.get("verbose_bakery", 0)),
 			"_run_as": "",
 			"_n_lines": D(
@@ -340,15 +341,11 @@ class _milcery(*(mixinport(mixins))):
 				else:
 					# CAREFUL! The order of the categories in the loop must not change here!
 					for cat in ("planetary", "baked"):
-						if value._settings[cat].supercalifragilisticexpialidocious._capture == "run":
-							frozen_capture = "run"
+						if value._settings[cat].supercalifragilisticexpialidocious._capture:
+							frozen_capture = value._settings[cat].supercalifragilisticexpialidocious._capture
 						if value._settings[cat].supercalifragilisticexpialidocious._ignore_stderr:
-							frozen_ignore_stderr = True
+							frozen_ignore_stderr = value._settings[cat].supercalifragilisticexpialidocious._ignore_stderr
 					return value._program
-
-		if pr in ("<", ">", ">>"):
-			frozen_capture = "run"
-			frozen_ignore_stderr = True
 
 		if isinstance(value, tuple):
 			if pr in ("<", ">", ">>"):
@@ -368,6 +365,18 @@ class _milcery(*(mixinport(mixins))):
 					pr = f"{value[0]}{pr}{value[2]}"
 		else:
 			processed_value = inner(value)
+
+		# TODO: Account for 1>, 2>, &>, and [n]>
+		if "&>" in pr:
+			frozen_capture = "run"
+			frozen_ignore_stderr = True
+		elif (
+			"1>" in pr or
+			pr in (">", ">>", "<")
+		):
+			frozen_capture = "run"
+		elif "2>" in pr:
+			frozen_ignore_stderr = True
 
 		partially_frozen = partial(
 			self.__class__,
