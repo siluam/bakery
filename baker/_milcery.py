@@ -368,17 +368,16 @@ class _milcery(*(mixinport(mixins))):
 		else:
 			processed_value = inner(value)
 
-		# TODO: Account for 1>, 2>, &>, and [n]>
-		if "&>" in pr:
+		if "&>" in pr or ">&" in pr:
 			frozen_dict["out"] = True
+			frozen_dict["err"] = True
+		elif "2>" in pr:
 			frozen_dict["err"] = True
 		elif (
 			"1>" in pr or
 			pr in (">", ">>", "<")
 		):
 			frozen_dict["out"] = True
-		elif "2>" in pr:
-			frozen_dict["err"] = True
 
 		partially_frozen = partial(
 			self.__class__,
