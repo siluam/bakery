@@ -114,7 +114,7 @@ class _process_args_kwargs:
 
 	def __process_args(self):
 		if (
-			(any(self.__baking, self.__global) and self.__add_replace == "replace") or
+			(any((self.__baking, self.__global)) and self.__add_replace == "replace") or
 			self.__calling
 		):
 			self.__cls._command[self.__cat][self.__subcommand].components.args[self.__starter_regular] = tea()

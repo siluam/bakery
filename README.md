@@ -159,12 +159,17 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     # Piping using frozen objects
 
     # ls | tail
+    tails = ls | tail
     tails = ls([]) | tail([])
     tails = "ls" | tail([])
     tails = ls([]) | "tail"
     tails()
 
     # Redirection using frozen objects
+
+    # ls > /dev/null
+    nulls = ls >> devnull
+    nulls()
 
     # ls > /dev/null
     nulls = ls([]) >> devnull

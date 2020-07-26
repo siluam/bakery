@@ -2,7 +2,7 @@
 from addict import Dict as D
 from collections import OrderedDict, ChainMap
 from gensing import tea, frosting
-from itertools import product
+from itertools import chain
 from toml import load
 
 class Error(Exception):
