@@ -319,9 +319,11 @@ class _milcery(*(mixinport(mixins))):
 		# Remember: "value" has already had its "_program" attribute added with its full command
 		# Since "value" has already been frozen, but is no longer so,
 		# its own "_program" attribute has also already been modified
-
-		frozen_capture = self._settings.defaults["_capture"]
-		frozen_ignore_stderr = self._settings.defaults["_ignore_stderr"]
+		
+		frozen_dict = {
+			"out" : self._settings.defaults["_ignore_stdout"],
+			"err" : self._settings.defaults["_ignore_stderr"],
+		}
 
 		def inner(value):
 			if isinstance(value, (str, bytes, bytearray)):
@@ -339,12 +341,12 @@ class _milcery(*(mixinport(mixins))):
 						f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!"
 					)
 				else:
-					# CAREFUL! The order of the categories in the loop must not change here!
+					# CAREFUL! The order of the categories in the top loop must not change here!
+					# The values of "frozen_dict" are meant to be overwritten!
 					for cat in ("planetary", "baked"):
-						if value._settings[cat].supercalifragilisticexpialidocious._capture:
-							frozen_capture = value._settings[cat].supercalifragilisticexpialidocious._capture
-						if value._settings[cat].supercalifragilisticexpialidocious._ignore_stderr:
-							frozen_ignore_stderr = value._settings[cat].supercalifragilisticexpialidocious._ignore_stderr
+						for std in ("out", "err"):
+							if value._settings[cat].supercalifragilisticexpialidocious[f"_ignore_std{std}"]:
+								frozen_dict[std] = value._settings[cat].supercalifragilisticexpialidocious[f"_ignore_std{std}"]
 					return value._program
 
 		if isinstance(value, tuple):
@@ -368,22 +370,22 @@ class _milcery(*(mixinport(mixins))):
 
 		# TODO: Account for 1>, 2>, &>, and [n]>
 		if "&>" in pr:
-			frozen_capture = "run"
-			frozen_ignore_stderr = True
+			frozen_dict["out"] = True
+			frozen_dict["err"] = True
 		elif (
 			"1>" in pr or
 			pr in (">", ">>", "<")
 		):
-			frozen_capture = "run"
+			frozen_dict["out"] = True
 		elif "2>" in pr:
-			frozen_ignore_stderr = True
+			frozen_dict["err"] = True
 
 		partially_frozen = partial(
 			self.__class__,
 			_ignore_check=True,
 			_baked_settings=D({"supercalifragilisticexpialidocious" : dict(
-				_capture = frozen_capture,
-				_ignore_stderr = frozen_ignore_stderr
+				_ignore_stdout = frozen_dict["out"],
+				_ignore_stderr = frozen_dict["err"],
 			)}),
 			_global_commands=D(self._command.planetary),
 			_global_settings=D(self._settings.planetary),

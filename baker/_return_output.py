@@ -70,45 +70,7 @@ class _return_output:
 
 	def __capture_output(self):
 
-		if not self.__cls._ignore_stdout:
-			stdout_capture = Capture(
-				timeout=self.__cls._timeout_stdout,
-				buffer_size=1
-				if self.__cls._capture == "run"
-				else self.__cls._buffer_size_stdout,
-			)
-
-		if not self.__cls._ignore_stderr:
-			stderr_capture = Capture(
-				timeout=self.__cls._timeout_stderr,
-				buffer_size=1
-				if self.__cls._capture == "run"
-				else self.__cls._buffer_size_stderr,
-			)
-
-		partial_Pipeline = partial(
-			Pipeline,
-			self.__command(),
-			posix=self.__cls._posix,
-		)
-
-		if self.__cls._capture in ("both", "stdout"):
-			if self.__cls._ignore_stderr:
-				p = partial_Pipeline(
-					stdout = stdout_capture,
-				)
-			else:
-				p = partial_Pipeline(
-					stdout = stdout_capture,
-					stderr = stderr_capture,
-				)
-		else:
-			if self.__cls._ignore_stderr:
-				p = partial_Pipeline()
-			else:
-				p = partial_Pipeline(
-					stderr = stderr_capture,
-				)
+		p = self.__set_process()
 
 		p.run(
 			input=self.__cls._input,
@@ -127,15 +89,30 @@ class _return_output:
 
 			_ = D({})
 
-			if self.__cls._capture in ("both", "stdout"):
-				if self.__cls._ignore_stderr:
+			if self.__cls._ignore_stderr and self.__cls._ignore_stdout:
+				pass
+			elif self.__cls._ignore_stderr:
+				if self.__cls._capture != "stderr":
 					_.stdout = self.__decode_std(p.stdout, "stdout")
+					if self.__cls._verbosity > 1:
+						_.capture.stdout = p.stdout
+			elif self.__cls._ignore_stdout:
+				if self.__cls._capture != "stdout":
+					_.stderr = self.__decode_std(p.stderr, "stderr")
+					if self.__cls._verbosity > 1:
+						_.capture.stderr = p.stderr
+			else:
+				if self.__cls._capture == "stder":
+					_.stderr = self.__decode_std(p.stderr, "stderr")
+					if self.__cls._verbosity > 1:
+						_.capture.stderr = p.stderr
 				else:
 					_.stdout = self.__decode_std(p.stdout, "stdout")
+					if self.__cls._verbosity > 1:
+						_.capture.stdout = p.stdout
 					_.stderr = self.__decode_std(p.stderr, "stderr")
-			else:
-				if not self.__cls._ignore_stderr:
-					_.stderr = self.__decode_std(p.stderr, "stderr")
+					if self.__cls._verbosity > 1:
+						_.capture.stderr = p.stderr
 
 			if self.__cls._verbosity > 0:
 				_.returns.code = p.returncode
@@ -144,16 +121,6 @@ class _return_output:
 				_.command.sarge = p.commands
 
 			if self.__cls._verbosity > 1:
-				if self.__cls._capture in ("both", "stdout"):
-					if self.__cls._ignore_stderr:
-						_.capture.stdout = p.stdout
-					else:
-						_.capture.stdout = p.stdout
-						_.capture.stderr = p.stderr
-				else:
-					if not self.__cls._ignore_stderr:
-						_.capture.stderr = p.stderr
-				_.capture.stderr = p.stderr
 				_.tea = self.__command
 				_.sub = self.__cls._sub
 				_.final = D(
@@ -195,6 +162,48 @@ class _return_output:
 		else:
 
 			return p
+
+	def __set_process(self):
+
+		if not self.__cls._ignore_stdout:
+			stdout = Capture(
+				timeout=self.__cls._timeout_stdout,
+				buffer_size=1
+				if self.__cls._capture == "run"
+				else self.__cls._buffer_size_stdout,
+			)
+
+		if not self.__cls._ignore_stderr:
+			stderr = Capture(
+				timeout=self.__cls._timeout_stderr,
+				buffer_size=1
+				if self.__cls._capture == "run"
+				else self.__cls._buffer_size_stderr,
+			)
+
+		pp = partial(
+			Pipeline,
+			self.__command(),
+			posix=self.__cls._posix,
+		)
+
+		if self.__cls._ignore_stderr and self.__cls._ignore_stdout:
+			return pp()
+		elif self.__cls._ignore_stderr:
+			if self.__cls._capture == "stderr":
+				return pp()
+			else:
+				return pp(stdout = stdout)
+		elif self.__cls._ignore_stdout:
+			if self.__cls._capture == "stdout":
+				return pp()
+			else:
+				return pp(stderr = stderr)
+		else:
+			if self.__cls._capture == "stder":
+				return pp(stderr = stderr)
+			else:
+				return pp(stdout = stdout, stderr = stderr)
 
 	def __decode_std(self, std, std_str):
 		"""
