@@ -319,6 +319,9 @@ class _milcery(*(mixinport(mixins))):
 		# Since "value" has already been frozen, but is no longer so,
 		# its own "_program" attribute has also already been modified
 
+		frozen_capture = self._settings.defaults._capture
+		frozen_ignore_stderr = self._settings.defaults._ignore_stderr
+
 		def inner(value):
 			if isinstance(value, (str, bytes, bytearray)):
 				return value
@@ -335,7 +338,17 @@ class _milcery(*(mixinport(mixins))):
 						f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!"
 					)
 				else:
+					# CAREFUL! The order of the categories in the loop must not change here!
+					for cat in ("planetary", "baked"):
+						if value._settings[cat].supercalifragilisticexpialidocious._capture == "run":
+							frozen_capture = "run"
+						if value._settings[cat].supercalifragilisticexpialidocious._ignore_stderr:
+							frozen_ignore_stderr = True
 					return value._program
+
+		if pr in ("<", ">", ">>"):
+			frozen_capture = "run"
+			frozen_ignore_stderr = True
 
 		if isinstance(value, tuple):
 			if pr in ("<", ">", ">>"):
@@ -359,6 +372,10 @@ class _milcery(*(mixinport(mixins))):
 		partially_frozen = partial(
 			self.__class__,
 			_ignore_check=True,
+			_baked_settings=D({"supercalifragilisticexpialidocious" : dict(
+				_capture = frozen_capture,
+				_ignore_stderr = frozen_ignore_stderr
+			)}),
 			_global_commands=D(self._command.planetary),
 			_global_settings=D(self._settings.planetary),
 		)

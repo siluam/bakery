@@ -165,11 +165,7 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     tails = ls([]) | "tail"
     tails()
 
-    # Redirection using frozen objects; depending on what's being redirected,
-    # the following kwarg settings must be set:
-        # stdout: _capture = "run"
-        # stderr: _ignore_stderr = True
-        # both: _capture = "run", _ignore_stderr = True
+    # Redirection using frozen objects
 
     # ls > /dev/null
     nulls = ls >> devnull
