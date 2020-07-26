@@ -375,7 +375,7 @@ class _milcery(*(mixinport(mixins))):
 			frozen_dict["err"] = True
 		elif (
 			"1>" in pr or
-			pr in (">", ">>", "<")
+			pr in (">", ">>", "<", "| tee", "| tee -a")
 		):
 			frozen_dict["out"] = True
 
@@ -410,6 +410,18 @@ class _milcery(*(mixinport(mixins))):
 
 	def __ror__(self, value):
 		return self.__assign_to_frozen("|", value, reversed=True)
+
+	def __xor__(self, value):
+		return self.__assign_to_frozen("| tee", value)
+
+	def __rxor__(self, value):
+		return self.__assign_to_frozen("| tee", value, reversed=True)
+
+	def __matmul__(self, value):
+		return self.__assign_to_frozen("| tee -a", value)
+
+	def __rmatmul__(self, value):
+		return self.__assign_to_frozen("| tee -a", value, reversed=True)
 
 	def __lshift__(self, value):
 		return self.__assign_to_frozen("<", value)

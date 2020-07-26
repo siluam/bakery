@@ -149,6 +149,9 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
 
     # Freeze using the keyword (but it's longer; why would you want to do that? :P)
     ls(_frozen = True)
+
+    # Freeze using... Nothing! :D
+    ls
     ```
 
 * Piping and Redirection is implemented through the use of frozen `bakery` objects and strings, as well as through the `_pipe` and `_redirect` kwarg settings:
@@ -165,6 +168,17 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     tails = ls([]) | "tail"
     tails()
 
+
+    # Piping to tee
+
+    # ls | tee /dev/null
+    teels = ls ^ devnull
+    teels()
+
+    # ls | tee -a /dev/null
+    teels = ls @ devnull
+    teels()
+
     # Redirection using frozen objects
 
     # ls > /dev/null
@@ -176,28 +190,28 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     nulls()
 
     # ls 2> /dev/null
-    nulls = ls([]) >> (2, devnull)
+    nulls = ls >> (2, devnull)
     nulls()
 
     # ls >1 /dev/null
-    nulls = ls([]) >> (devnull, 1)
+    nulls = ls >> (devnull, 1)
 
     # ls &> /dev/null
-    nulls = ls([]) >> ("&", devnull)
+    nulls = ls >> ("&", devnull)
     nulls()
 
     # ls >&1 /dev/null
-    nulls = ls([]) >> (devnull, "&1")
+    nulls = ls >> (devnull, "&1")
     nulls()
 
     # ls 2>&1 /dev/null
-    nulls = ls([]) >> (2, devnull, "&1")
+    nulls = ls >> (2, devnull, "&1")
 
     # ls < /dev/null
-    nulls = ls([]) << devnull
+    nulls = ls << devnull
 
     # ls >> /dev/null
-    nulls = ls([]) + devnull
+    nulls = ls + devnull
     ```
 
 
