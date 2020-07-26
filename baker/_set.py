@@ -1,6 +1,6 @@
 # From Imports
 from addict import Dict as D
-from collections import OrderedDict, ChainMap
+from collections import OrderedDict
 from gensing import tea, frosting
 from itertools import chain
 from toml import load
@@ -115,10 +115,10 @@ class _set:
 				D(self.__cls._settings.defaults)
 			)
 			if self.__subcommand != "supercalifragilisticexpialidocious":
-				self.__cls._settings.final[self.__subcommand].update(D(ChainMap(
+				self.__cls._settings.final[self.__subcommand].update(D(
 					self.__cls._settings.planetary.supercalifragilisticexpialidocious,
-					self.__cls._settings.baked.supercalifragilisticexpialidocious,
-				)))
+					**self.__cls._settings.baked.supercalifragilisticexpialidocious,
+				))
 
 			# Careful! The order of the categories here matters!
 			for category in tuple(categories.keys())[:-1]:

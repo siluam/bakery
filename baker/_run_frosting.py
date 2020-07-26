@@ -37,9 +37,7 @@ class _run_frosting:
 			# 				print(line)
 			pout.v(output)
 
-		if isinstance(output, (dict, tea, frosting)) and len(output) == 0:
-			return "None" if _cls._type.__name__ in ("str", "repr") else None
-		elif isinstance(output, (dict, tea, frosting)) and len(output) == 1:
+		if isinstance(output, (dict, tea, frosting)) and len(output) == 1:
 			return next(iter(output.values()))
 		else:
 			return output

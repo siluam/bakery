@@ -81,7 +81,7 @@ class _return_output:
 
 			p.close()
 
-			return None
+			return "None" if self.__cls._type.__name__ in ("str", "repr") else None
 
 		elif self.__cls._wait:
 

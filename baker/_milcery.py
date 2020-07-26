@@ -182,10 +182,7 @@ class _milcery(*(mixinport(mixins))):
 	def _convert_to_type(self, input, _type=iter):
 
 		if input is None:
-			if _type.__name__ in ("str", "repr"):
-				return "None"
-			else:
-				return None
+			return "None" if _type.__name__ in ("str", "repr") else None
 
 		if input and isinstance(input, frosting):
 			if isinstance(input(), (str, bytes, bytearray)):
@@ -196,10 +193,7 @@ class _milcery(*(mixinport(mixins))):
 					).fill(input())
 				]
 			elif input() is None:
-				if _type.__name__ in ("str", "repr"):
-					return "None"
-				else:
-					return None
+				return "None" if _type.__name__ in ("str", "repr") else None
 			elif isinstance(input(), int):
 				if _type.__name__ in ("str", "repr"):
 					return repr(input())
@@ -237,7 +231,7 @@ class _milcery(*(mixinport(mixins))):
 	def __getattr__(self, subcommand):
 		def inner(*args, **kwargs):
 			try:
-				self._class(
+				return self._class(
 					*args, **kwargs, _subcommand=subcommand
 				)
 			finally:
