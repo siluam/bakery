@@ -82,7 +82,7 @@ class _milcery(*(mixinport(mixins))):
 
 		self._settings = D({})
 		self._settings.baked = _baked_settings or D({})
-		self._settings.planetary = _globe_settings or D({})
+		self._settings.planetary = _global_settings or D({})
 
 		self._sub = D({})
 

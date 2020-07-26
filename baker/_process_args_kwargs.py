@@ -1,5 +1,6 @@
 # From Imports
 from addict import Dict as D
+from collections import OrderedDict
 from itertools import chain
 from os import name as os_name
 from typing import Union, Any
@@ -42,24 +43,24 @@ class _process_args_kwargs:
 		self.__starter_regular = _starter_regular
 
 		self.__categories = OrderedDict({
-			"_global" : "planetary",
-			"_baking" : "baked",
-			"_calling" : "called",
-			"_final" : "final",
+			"planetary" : self.__global,
+			"baked" : self.__baking,
+			"called" : self.__calling,
+			"final" : self.__final,
 		})
 
 		for key, value in tuple(self.__categories.items())[:-1]:
-			if getattr(self, f"_{key}", False):
-				self.__cat = self.__categories[key]
+			if value:
+				self.__cat = key
 
-		c_count = (getattr(self, f"_{c}", False) for c in self.__categories.keys()).count(True)
+		c_count = tuple(value for value in self.__categories.values()).count(True)
 
 		if c_count != 1:
 			raise cannot_set_multiple(
-				f'Sorry! No combination of {", ".join(self.__categories)} may be used! Please choose only a single category!'
+				f'Sorry! No combination of {", ".join(self.__categories.keys())} may be used! Please choose only a single category!'
 			)
 
-		for cat in self.__categories.values():
+		for cat in self.__categories.keys():
 			for ak in ("args", "kwargs"):
 				for sr in ("starter", "regular"):
 					if not self.__cls._command[cat][self.__subcommand].components[ak][sr]:
@@ -68,7 +69,7 @@ class _process_args_kwargs:
 		if self.__final:
 			for ak in ("args", "kwargs"):
 				for sr in ("starter", "regular"):
-					for cat in tuple(self.__categories.values())[:-1]:
+					for cat in tuple(self.__categories.keys())[:-1]:
 						self.__cls._command.final[self.__subcommand].components[ak][sr].extend(
 							*self.__cls._command[cat][self.__subcommand].components[ak][sr]
 						)

@@ -1,6 +1,6 @@
 # From Imports
 from addict import Dict as D
-from collections import OrderedDict
+from collections import OrderedDict, ChainMap
 from gensing import tea, frosting
 from itertools import product
 from toml import load
@@ -70,18 +70,18 @@ class _set:
 	def __set(self):
 
 		categories = OrderedDict({
-			"_global" : "planetary",
-			"_baking" : "baked",
-			"_calling" : "called",
-			"_final" : "final",
+			"planetary" : self.__global,
+			"baked" : self.__baking,
+			"called" : self.__calling,
+			"final" : self.__final,
 		})
 
-		bategories = [getattr(self, f"_{c}", False) for c in categories.keys()]
+		bategories = tuple(categories.values())
 
 		c_count = bategories.count(True)
 
 		if c_count != 1:
-			raise cannot_set_multiple(f'Sorry! No combination of {", ".join(categories)} may be used! Please choose only a single category!')
+			raise cannot_set_multiple(f'Sorry! No combination of {", ".join(categories.keys())} may be used! Please choose only a single category!')
 
 		self.__kwargs_mods()
 
@@ -90,8 +90,8 @@ class _set:
 			_ = dict()
 
 			for key, value in tuple(categories.items())[:-1]:
-				if getattr(self, f"_{key}", False):
-					cat = categories[key]
+				if value:
+					cat = key
 
 			for index, arg in enumerate(self.__args):
 				if not isinstance(
@@ -115,12 +115,13 @@ class _set:
 				D(self.__cls._settings.defaults)
 			)
 			if self.__subcommand != "supercalifragilisticexpialidocious":
-				self.__cls._settings.final[self.__subcommand].update(
-					D(self.__cls._settings.baked.supercalifragilisticexpialidocious)
-				)
+				self.__cls._settings.final[self.__subcommand].update(D(ChainMap(
+					self.__cls._settings.planetary.supercalifragilisticexpialidocious,
+					self.__cls._settings.baked.supercalifragilisticexpialidocious,
+				)))
 
 			# Careful! The order of the categories here matters!
-			for category in tuple(categories.values())[:-1]:
+			for category in tuple(categories.keys())[:-1]:
 				self.__cls._settings.final[self.__subcommand].update(
 					D(self.__cls._settings[category][self.__subcommand])
 				)
