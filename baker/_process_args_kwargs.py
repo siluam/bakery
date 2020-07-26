@@ -23,6 +23,7 @@ class _process_args_kwargs:
 		self,
 		*args,
 		_cls = None,
+		_global = False,
 		_baking = False,
 		_calling = False,
 		_final = False,
@@ -33,52 +34,54 @@ class _process_args_kwargs:
 		self.__args = args
 		self.__kwargs = kwargs
 		self.__cls = self._cls_check(_cls)
+		self.__global = _global
 		self.__baking = _baking
 		self.__calling = _calling
 		self.__final = _final
-		self.__boc = "baked" if self.__baking else "called"
 		self.__subcommand = _subcommand
 		self.__starter_regular = _starter_regular
 
-		if (
-			(self.__baking and self.__calling) or
-			(self.__baking and self.__final) or
-			(self.__calling and self.__final) or
-			(self.__baking and self.__calling and self.__final)
-		):
-			raise cannot_set_multiple('Sorry! No combination of _baking, _calling, or _final may be used! Please choose only a single category!')
+		self.__categories = OrderedDict({
+			"_global" : "planetary",
+			"_baking" : "baked",
+			"_calling" : "called",
+			"_final" : "final",
+		})
 
-		for bcf in ("baked", "called", "final"):
+		for key, value in tuple(self.__categories.items())[:-1]:
+			if getattr(self, f"_{key}", False):
+				self.__cat = self.__categories[key]
+
+		c_count = (getattr(self, f"_{c}", False) for c in self.__categories.keys()).count(True)
+
+		if c_count != 1:
+			raise cannot_set_multiple(
+				f'Sorry! No combination of {", ".join(self.__categories)} may be used! Please choose only a single category!'
+			)
+
+		for cat in self.__categories.values():
 			for ak in ("args", "kwargs"):
 				for sr in ("starter", "regular"):
-					if not self.__cls._command[bcf][self.__subcommand].components[ak][sr]:
-						self.__cls._command[bcf][self.__subcommand].components[ak][sr] = tea()
+					if not self.__cls._command[cat][self.__subcommand].components[ak][sr]:
+						self.__cls._command[cat][self.__subcommand].components[ak][sr] = tea()
 
 		if self.__final:
-			self.__cls._command.final[self.__subcommand].components.args.starter.extend(
-				*self.__cls._command.baked[self.__subcommand].components.args.starter,
-				*self.__cls._command.called[self.__subcommand].components.args.starter,
-			)
-			self.__cls._command.final[self.__subcommand].components.args.regular.extend(
-				*self.__cls._command.baked[self.__subcommand].components.args.regular,
-				*self.__cls._command.called[self.__subcommand].components.args.regular,
-			)
-			self.__cls._command.final[self.__subcommand].components.kwargs.starter.extend(
-				*self.__cls._command.baked[self.__subcommand].components.kwargs.starter,
-				*self.__cls._command.called[self.__subcommand].components.kwargs.starter,
-			)
+			for ak in ("args", "kwargs"):
+				for sr in ("starter", "regular"):
+					for cat in tuple(self.__categories.values())[:-1]:
+						self.__cls._command.final[self.__subcommand].components[ak][sr].extend(
+							*self.__cls._command[cat][self.__subcommand].components[ak][sr]
+						)
 
 			if self.__subcommand != "supercalifragilisticexpialidocious":
+				if not self.__cls._command.planetary.supercalifragilisticexpialidocious.components.kwargs.starter:
+					self.__cls._command.planetary.supercalifragilisticexpialidocious.components.kwargs.starter = tea()
 				if not self.__cls._command.baked.supercalifragilisticexpialidocious.components.kwargs.starter:
 					self.__cls._command.baked.supercalifragilisticexpialidocious.components.kwargs.starter = tea()
 				self.__cls._command.final[self.__subcommand].components.kwargs.starter.extend(
+					*self.__cls._command.planetary.supercalifragilisticexpialidocious.components.kwargs.starter,
 					*self.__cls._command.baked.supercalifragilisticexpialidocious.components.kwargs.starter,
 				)
-
-			self.__cls._command.final[self.__subcommand].components.kwargs.regular.extend(
-				*self.__cls._command.baked[self.__subcommand].components.kwargs.regular,
-				*self.__cls._command.called[self.__subcommand].components.kwargs.regular,
-			)
 		else:
 			if self.__args:
 				self.__process_args()
@@ -110,14 +113,14 @@ class _process_args_kwargs:
 
 	def __process_args(self):
 		if (
-			(self.__baking and self.__add_replace == "replace") or
+			(any(self.__baking, self.__global) and self.__add_replace == "replace") or
 			self.__calling
 		):
-			self.__cls._command[self.__boc][self.__subcommand].components.args[self.__starter_regular] = tea()
+			self.__cls._command[self.__cat][self.__subcommand].components.args[self.__starter_regular] = tea()
 
 		for arg in self.__args:
 			if isinstance(arg, dict):
-				self.__cls._command[self.__boc][self.__subcommand].components.args[
+				self.__cls._command[self.__cat][self.__subcommand].components.args[
 					self.__starter_regular
 				].append(self.__quoting(
 						arg.get("quotes", None),
@@ -125,7 +128,7 @@ class _process_args_kwargs:
 					)
 				)
 			elif isinstance(arg, (str, bytes, bytearray, int)):
-				self.__cls._command[self.__boc][self.__subcommand].components.args[
+				self.__cls._command[self.__cat][self.__subcommand].components.args[
 					self.__starter_regular
 				].append(arg)
 			else:
@@ -136,7 +139,7 @@ class _process_args_kwargs:
 	def __add_kwargs(self):
 
 		# Resets or initializes the unprocessed kwargs
-		self.__cls._command[self.__boc][
+		self.__cls._command[self.__cat][
 			self.__subcommand
 		].components.kwargs.unprocessed = D({})
 
@@ -151,7 +154,7 @@ class _process_args_kwargs:
 			"""
 			if bool(value):
 				if isinstance(value, dict):
-					self.__cls._command[self.__boc][
+					self.__cls._command[self.__cat][
 						self.__subcommand
 					].components.kwargs.unprocessed[key]["value"] = self.__quoting(
 						value.get("quotes", None),
@@ -164,13 +167,13 @@ class _process_args_kwargs:
 						"repeat_with_values",
 					):
 						if keyop in value.keys():
-							self.__cls._command[self.__boc][
+							self.__cls._command[self.__cat][
 								self.__subcommand
 							].components.kwargs.unprocessed[key][keyop] = value[keyop]
 				elif isinstance(
 					value, (str, bytes, bytearray, int)
 				):
-					self.__cls._command[self.__boc][
+					self.__cls._command[self.__cat][
 						self.__subcommand
 					].components.kwargs.unprocessed[key] = value
 				else:
@@ -179,7 +182,7 @@ class _process_args_kwargs:
 					)
 
 	def __process_kwargs(self):
-		for key, value in self.__cls._command[self.__boc][
+		for key, value in self.__cls._command[self.__cat][
 			self.__subcommand
 		].components.kwargs.unprocessed.items():
 			if isinstance(value, dict):
@@ -194,7 +197,7 @@ class _process_args_kwargs:
 				final_key = f'{dash}{key if value.get("fixed", False) or self.__cls._fixed_key else key.replace("_", "-")}'
 
 				if "repeat" in value.keys():
-					self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
+					self.__cls._command[self.__cat][self.__subcommand].components.kwargs[
 						self.__starter_regular
 					].append([final_key] * value["repeat"])
 				elif "repeat_with_values" in value.keys():
@@ -208,7 +211,7 @@ class _process_args_kwargs:
 							"repeat_with_values"
 						]
 					]
-					self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
+					self.__cls._command[self.__cat][self.__subcommand].components.kwargs[
 						self.__starter_regular
 					].extend(
 						chain(
@@ -220,10 +223,10 @@ class _process_args_kwargs:
 						)
 					)
 				else:
-					self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
+					self.__cls._command[self.__cat][self.__subcommand].components.kwargs[
 						self.__starter_regular
 					].append(final_key)
-					self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
+					self.__cls._command[self.__cat][self.__subcommand].components.kwargs[
 						self.__starter_regular
 					].append(
 						""
@@ -239,11 +242,11 @@ class _process_args_kwargs:
 
 				final_key = key if self.__cls._fixed_key else key.replace("_", "-")
 
-				self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
+				self.__cls._command[self.__cat][self.__subcommand].components.kwargs[
 					self.__starter_regular
 				].append(dash + final_key)
 
-				self.__cls._command[self.__boc][self.__subcommand].components.kwargs[
+				self.__cls._command[self.__cat][self.__subcommand].components.kwargs[
 					self.__starter_regular
 				].append(
 					"" if isinstance(value, bool) else value

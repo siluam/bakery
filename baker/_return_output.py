@@ -131,6 +131,9 @@ class _return_output:
                 _.baked = D(
                     self.__cls._command.baked[self.__subcommand]
                 )
+                _.planetary = D(
+                    self.__cls._command.planetary[self.__subcommand]
+                )
                 _.called = D(
                     self.__cls._command.called[self.__subcommand]
                 )

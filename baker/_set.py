@@ -76,18 +76,20 @@ class _set:
 			"_final" : "final",
 		})
 
-		c_count = (getattr(self, f"_{c}", False) for c in categories.keys()).count(True)
+		bategories = [getattr(self, f"_{c}", False) for c in categories.keys()]
+
+		c_count = bategories.count(True)
 
 		if c_count != 1:
 			raise cannot_set_multiple(f'Sorry! No combination of {", ".join(categories)} may be used! Please choose only a single category!')
 
 		self.__kwargs_mods()
 
-		if self.__baking or self.__calling or self.__global:
+		if any(bategories[:-1]):
 
 			_ = dict()
 
-			for key, value in categories.items():
+			for key, value in tuple(categories.items())[:-1]:
 				if getattr(self, f"_{key}", False):
 					cat = categories[key]
 
@@ -108,7 +110,7 @@ class _set:
 
 			self.__kwargs = D(_)
 
-		elif self.__final:
+		else:
 			self.__cls._settings.final[self.__subcommand].update(
 				D(self.__cls._settings.defaults)
 			)

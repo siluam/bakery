@@ -277,6 +277,8 @@ class _milcery(*(mixinport(mixins))):
 			_ignore_check=self._ignore_check,
 			_baked_commands=D(self._command.baked),
 			_baked_settings=D(self._settings.baked),
+			_global_commands=D(self._command.planetary),
+			_global_settings=D(self._settings.planetary),
 		)
 
 	def __iter__(self):
@@ -357,8 +359,8 @@ class _milcery(*(mixinport(mixins))):
 		partially_frozen = partial(
 			self.__class__,
 			_ignore_check=True,
-			_baked_commands=D(self._command.baked),
-			_baked_settings=D(self._settings.baked),
+			_global_commands=D(self._command.planetary),
+			_global_settings=D(self._settings.planetary),
 		)
 
 		if reversed:
@@ -407,6 +409,8 @@ class _milcery(*(mixinport(mixins))):
 			*args,
 			_baked_commands=D(self._command.baked),
 			_baked_settings=D(self._settings.baked),
+			_global_commands=D(self._command.planetary),
+			_global_settings=D(self._settings.planetary),
 			**kwargs,
 		)
 

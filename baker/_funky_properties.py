@@ -27,6 +27,8 @@ class _funky_properties:
 		_.attrs.self_class = f"{type(self)=}"
 		_.attrs.type_self = f"{self.__class__=}"
 		_._settings.defaults = self._settings.defaults
+		_._settings.planetary = self._settings.planetary
+		_._command.planetary = self._command.planetary
 		_._settings.baked = self._settings.baked
 		_._command.baked = self._command.baked
 

@@ -42,13 +42,14 @@ class _create_command:
 					self.__cls._program,
 				)
 
+			_command.extend(*self.__cls._command.final[self.__subcommand].components.kwargs.starter)
+
 			if self.__cls._sub.processed:
 				_command.append(self.__cls._sub.processed)
 
-			# CAREFUL! The order must not change here!
-			for c1 in ("starter", "regular"):
-				for c2 in ("kwargs", "args"):
-					_command.extend(*self.__cls._command.final[self.__subcommand].components[c2][c1])
+			_command.extend(*self.__cls._command.final[self.__subcommand].components.args.starter)
+			_command.extend(*self.__cls._command.final[self.__subcommand].components.kwargs.regular)
+			_command.extend(*self.__cls._command.final[self.__subcommand].components.args.regular)
 
 			if self.__cls._shell:
 				_command.glue("'")

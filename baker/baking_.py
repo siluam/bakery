@@ -46,15 +46,17 @@ class baking_:
 			
 			_sr: starter or regular args and / or kwargs
 
+			_g: whether to affect the global args, kwargs, or settings
+
 		"""
 
 		_cls = self._cls_check(_cls)
 
 		if _akar == "replace":
-			_cls._command.baked[_subcommand] = D({})
+			_cls._command["planetary" if _g else "baked"][_subcommand] = D({})
 
 		if _sar == "replace":
-			_cls._settings.baked[_subcommand] = D({})
+			_cls._settings["planetary" if _g else "baked"][_subcommand] = D({})
 
 		self._set(_setup = True)
 
@@ -123,6 +125,7 @@ class baking_:
 		_subcommands = ["supercalifragilisticexpialidocious"],
 		_settings = False,
 		_args_kwargs = False,
+		_global = False,
 	):
 		"""
 
@@ -146,14 +149,14 @@ class baking_:
 
 		def inner(category):
 			if _all:
-				getattr(_cls, category).baked = D({})
+				getattr(_cls, category)["planetary" if _global else "baked"] = D({})
 			elif _all_subcommands:
-				for key in getattr(_cls, category).baked.keys():
+				for key in getattr(_cls, category)["planetary" if _global else "baked"].keys():
 					if key != "supercalifragilisticexpialidocious":
-						getattr(_cls, category).baked[key] = D({})
+						getattr(_cls, category)["planetary" if _global else "baked"][key] = D({})
 			else:
 				for sub in _subcommands:
-					getattr(_cls, category).baked[sub] = D({})
+					getattr(_cls, category)["planetary" if _global else "baked"][sub] = D({})
 
 		if _settings and _args_kwargs:
 			for category in ("_settings", "_command"):
@@ -179,6 +182,7 @@ class baking_:
 				_subcommands = _subcommands,
 				_settings = _settings,
 				_args_kwargs = _args_kwargs,
+				_global = True,
 			)
 
 	def _cls_check(self, _cls):
