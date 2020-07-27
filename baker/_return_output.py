@@ -72,6 +72,7 @@ class _return_output:
 
 		p = self.__set_process()
 
+		# TODO: Do I have to print here?
 		p.run(
 			input=self.__cls._input,
 			async_=self.__cls._async,
@@ -138,7 +139,9 @@ class _return_output:
 
 			if (
 				self.__cls._n_lines.number is not None
-				and self.__cls._type.__name__ != "str"
+				and not self.__cls._type.__name__ in ("str", "repr")
+
+				# TODO: If "tee" works, remove this line
 				and self.__cls._capture != "run"
 			):
 				trim_part = partial(

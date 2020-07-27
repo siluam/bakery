@@ -12,8 +12,6 @@ i = module_installed(fullpath("i.py", f_back = 2)).i
 
 default: Tuple[None] = namedtuple("default", "")
 
-# TODO: Fix
-
 class y(_milcery):
 	def __init__(
 		self,

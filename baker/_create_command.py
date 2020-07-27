@@ -21,7 +21,10 @@ class _create_command:
 
 		else:
 
-			_command = tea()
+			if self.__cls._capture == "run":
+				_command = tea("(")
+			else:
+				_command = tea()
 
 			if self.__cls._sudo:
 				_command.append(
@@ -29,8 +32,10 @@ class _create_command:
 				)
 
 			if self.__cls._shell:
-				_command.append(self.__cls._shell + " -c")
-				_command.append("'")
+				_command.extend(
+					self.__cls._shell + " -c",
+					"'",
+				)
 				if self.__cls._run_as:
 					_command.glue(self.__cls._run_as)
 					_command.append(self.__cls._program)
@@ -47,12 +52,20 @@ class _create_command:
 			if self.__cls._sub.processed:
 				_command.append(self.__cls._sub.processed)
 
-			_command.extend(*self.__cls._command.final[self.__subcommand].components.args.starter)
-			_command.extend(*self.__cls._command.final[self.__subcommand].components.kwargs.regular)
-			_command.extend(*self.__cls._command.final[self.__subcommand].components.args.regular)
+			_command.extend(
+				*self.__cls._command.final[self.__subcommand].components.args.starter,
+				*self.__cls._command.final[self.__subcommand].components.kwargs.regular,
+				*self.__cls._command.final[self.__subcommand].components.args.regular,
+			)
 
 			if self.__cls._shell:
 				_command.glue("'")
+
+			if self.__cls._capture == "run":
+				_command.extend(
+					")",
+					"| tee",
+				)
 
 			"""
 

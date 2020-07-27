@@ -13,8 +13,6 @@ _milcery = module_installed(
 
 default: Tuple[None] = namedtuple("default", "")
 
-# TODO: Fix
-
 class i(_milcery):
 	def __init__(
 		self,
