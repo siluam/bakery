@@ -52,7 +52,7 @@ class _return_output:
 					_type = self.__cls._type,
 				)
 
-				if self.__cls._capture == "stdout":
+				if self.__cls._capture in ("stdout", "run"):
 					if not output.dict and not isinstance(output.stderr, dict):
 						del output.stderr
 					if not self.__cls._ignore_stdout:
