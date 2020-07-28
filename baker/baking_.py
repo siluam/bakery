@@ -100,7 +100,6 @@ class baking_:
 		*args,
 		_akar = "add",
 		_sar = "add",
-		_sc = "supercalifragilisticexpialidocious",
 		_sr = "regular",
 		**kwargs
 	):
@@ -112,7 +111,6 @@ class baking_:
 				_cls = store,
 				_akar = _akar,
 				_sar = _sar,
-				_sc = _sc,
 				_sr = _sr,
 				**kwargs
 			)
@@ -169,7 +167,6 @@ class baking_:
 		_cls = None,
 		_all = False,
 		_all_subcommands = False,
-		_subcommands = ["supercalifragilisticexpialidocious"],
 		_settings = False,
 		_args_kwargs = False,
 	):
@@ -179,7 +176,6 @@ class baking_:
 				_cls = store,
 				_all = _all,
 				_all_subcommands = _all_subcommands,
-				_subcommands = _subcommands,
 				_settings = _settings,
 				_args_kwargs = _args_kwargs,
 				_global = True,

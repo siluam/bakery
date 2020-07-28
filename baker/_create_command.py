@@ -1,5 +1,8 @@
+# Imports
+import os
+import sys
+
 # From Imports
-from os import name as os_name
 from gensing import tea
 
 class Error(Exception):
@@ -22,10 +25,7 @@ class _create_command:
 
 		else:
 
-			if self.__cls._capture == "run" and os_name != "nt":
-				_command = tea("(")
-			else:
-				_command = tea()
+			_command = tea()
 
 			if self.__cls._sudo:
 				_command.append(
@@ -34,7 +34,8 @@ class _create_command:
 
 			if self.__cls._shell:
 				_command.extend(
-					self.__cls._shell + " -c",
+					self.__cls._shell,
+					"-c",
 					"'",
 				)
 				if self.__cls._run_as:
@@ -61,14 +62,6 @@ class _create_command:
 
 			if self.__cls._shell:
 				_command.glue("'")
-
-			if self.__cls._capture == "run" and os_name != "nt":
-				_command.extend(
-					")",
-					"|",
-					"tee",
-					"/dev/tty",
-				)
 
 			"""
 

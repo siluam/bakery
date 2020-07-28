@@ -1,3 +1,6 @@
+# Imports
+import builtins
+
 # From Imports
 from addict import Dict as D
 from functools import partial
@@ -76,13 +79,17 @@ class _milcery(*(mixinport(mixins))):
 		self._ignore_check: bool = _ignore_check
 		self._program: str = _program or ""
 
-		self._command = D({})
-		self._command.baked = _baked_commands or D({})
-		self._command.planetary = _global_commands or D({})
-
-		self._settings = D({})
-		self._settings.baked = _baked_settings or D({})
-		self._settings.planetary = _global_settings or D({})
+		try:
+			for category in ("_settings", "_command"):
+				assert hasattr(builtins.bakeriy_stores[0], category) is True
+		except AssertionError:
+			self._command = D({})
+			self._settings = D({})
+		finally:
+			self._command.baked = _baked_commands or D({})
+			self._settings.baked = _baked_settings or D({})
+			self._command.planetary = builtins.bakeriy_stores[0]._command.planetary or D({})
+			self._settings.planetary = builtins.bakeriy_stores[0]._settings.planetary or D({})
 
 		self._sub = D({})
 
@@ -120,8 +127,9 @@ class _milcery(*(mixinport(mixins))):
 			# If set to None, _capture = "run" will wait for the process to finish
 			# before returning None
 			"_wait": True,
-			# If set to True, _capture set to "out", "err", or "both" will wait for user input
-			"_block": False,
+			# If set to True, will wait for user input
+			"_block_stdout": False,
+			"_block_stderr": False,
 			"_timeout_stdout": None,
 			"_timeout_stderr": None,
 			"_buffer_size_stdout": 0,
@@ -442,13 +450,16 @@ class _milcery(*(mixinport(mixins))):
 	def __rxor__(self, value):
 		return self.__assign_to_frozen("| tee", value, reversed=True)
 
-	def __matmul__(self, value):
+	def __add__(self, value):
 		return self.__assign_to_frozen("| tee -a", value)
 
-	def __rmatmul__(self, value):
+	def __radd__(self, value):
 		return self.__assign_to_frozen("| tee -a", value, reversed=True)
 
 	def __lshift__(self, value):
+		return self.__assign_to_frozen("<", value)
+
+	def __lt__(self, value):
 		return self.__assign_to_frozen("<", value)
 
 	def __rlshift__(self, value):
@@ -457,13 +468,16 @@ class _milcery(*(mixinport(mixins))):
 	def __rshift__(self, value):
 		return self.__assign_to_frozen(">", value)
 
+	def __gt__(self, value):
+		return self.__assign_to_frozen(">", value)
+
 	def __rrshift__(self, value):
 		return self.__assign_to_frozen(">", value, reversed=True)
 
-	def __add__(self, value):
+	def __matmul__(self, value):
 		return self.__assign_to_frozen(">>", value)
 
-	def __radd__(self, value):
+	def __rmatmul__(self, value):
 		return self.__assign_to_frozen(">>", value, reversed=True)
 
 	def _partial_class(self, *args, **kwargs):

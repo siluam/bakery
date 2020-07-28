@@ -2,7 +2,6 @@
 from addict import Dict as D
 from functools import partial
 from nanite import peek, trim
-from sarge import Pipeline, Capture
 from typing import Dict, Any
 
 
@@ -72,15 +71,47 @@ class _return_output:
 
 		p = self.__set_process()
 
-		# TODO: Do I have to print here?
-		p.run(
-			input=self.__cls._input,
-			async_=self.__cls._async,
-		)
+		if self.__cls._capture == "run":
+			from subprocess import PIPE
+			p.run(
+				input=PIPE,
+				async_=True,
+			)
+			while p.poll() is None:
+				if self.__cls._ignore_stdout and self.__cls._ignore_stderr:
+					pass
+				elif self.__cls._ignore_stderr:
+					output = p.stdout.readline(block=self.__cls._block_stdout)
+					output = output.decode("utf-8") if isinstance(output, (bytes, bytearray)) else output
+					if output:
+						print(output)
+				elif self.__cls._ignore_stdout:
+					output = p.stderr.readline(block=self.__cls._block_stderr)
+					output = output.decode("utf-8") if isinstance(output, (bytes, bytearray)) else output
+					if output:
+						print(output)
+				else:
+					stdoutput = p.stdout.readline(block=self.__cls._block_stdout)
+					stdoutput = stdoutput.decode("utf-8") if isinstance(stdoutput, (bytes, bytearray)) else stdoutput
+					if stdoutput:
+						print(stdoutput)
+					stderrput = p.stderr.readline(block=self.__cls._block_stderr)
+					stderrput = stderrput.decode("utf-8") if isinstance(stderrput, (bytes, bytearray)) else stderrput
+					if stderrput:
+						print(stderrput)
+		else:
+			p.run(
+				input=self.__cls._input,
+				async_=self.__cls._async,
+			)
 
 		if self.__cls._wait is None:
 
-			p.close()
+			if self.__cls._capture == "run":
+				p.wait()
+				p.kill()
+			else:
+				p.close()
 
 			return "None" if self.__cls._type.__name__ in ("str", "repr") else None
 
@@ -158,7 +189,11 @@ class _return_output:
 				if self.__cls._n_lines.std in ("stderr", "both"):
 					_.stderr = trim_part(iterable=_.stderr)
 
-			p.close()
+			if self.__cls._capture == "run":
+				p.wait()
+				p.kill()
+			else:
+				p.close()
 
 			return _
 
@@ -167,6 +202,11 @@ class _return_output:
 			return p
 
 	def __set_process(self):
+
+		if self.__cls._capture == "run":
+			from sarge import Command, Capture
+		else:
+			from sarge import Pipeline, Capture
 
 		if not self.__cls._ignore_stdout:
 			stdout = Capture(
@@ -185,6 +225,9 @@ class _return_output:
 			)
 
 		pp = partial(
+			Command,
+			self.__command,
+		) if self.__cls._capture == "run" else partial(
 			Pipeline,
 			self.__command(),
 			posix=self.__cls._posix,
@@ -203,10 +246,13 @@ class _return_output:
 			else:
 				return pp(stderr = stderr)
 		else:
-			if self.__cls._capture == "stder":
+			if self.__cls._capture == "stderr":
 				return pp(stderr = stderr)
 			else:
-				return pp(stdout = stdout, stderr = stderr)
+				return pp(
+					stdout = stdout,
+					stderr = stderr
+				)
 
 	def __decode_std(self, std, std_str):
 		"""
