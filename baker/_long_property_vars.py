@@ -3,13 +3,13 @@ import os
 
 # From Imports
 from addict import Dict as D
-from sarge import get_stdout
+from subprocess import Popen, PIPE
 
 class Error(Exception):
 	pass
 
 
-class no_prog(Error):
+class stderr(Error):
 	pass
 
 
@@ -50,17 +50,19 @@ class _long_property_vars:
 				value = value.replace("_", "-")
 		else:
 			value = value.replace("_", "-")
-		if (
-			not self._ignore_check and
-			not get_stdout(
-				f'{"where.exe" if os.name == "nt" else "which"} {value}'
-			)
-		):
-			raise no_prog(
-				f'Sorry! "{value}" does not seem to exist in the path!'
-			)
+
+		p = Popen(
+			(
+				"where.exe" if os.name == "nt" else "which",
+				value,
+			),
+			stdout = PIPE,
+			stderr = PIPE,
+		)
+		if not self._ignore_check and (stderrput := p.stderr.readline().decode().strip()):
+			raise stderr(stderrput)
 		else:
-			self.__program = value
+			self.__program = p.stdout.readline().decode().strip()
 
 	@property
 	def _n_lines(self):

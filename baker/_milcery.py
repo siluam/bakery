@@ -125,25 +125,23 @@ class _milcery(*(mixinport(mixins))):
 			# If set to None, _capture = "run" will wait for the process to finish
 			# before returning None
 			"_wait": True,
-			# If set to True, will wait for user input
-			"_block_stdout": False,
-			"_block_stderr": False,
 			"_timeout_stdout": None,
 			"_timeout_stderr": None,
-			"_buffer_size_stdout": 0,
-			"_buffer_size_stderr": 0,
-			"_chunk_size_stdout": -1,
-			"_chunk_size_stderr": -1,
 			"_input": None,
-			"_posix": True,
-			"_async": False,
-			"_stop_threads": False,
 			# Dict must be in the form {"i" : user} or {"s" : user}, to use or not use the
 			# configuration files of the specified user
 			"_sudo": {},
 			# If "_frozen" has a truthy value, freeze this bakery object such that another bakery object
 			# may act on it; else keep it active
 			"_frozen": False,
+			"""
+				A dictionary used to pass options to the subprocess Popen class;
+				unavailable options include:
+					* stdin
+					* stdout
+					* stderr
+			"""
+			"_popen": {},
 		}
 
 		self._settings.functions = (

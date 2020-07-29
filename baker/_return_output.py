@@ -1,7 +1,9 @@
 # From Imports
 from addict import Dict as D
 from functools import partial
-from nanite import peek, trim
+from nanite import trim
+from shlex import split
+from subprocess import Popen, PIPE, DEVNULL
 from typing import Dict, Any
 
 
@@ -203,56 +205,28 @@ class _return_output:
 
 	def __set_process(self):
 
-		if self.__cls._capture == "run":
-			from sarge import Command, Capture
-		else:
-			from sarge import Pipeline, Capture
-
-		if not self.__cls._ignore_stdout:
-			stdout = Capture(
-				timeout=self.__cls._timeout_stdout,
-				buffer_size=1
-				if self.__cls._capture == "run"
-				else self.__cls._buffer_size_stdout,
-			)
-
-		if not self.__cls._ignore_stderr:
-			stderr = Capture(
-				timeout=self.__cls._timeout_stderr,
-				buffer_size=1
-				if self.__cls._capture == "run"
-				else self.__cls._buffer_size_stderr,
-			)
-
-		pp = partial(
-			Command,
-			self.__command,
-		) if self.__cls._capture == "run" else partial(
-			Pipeline,
-			self.__command(),
-			posix=self.__cls._posix,
+		return Popen(
+			self.__command() if self.__cls._popen.get("shell", False) else split(self.__command()),
+			bufsize = self.__cls._popen.get("bufsize", -1),
+			executable = self.__cls._popen.get("executable", None),
+			stdin = PIPE,
+			stdout = DEVNULL if self.__cls._ignore_stdout else PIPE,
+			stderr = DEVNULL if self.__cls._ignore_stderr else PIPE,
+			preexec_fn = self.__cls._popen.get("preexec_fn", None),
+			close_fds = self.__cls._popen.get("close_fds", True),
+			shell = self.__cls._popen.get("shell", False),
+			cwd = self.__cls._popen.get("cwd", None),
+			env = self.__cls._popen.get("env", None),
+			universal_newlines = True if self.__cls._popen.get("bufsize", -1) == 1 else self.__cls._popen.get("universal_newlines", None),
+			startupinfo = self.__cls._popen.get("startupinfo", None),
+			creationflags = self.__cls._popen.get("creationflags", 0),
+			restore_signals = self.__cls._popen.get("restore_signals", True),
+			start_new_session = self.__cls._popen.get("start_new_session", False),
+			pass_fds = self.__cls._popen.get("pass_fds", ()),
+			encoding = self.__cls._popen.get("encoding", None),
+			errors = self.__cls._popen.get("errors", None),
+			text = self.__cls._popen.get("text", None),
 		)
-
-		if self.__cls._ignore_stderr and self.__cls._ignore_stdout:
-			return pp()
-		elif self.__cls._ignore_stderr:
-			if self.__cls._capture == "stderr":
-				return pp()
-			else:
-				return pp(stdout = stdout)
-		elif self.__cls._ignore_stdout:
-			if self.__cls._capture == "stdout":
-				return pp()
-			else:
-				return pp(stderr = stderr)
-		else:
-			if self.__cls._capture == "stderr":
-				return pp(stderr = stderr)
-			else:
-				return pp(
-					stdout = stdout,
-					stderr = stderr
-				)
 
 	def __decode_std(self, std, std_str):
 		"""
