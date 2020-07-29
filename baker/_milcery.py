@@ -61,8 +61,6 @@ class _milcery(*(mixinport(mixins))):
 		_ignore_check: bool = False,
 		_baked_commands: Dict[str, Any] = None,
 		_baked_settings: Dict[str, Any] = None,
-		_global_commands: Dict[str, Any] = None,
-		_global_settings: Dict[str, Any] = None,
 		**kwargs,
 	):
 		"""
@@ -294,8 +292,6 @@ class _milcery(*(mixinport(mixins))):
 			_ignore_check=self._ignore_check,
 			_baked_commands=D(self._command.baked),
 			_baked_settings=D(self._settings.baked),
-			_global_commands=D(self._command.planetary),
-			_global_settings=D(self._settings.planetary),
 		)
 
 	def __iter__(self):
@@ -419,8 +415,6 @@ class _milcery(*(mixinport(mixins))):
 				_ignore_stdout = frozen_dict["out"],
 				_ignore_stderr = frozen_dict["err"],
 			)}),
-			_global_commands=D(self._command.planetary),
-			_global_settings=D(self._settings.planetary),
 		)
 
 		if reversed:
@@ -487,8 +481,6 @@ class _milcery(*(mixinport(mixins))):
 			*args,
 			_baked_commands=D(self._command.baked),
 			_baked_settings=D(self._settings.baked),
-			_global_commands=D(self._command.planetary),
-			_global_settings=D(self._settings.planetary),
 			**kwargs,
 		)
 

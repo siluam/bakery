@@ -5,8 +5,6 @@ def ext_(
 	_ignore_check: bool = False,
 	_baked_commands: Dict[str, Any] = None,
 	_baked_settings: Dict[str, Any] = None,
-	_global_commands: Dict[str, Any] = None,
-	_global_settings: Dict[str, Any] = None,
 	**kwargs,
 ):
 	"""
@@ -20,8 +18,6 @@ def ext_(
 		_ignore_check = _ignore_check,
 		_baked_commands = _baked_commands or D({}),
 		_baked_settings = _baked_settings or D({}),
-		_global_commands = _global_commands or D({}),
-		_global_settings = _global_settings or D({}),
 		**kwargs,
 	)
 
@@ -31,8 +27,6 @@ def baker_(
 	*args,
 	_baked_commands: Dict[str, Any] = None,
 	_baked_settings: Dict[str, Any] = None,
-	_global_commands: Dict[str, Any] = None,
-	_global_settings: Dict[str, Any] = None,
 	**kwargs,
 ):
 	return bakeriy(
@@ -40,7 +34,5 @@ def baker_(
 		_ignore_check = True,
 		_baked_commands = _baked_commands or D({}),
 		_baked_settings = _baked_settings or D({}),
-		_global_commands = _global_commands or D({}),
-		_global_settings = _global_settings or D({}),
 		**kwargs,
 	)

@@ -20,8 +20,6 @@ class i(_milcery):
 		_program: str = None,
 		_baked_commands: Dict[str, Any] = None,
 		_baked_settings: Dict[str, Any] = None,
-		_global_commands: Dict[str, Any] = None,
-		_global_settings: Dict[str, Any] = None,
 		**kwargs,
 	):
 		super().__init__(
@@ -29,8 +27,6 @@ class i(_milcery):
 			_program = _program or "",
 			_baked_commands = _baked_commands or D({}),
 			_baked_settings = _baked_settings or D({}),
-			_global_commands = _global_commands or D({}),
-			_global_settings = _global_settings or D({}),
 			**kwargs,
 		)
 		"""
