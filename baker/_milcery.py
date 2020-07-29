@@ -134,13 +134,7 @@ class _milcery(*(mixinport(mixins))):
 			# If "_frozen" has a truthy value, freeze this bakery object such that another bakery object
 			# may act on it; else keep it active
 			"_frozen": False,
-			"""
-				A dictionary used to pass options to the subprocess Popen class;
-				unavailable options include:
-					* stdin
-					* stdout
-					* stderr
-			"""
+			# A dictionary used to pass options to the subprocess Popen class
 			"_popen": {},
 		}
 
