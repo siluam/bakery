@@ -187,7 +187,13 @@ class _return_output:
 			text = True if self.__cls._popen.get("bufsize", -1) == 1 else self.__cls._popen.get("text", None),,
 		)
 
-	def __capture(self):
+	def __capture(self, p):
+	"""
+		Answer: https://stackoverflow.com/a/519653
+		User: https://stackoverflow.com/users/17160/nosklo
+	"""
+
+		capture = []
 
 		if self.__cls._capture == "run":
 			while p.poll() is None:
@@ -213,19 +219,14 @@ class _return_output:
 					if stderrput:
 						print(stderrput)
 		else:
-			"""
-				Answer: https://stackoverflow.com/a/519653
-				User: https://stackoverflow.com/users/17160/nosklo
-			"""
-			while True:
-				chunk = std.read(
-					size=getattr(
-						self.__cls, f"_chunk_size_{std_str}"
-					),
-				)
-				if not chunk:
-					break
-				yield chunk.decode("utf-8") if isinstance(
-					chunk, (bytes, bytearray)
-				) else chunk
-				std.close(stop_threads=self.__cls._stop_threads)
+			for cat in ("out, err"):
+				while True:
+					if not (output := getattr(p, f"std{cat}").readline()):
+						break
+					capture.append(
+						output.decode("utf-8") if isinstance(
+							output, (bytes, bytearray)
+						) else output
+					)
+
+		yield from capture
