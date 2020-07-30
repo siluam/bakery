@@ -64,7 +64,7 @@ class _melcery(type):
 			Answer: https://stackoverflow.com/questions/328851/printing-all-instances-of-a-class/328882#328882
 			User: https://stackoverflow.com/users/9567/torsten-marek
 		"""
-		if isinstance(value, list) and not value:
+		if isinstance(value, list):
 			cls._stores = None
 		else:
 			if cls._stores is None:
@@ -73,7 +73,7 @@ class _melcery(type):
 				cls._stores.append(value)
 
 	def __init__(cls, *args, **kwargs):
-		cls.stores_ = None
+		cls.stores_ = []
 
 class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 
@@ -103,14 +103,21 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		self._ignore_check: bool = _ignore_check
 		self._program: str = _program or ""
 
-		# TODO: Fix this; these dictionaries will be overwritten otherwise
-		self._command = D({})
-		self._command.baked = _baked_commands or D({})
-		self._command.planetary = self.stores_[0].__callback__._command.planetary or D({})
+		try:
+			self.stores_[0].__callback__._command
+		except AttributeError:
+			self._command = D({})
+		finally:
+			self._command.baked = _baked_commands or D({})
+			self._command.planetary = self.stores_[0].__callback__._command.planetary or D({})
 
-		self._settings = D({})
-		self._settings.baked = _baked_settings or D({})
-		self._settings.planetary = self.stores_[0].__callback__._settings.planetary or D({})		
+		try:
+			self.stores_[0].__callback__._settings
+		except AttributeError:
+			self._settings = D({})
+		finally:
+			self._settings.baked = _baked_settingss or D({})
+			self._settings.planetary = self.stores_[0].__callback__._settings.planetary or D({})
 
 		self._sub = D({})
 
