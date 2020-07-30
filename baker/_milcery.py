@@ -48,15 +48,34 @@ class not_stb(Error):
 	pass
 
 
-class _milcery(*(mixinport(mixins))):
+class _melcery:
 	"""
-		Answer: https://stackoverflow.com/questions/328851/printing-all-instances-of-a-class/328882#328882
-		User: https://stackoverflow.com/users/9567/torsten-marek
+		Answer: https://stackoverflow.com/questions/128573/using-property-on-classmethods/1800999#1800999
+		User: https://stackoverflow.com/users/36433/a-coady
 	"""
-	try:
-		stores_
-	except NameError:
-		stores_ = []
+
+	@property
+	def stores_(cls):
+		return cls._stores
+
+	@stores_.setter
+	def stores_(cls, value):
+		"""
+			Answer: https://stackoverflow.com/questions/328851/printing-all-instances-of-a-class/328882#328882
+			User: https://stackoverflow.com/users/9567/torsten-marek
+		"""
+		if isinstance(value, list) and not value:
+			cls._stores = None
+		else:
+			if cls._stores is None:
+				cls._stores = [value]
+			else:
+				cls._stores.append(value)
+
+	def __init__(cls, *args, **kwargs):
+		cls.stores_ = None
+
+class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 
 	def __init__(
 		self,
@@ -68,7 +87,7 @@ class _milcery(*(mixinport(mixins))):
 		**kwargs,
 	):
 
-		self.stores_.append(weakref.ref(self, self))
+		self.stores_ = weakref.ref(self, self)
 
 		"""
 			_type can be any type, such as:
@@ -86,11 +105,11 @@ class _milcery(*(mixinport(mixins))):
 
 		self._command = D({})
 		self._command.baked = _baked_commands or D({})
-		self._command.planetary = self.stores_[0].__callback__._command.planetary or D({})
+		self._command.planetary = self._stores[0].__callback__._command.planetary or D({})
 
 		self._settings = D({})
 		self._settings.baked = _baked_settings or D({})
-		self._settings.planetary = self.stores_[0].__callback__._settings.planetary or D({})		
+		self._settings.planetary = self._stores[0].__callback__._settings.planetary or D({})		
 
 		self._sub = D({})
 
