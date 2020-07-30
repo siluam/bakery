@@ -64,6 +64,13 @@ class _set:
 				return self.__args, self.__kwargs, self.__cls
 
 	def __set_defaults(self):
+
+		if not self.__cls._command.planetary:
+			self.__cls._command.planetary = self.__class__.stores_[0].__callback__._command.planetary or D({})
+
+		if not self.__cls._settings.planetary:
+			self.__cls._settings.planetary = self.__class__.stores_[0].__callback__._settings.planetary or D({})
+
 		for key, value in self.__cls._settings.defaults.items():
 			setattr(self.__cls, key, value)
 

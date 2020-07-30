@@ -100,7 +100,7 @@ class baking_:
 		_sr = "regular",
 		**kwargs
 	):
-		for store in self.stores_:
+		for store in _milcery.stores_:
 			store.bake_(
 				*args,
 				_g = True,
@@ -166,7 +166,7 @@ class baking_:
 		_settings = False,
 		_args_kwargs = False,
 	):
-		for store in self.stores_:
+		for store in _milcery.stores_:
 			store.splat_(
 				_cls = store,
 				_all = _all,
