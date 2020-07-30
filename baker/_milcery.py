@@ -103,6 +103,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		self._ignore_check: bool = _ignore_check
 		self._program: str = _program or ""
 
+		# TODO: Fix: ('y', TypeError("'weakref' object is not subscriptable"))
 		try:
 			self.stores_[0].__callback__._command
 		except AttributeError:
