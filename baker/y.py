@@ -1,6 +1,3 @@
-# Imports
-import builtins
-
 # From Imports
 from addict import Dict as D
 from collections import namedtuple
@@ -28,15 +25,6 @@ class y(_milcery):
 			_baked_settings = _baked_settings or D({}),
 			**kwargs,
 		)
-		"""
-			Answer: https://stackoverflow.com/questions/11813287/insert-variable-into-global-namespace-from-within-a-function/39937010#39937010
-			User: https://stackoverflow.com/users/1397061/1
-		"""
-		try:
-			builtins.bakeriy_stores.append(self)
-		except AttributeError:
-			builtins.bakeriy_stores = [self]
-
 		self.__output = None
 
 	def __enter__(self):

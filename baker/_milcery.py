@@ -1,8 +1,9 @@
 # Imports
-import builtins
+import weakref
 
 # From Imports
 from addict import Dict as D
+from collections import defaultdict
 from functools import partial
 from gensing import tea, frosting
 from itertools import chain
@@ -48,11 +49,14 @@ class not_stb(Error):
 
 
 class _milcery(*(mixinport(mixins))):
-
 	"""
-		Answer: https://stackoverflow.com/questions/26315584/apply-a-function-to-all-instances-of-a-class/26315625#26315625
-		User: https://stackoverflow.com/users/625914/behzad-nouri
+		Answer: https://stackoverflow.com/questions/328851/printing-all-instances-of-a-class/328882#328882
+		User: https://stackoverflow.com/users/9567/torsten-marek
 	"""
+	try:
+		stores_
+	except NameError:
+		stores_ = []
 
 	def __init__(
 		self,
@@ -63,6 +67,9 @@ class _milcery(*(mixinport(mixins))):
 		_baked_settings: Dict[str, Any] = None,
 		**kwargs,
 	):
+
+		self.stores_.append(weakref.ref(self, self))
+
 		"""
 			_type can be any type, such as:
 			* iter
@@ -78,16 +85,20 @@ class _milcery(*(mixinport(mixins))):
 		self._program: str = _program or ""
 
 		try:
-			for category in ("_settings", "_command"):
-				assert hasattr(builtins.bakeriy_stores[0], category) is True
-		except AssertionError:
-			self._command = D({})
-			self._settings = D({})
+			self.stores_[0].__callback__._command
+		except AttributeError:
+			self.stores_[0].__callback__._command = D({})
 		finally:
 			self._command.baked = _baked_commands or D({})
+			self._command.planetary = self.stores_[0].__callback__._command.planetary or D({})
+
+		try:
+			self.stores_[0].__callback__._settings
+		except AttributeError:
+			self.stores_[0].__callback__._settings = D({})
+		finally:
 			self._settings.baked = _baked_settings or D({})
-			self._command.planetary = builtins.bakeriy_stores[0]._command.planetary or D({})
-			self._settings.planetary = builtins.bakeriy_stores[0]._settings.planetary or D({})
+			self._settings.planetary = self.stores_[0].__callback__._settings.planetary or D({})
 
 		self._sub = D({})
 
@@ -171,8 +182,6 @@ class _milcery(*(mixinport(mixins))):
 		kwargs.update(ska)
 		self._kwargs = kwargs
 
-	# DONE: Something's wrong with this, or returning the generator created by this
-	# DONE: Always remember a generator is used up
 	def _convert_to_generator(self, input):
 		yield from input
 

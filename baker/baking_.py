@@ -1,11 +1,9 @@
-# Imports
-import builtins
-
 # From Imports
 from addict import Dict as D
 from copy import deepcopy
 from functools import partial
 from gensing import tea
+from itertools import chain
 from typing import Dict, Union, Tuple
 
 genstring = Union[str, tea]
@@ -94,17 +92,16 @@ class baking_:
 			_cls = self_pak()
 			return _cls
 
+	@classmethod
 	def bake_all_(
-		self,
-		_cls = None,
+		cls,
 		*args,
 		_akar = "add",
 		_sar = "add",
 		_sr = "regular",
 		**kwargs
 	):
-		_cls = self._cls_check(_cls)
-		for store in _cls._stores:
+		for store in cls.stores_:
 			store.bake_(
 				*args,
 				_g = True,
@@ -162,16 +159,16 @@ class baking_:
 		else:
 			inner("_settings" if _settings else "_command")
 
+	@classmethod
 	def splat_all_(
-		self,
+		cls,
 		_cls = None,
 		_all = False,
 		_all_subcommands = False,
 		_settings = False,
 		_args_kwargs = False,
 	):
-		_cls = self._cls_check(_cls)
-		for store in _cls._stores:
+		for store in cls.stores_:
 			store.splat_(
 				_cls = store,
 				_all = _all,

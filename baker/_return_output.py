@@ -40,7 +40,7 @@ class _return_output:
 
             if isinstance((output := self.__return()), dict):
                 if output.stderr:
-                    raise stderr("\n".join(output.stderr))
+                    raise stderr("".join(output.stderr))
 
                 conversion_partial = partial(
                     self.__cls._convert_to_type,

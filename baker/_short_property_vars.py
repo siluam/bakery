@@ -1,6 +1,3 @@
-# Imports
-import builtins
-
 # From Imports
 from gensing import tea, frosting
 from nanite import check_type, fullpath
@@ -31,10 +28,6 @@ class no_is(Error):
 
 
 class _short_property_vars:
-
-	@property
-	def _stores(self):
-		return builtins.bakeriy_stores
 
 	@property
 	def _capture(self):
