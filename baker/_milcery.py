@@ -84,29 +84,18 @@ class _milcery(*(mixinport(mixins))):
 		self._ignore_check: bool = _ignore_check
 		self._program: str = _program or ""
 
-		try:
-			self.stores_[0].__callback__._command
-		except AttributeError:
-			self.stores_[0].__callback__._command = D({})
-		finally:
-			self._command.baked = _baked_commands or D({})
-			self._command.planetary = self.stores_[0].__callback__._command.planetary or D({})
+		self._command = D({})
+		self._command.baked = _baked_commands or D({})
+		self._command.planetary = self.stores_[0].__callback__._command.planetary or D({})
 
-		try:
-			self.stores_[0].__callback__._settings
-		except AttributeError:
-			self.stores_[0].__callback__._settings = D({})
-		finally:
-			self._settings.baked = _baked_settings or D({})
-			self._settings.planetary = self.stores_[0].__callback__._settings.planetary or D({})
+		self._settings = D({})
+		self._settings.baked = _baked_settings or D({})
+		self._settings.planetary = self.stores_[0].__callback__._settings.planetary or D({})		
 
 		self._sub = D({})
 
 		self._is_bakery_object = True
 
-		"""
-
-		"""
 		self._settings.defaults: Dict[str, Any] = {
 			"_type": list,
 			"_capture": "stdout",
