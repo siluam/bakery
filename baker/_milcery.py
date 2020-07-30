@@ -86,7 +86,10 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		_baked_settings: Dict[str, Any] = None,
 		**kwargs,
 	):
-
+		"""
+			Answer: https://stackoverflow.com/questions/26626653/class-variable-access-in-all-class-method/26626707#26626707
+			User: https://stackoverflow.com/users/100297/martijn-pieters
+		"""
 		self.__class__.stores_ = weakref.ref(self, self)
 
 		"""
