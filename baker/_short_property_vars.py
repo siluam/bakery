@@ -66,7 +66,7 @@ class _short_property_vars:
 	def _frosting(self, value):
 		self.__frosting = bool(value)
 		if value:
-			self._type = iter
+			self._type = self._settings.defaults._type
 
 	@property
 	def _sudo(self):

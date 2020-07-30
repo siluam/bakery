@@ -1,7 +1,7 @@
 # From Imports
 from addict import Dict as D
 from functools import partial
-from nanite import peek, trim
+from nanite import trim
 from shlex import split
 from subprocess import Popen, PIPE, DEVNULL
 from typing import Dict, Any
@@ -38,34 +38,26 @@ class _return_output:
 			if self.__cls._str:
 				return self.__command()
 
-			output = self.__return()
-
-			if isinstance(output, dict):
+			if isinstance((output := self.__return()), dict):
 				if output.stderr:
-					_peek_value, output.stderr = peek(
-						output.stderr, return_first=2
-					)
-					if _peek_value:
-						raise stderr("\n".join(output.stderr))
+					raise stderr("\n".join(output.stderr))
 
 				conversion_partial = partial(
 					self.__cls._convert_to_type,
 					_type = self.__cls._type,
 				)
 
-				if self.__cls._capture in ("stdout", "run"):
-					if not output.dict and not isinstance(output.stderr, dict):
+				if self.__cls._capture == "stdout":
+					if self.__cls._verbosity > 0:
 						del output.stderr
-					if not self.__cls._ignore_stdout:
-						output.stdout = conversion_partial(output.stdout)
-				if self.__cls._capture == "stderr":
-					if not self.__cls._ignore_stderr:
-						output.stderr = conversion_partial(output.stderr)
-				if self.__cls._capture == "both":
-					if not self.__cls._ignore_stdout:
-						output.stdout = conversion_partial(output.stdout)
-					if not self.__cls._ignore_stderr:
-						output.stderr = conversion_partial(output.stderr)
+					output.stdout = conversion_partial(output.stdout)
+				elif self.__cls._capture == "stderr":
+					if self.__cls._verbosity > 0:
+						del output.stdout
+					output.stderr = conversion_partial(output.stderr)
+				else:
+					output.stdout = conversion_partial(output.stdout)
+					output.stderr = conversion_partial(output.stderr)
 
 			return output
 
@@ -75,51 +67,29 @@ class _return_output:
 
 		if self.__cls._wait is None:
 
-			with process() as p:
+			with process(
+				stdout = DEVNULL,
+				stderr = DEVNULL,
+			) as p:
 				return "None" if self.__cls._type.__name__ in ("str", "repr") else None
 
 		elif self.__cls._wait:
 
-			with process(
-				stdin = self.__cls._popen.get("stdin", PIPE),
-				stdout = self.__cls._popen.get("stdout", DEVNULL) if self.__cls._ignore_stdout else self.__cls._popen.get("stdout", PIPE),
-				stderr = self.__cls._popen.get("stderr", DEVNULL) if self.__cls._ignore_stderr else self.__cls._popen.get("stderr", PIPE),
-			) as p:
+			with process() as p:
 
-				p.wait()
+				p.wait(self.__cls._timeout)
 
 				_ = D({})
 
-				if self.__cls._ignore_stderr and self.__cls._ignore_stdout:
-					pass
-				elif self.__cls._ignore_stderr:
-					if self.__cls._capture != "stderr":
-						_.stdout = self.__decode_std(p.stdout, "stdout")
-						if self.__cls._verbosity > 1:
-							_.capture.stdout = p.stdout
-				elif self.__cls._ignore_stdout:
-					if self.__cls._capture != "stdout":
-						_.stderr = self.__decode_std(p.stderr, "stderr")
-						if self.__cls._verbosity > 1:
-							_.capture.stderr = p.stderr
-				else:
-					if self.__cls._capture == "stderr":
-						_.stderr = self.__decode_std(p.stderr, "stderr")
-						if self.__cls._verbosity > 1:
-							_.capture.stderr = p.stderr
-					else:
-						_.stdout = self.__decode_std(p.stdout, "stdout")
-						if self.__cls._verbosity > 1:
-							_.capture.stdout = p.stdout
-						_.stderr = self.__decode_std(p.stderr, "stderr")
-						if self.__cls._verbosity > 1:
-							_.capture.stderr = p.stderr
+				_.stdout = self.__capture(p, "out")
+				_.stderr = self.__capture(p, "err")
 
 				if self.__cls._verbosity > 0:
 					_.returns.code = p.returncode
-					_.returns.codes = p.returncodes
+					# _.returns.codes = p.returncodes
 					_.command.bakeriy = self.__command()
-					_.command.sarge = p.commands
+					_.command.subprocess = p.args
+					_.pid = p.pid
 
 				if self.__cls._verbosity > 1:
 					_.tea = self.__command
@@ -140,9 +110,6 @@ class _return_output:
 				if (
 					self.__cls._n_lines.number is not None
 					and not self.__cls._type.__name__ in ("str", "repr")
-
-					# TODO: If "tee" works, remove this line
-					and self.__cls._capture != "run"
 				):
 					trim_part = partial(
 						trim,
@@ -162,14 +129,23 @@ class _return_output:
 
 		else:
 
-			return p
+			return process()
 
 	def __set_popen_partial(self):
+
+		if self.__cls._capture == "stderr":
+			stdout = DEVNULL
+		else:
+			stdout = self.__cls._popen.get("stdout", DEVNULL) if self.__cls._ignore_stdout else self.__cls._popen.get("stdout", PIPE)
+		stderr = self.__cls._popen.get("stderr", DEVNULL) if self.__cls._ignore_stderr else self.__cls._popen.get("stderr", PIPE)
 
 		return partial(
 			Popen,
 			self.__command() if self.__cls._popen.get("shell", False) else split(self.__command()),
 			bufsize = self.__cls._popen.get("bufsize", -1),
+			stdin = self.__cls._popen.get("stdin", PIPE),
+			stdout = stdout,
+			stderr = stderr,
 			executable = self.__cls._popen.get("executable", None),
 			preexec_fn = self.__cls._popen.get("preexec_fn", None),
 			close_fds = self.__cls._popen.get("close_fds", True),
@@ -187,7 +163,7 @@ class _return_output:
 			text = True if self.__cls._popen.get("bufsize", -1) == 1 else self.__cls._popen.get("text", None),,
 		)
 
-	def __capture(self, p):
+	def __capture(self, p, std):
 	"""
 		Answer: https://stackoverflow.com/a/519653
 		User: https://stackoverflow.com/users/17160/nosklo
@@ -195,38 +171,21 @@ class _return_output:
 
 		capture = []
 
-		if self.__cls._capture == "run":
-			while p.poll() is None:
-				if self.__cls._ignore_stdout and self.__cls._ignore_stderr:
-					pass
-				elif self.__cls._ignore_stderr:
-					output = p.stdout.readline(block=self.__cls._block_stdout)
-					output = output.decode("utf-8") if isinstance(output, (bytes, bytearray)) else output
-					if output:
-						print(output)
-				elif self.__cls._ignore_stdout:
-					output = p.stderr.readline(block=self.__cls._block_stderr)
-					output = output.decode("utf-8") if isinstance(output, (bytes, bytearray)) else output
-					if output:
-						print(output)
-				else:
-					stdoutput = p.stdout.readline(block=self.__cls._block_stdout)
-					stdoutput = stdoutput.decode("utf-8") if isinstance(stdoutput, (bytes, bytearray)) else stdoutput
-					if stdoutput:
-						print(stdoutput)
-					stderrput = p.stderr.readline(block=self.__cls._block_stderr)
-					stderrput = stderrput.decode("utf-8") if isinstance(stderrput, (bytes, bytearray)) else stderrput
-					if stderrput:
-						print(stderrput)
-		else:
-			for cat in ("out, err"):
-				while True:
-					if not (output := getattr(p, f"std{cat}").readline()):
-						break
-					capture.append(
-						output.decode("utf-8") if isinstance(
-							output, (bytes, bytearray)
-						) else output
-					)
+		def inner():
+			if (output := getattr(p, f"std{std}").readline()):
+				output = output.decode("utf-8") if isinstance(
+					output, (bytes, bytearray)
+				) else output
+				capture.append(output)
+				return output
+			return
 
-		yield from capture
+		if std != "err" and self.__cls._capture == "run":
+			while p.poll() is None:
+				print(inner())
+		else:
+			while True:
+				if not inner():
+					break
+
+		return capture

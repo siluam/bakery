@@ -97,7 +97,7 @@ class _milcery(*(mixinport(mixins))):
 
 		"""
 		self._settings.defaults: Dict[str, Any] = {
-			"_type": iter,
+			"_type": list,
 			"_capture": "stdout",
 			"_shell": None,
 			"_frosting": False,
@@ -125,8 +125,7 @@ class _milcery(*(mixinport(mixins))):
 			# If set to None, _capture = "run" will wait for the process to finish
 			# before returning None
 			"_wait": True,
-			"_timeout_stdout": None,
-			"_timeout_stderr": None,
+			"_timeout": None,
 			"_input": None,
 			# Dict must be in the form {"i" : user} or {"s" : user}, to use or not use the
 			# configuration files of the specified user
@@ -177,7 +176,7 @@ class _milcery(*(mixinport(mixins))):
 	def _convert_to_generator(self, input):
 		yield from input
 
-	def _convert_to_type(self, input, _type=iter):
+	def _convert_to_type(self, input, _type=list):
 
 		if input is None:
 			return "None" if _type.__name__ in ("str", "repr") else None
