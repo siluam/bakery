@@ -66,10 +66,10 @@ class _set:
 	def __set_defaults(self):
 
 		if not self.__cls._command.planetary:
-			self.__cls._command.planetary = progenitor_._command.planetary or D({})
+			self.__cls._command.planetary = self.progenitor_._command.planetary or D({})
 
 		if not self.__cls._settings.planetary:
-			self.__cls._settings.planetary = progenitor_._settings.planetary or D({})
+			self.__cls._settings.planetary = self.progenitor_._settings.planetary or D({})
 
 		for key, value in self.__cls._settings.defaults.items():
 			setattr(self.__cls, key, value)
