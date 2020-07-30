@@ -48,7 +48,7 @@ class not_stb(Error):
 	pass
 
 
-class _melcery:
+class _melcery(type):
 	"""
 		Answer: https://stackoverflow.com/questions/128573/using-property-on-classmethods/1800999#1800999
 		User: https://stackoverflow.com/users/36433/a-coady
@@ -103,13 +103,14 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		self._ignore_check: bool = _ignore_check
 		self._program: str = _program or ""
 
+		# TODO: Fix this; these dictionaries will be overwritten otherwise
 		self._command = D({})
 		self._command.baked = _baked_commands or D({})
-		self._command.planetary = self._stores[0].__callback__._command.planetary or D({})
+		self._command.planetary = self.stores_[0].__callback__._command.planetary or D({})
 
 		self._settings = D({})
 		self._settings.baked = _baked_settings or D({})
-		self._settings.planetary = self._stores[0].__callback__._settings.planetary or D({})		
+		self._settings.planetary = self.stores_[0].__callback__._settings.planetary or D({})		
 
 		self._sub = D({})
 
