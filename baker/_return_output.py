@@ -2,7 +2,7 @@
 from addict import Dict as D
 from functools import partial
 from nanite import trim
-from shlex import split
+from shlex import split, quote
 from subprocess import Popen, PIPE, DEVNULL
 from typing import Dict, Any
 
@@ -141,7 +141,7 @@ class _return_output:
 
 		return partial(
 			Popen,
-			self.__command() if self.__cls._popen.get("shell", False) else split(self.__command()),
+			quote(self.__command()) if self.__cls._popen.get("shell", False) else split(self.__command()),
 			bufsize = self.__cls._popen.get("bufsize", -1),
 			stdin = self.__cls._popen.get("stdin", PIPE),
 			stdout = stdout,
