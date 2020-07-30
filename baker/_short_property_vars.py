@@ -30,6 +30,10 @@ class no_is(Error):
 class _short_property_vars:
 
 	@property
+	def progenitor_(self):
+		return self.__class__.stores_[0].__callback__
+
+	@property
 	def _capture(self):
 		return self.__capture
 
