@@ -87,12 +87,12 @@ class _return_output:
 
 			with process() as p:
 
-				p.wait(self.__cls._timeout)
-
 				_ = D({})
 
 				_.stdout = self.__capture(p, "out")
 				_.stderr = self.__capture(p, "err")
+
+				p.wait(self.__cls._timeout)
 
 				if self.__cls._verbosity > 0:
 					_.returns.code = p.returncode
