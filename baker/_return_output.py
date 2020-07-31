@@ -223,33 +223,29 @@ class _return_output:
 			User: https://stackoverflow.com/users/17160/nosklo
 		"""
 
-		# TODO: Fix; don't yield?
-		if p:
-			if std != "err" and self.__cls._capture == "run":
-				while p.poll() is None:
-					if (output := getattr(p, f"std{std}").read(self.__cls._chunk_size)):
-						print(new_output := (
+		if self.__cls._capture == "run":
+			while p.poll() is None:
+				if (output := getattr(p, f"std{std}").read(self.__cls._chunk_size)):
+					print(new_output := (
+						output.decode("utf-8")
+						if isinstance(output, (bytes, bytearray))
+						else output
+					))
+					yield new_output
+				else:
+					break
+		else:
+			while True:
+				try:
+					output = getattr(p, f"std{std}").readlines()
+				except ValueError:
+					break
+				else:
+					if output:
+						yield (
 							output.decode("utf-8")
 							if isinstance(output, (bytes, bytearray))
 							else output
-						))
-						yield new_output
+						)
 					else:
-						return None
-			else:
-				while True:
-					try:
-						output = getattr(p, f"std{std}").readlines()
-					except ValueError:
-						return None
-					else:
-						if output:
-							yield (
-								output.decode("utf-8")
-								if isinstance(output, (bytes, bytearray))
-								else output
-							)
-						else:
-							return None
-		else:
-			return None
+						break
