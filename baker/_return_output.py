@@ -223,29 +223,19 @@ class _return_output:
 			User: https://stackoverflow.com/users/17160/nosklo
 		"""
 
-		if self.__cls._capture == "run":
-			while p.poll() is None:
-				if (output := getattr(p, f"std{std}").read(self.__cls._chunk_size)):
-					print(new_output := (
-						output.decode("utf-8")
-						if isinstance(output, (bytes, bytearray))
-						else output
-					))
-					yield new_output
-				else:
-					break
-		else:
-			while True:
-				try:
-					output = getattr(p, f"std{std}").readlines()
-				except ValueError:
-					break
-				else:
-					if output:
-						yield (
+		if isinstance(p, Popen):
+			if self.__cls._capture == "run":
+				while p.poll() is None:
+					if (output := getattr(p, f"std{std}").read(self.__cls._chunk_size)):
+						print(new_output := (
 							output.decode("utf-8")
 							if isinstance(output, (bytes, bytearray))
 							else output
-						)
+						))
+						yield new_output
 					else:
 						break
+			else:
+				return getattr(p, f"std{std}")
+		else:
+			return []
