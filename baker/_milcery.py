@@ -154,7 +154,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			# A dictionary used to pass options to the subprocess Popen class
 			"_popen": {},
 			# Chunk size used when reading with _capture = "run"
-			"_chunk_size": ,
+			"_chunk_size": 512,
 		}
 
 		self._sub = D({})
@@ -198,7 +198,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 	def _convert_to_generator(self, input):
 		yield from input
 
-	def _convert_to_type(self, input, _type=self._settings.defaults._type):
+	def _convert_to_type(self, input, _type=iter):
 
 		if input is None:
 			return "None" if _type.__name__ in ("str", "repr") else None

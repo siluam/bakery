@@ -40,10 +40,10 @@ class _return_output:
 
 			if isinstance((output := self.__return()), dict):
 				_peek_value, output.stderr = peek(
-                    output.stderr, return_first=2
-                )
-                if _peek_value and not self.__cls._ignore_stderr:
-                    raise stderr("".join(output.stderr))
+					output.stderr, return_first=2
+				)
+				if _peek_value and not self.__cls._ignore_stderr:
+					raise stderr("".join(output.stderr))
 
 				conversion_partial = partial(
 					self.__cls._convert_to_type,
@@ -51,7 +51,7 @@ class _return_output:
 				)
 
 				if self.__cls._capture == "stdout":
-					if self.__cls._verbosity > 0:
+					if self.__cls._verbosity < 1:
 						del output.stderr
 					output.stdout = conversion_partial(
 						output.stdout
@@ -92,10 +92,10 @@ class _return_output:
 
 				_ = D({})
 
+				p.wait(self.__cls._timeout)
+
 				_.stdout = self.__capture(p, "out")
 				_.stderr = self.__capture(p, "err")
-
-				p.wait(self.__cls._timeout)
 
 				if self.__cls._verbosity > 0:
 					_.returns.code = p.returncode
@@ -223,6 +223,7 @@ class _return_output:
 			User: https://stackoverflow.com/users/17160/nosklo
 		"""
 
+		# TODO: Fix; don't yield?
 		if p:
 			if std != "err" and self.__cls._capture == "run":
 				while p.poll() is None:
@@ -233,13 +234,22 @@ class _return_output:
 							else output
 						))
 						yield new_output
+					else:
+						return None
 			else:
-				with open(p, "r") as file:
-					yield from (
-						line.decode("utf-8")
-						if isinstance(line, (bytes, bytearray))
-						else line
-						for line in file
-					)
+				while True:
+					try:
+						output = getattr(p, f"std{std}").readlines()
+					except ValueError:
+						return None
+					else:
+						if output:
+							yield (
+								output.decode("utf-8")
+								if isinstance(output, (bytes, bytearray))
+								else output
+							)
+						else:
+							return None
 		else:
-			yield
+			return None
