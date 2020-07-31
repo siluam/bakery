@@ -1,7 +1,7 @@
 # From Imports
 from addict import Dict as D
 from functools import partial
-from nanite import trim
+from nanite import peek, trim
 from shlex import split, quote
 from subprocess import Popen, PIPE, DEVNULL
 from typing import Dict, Any
@@ -39,8 +39,11 @@ class _return_output:
 				return self.__command()
 
 			if isinstance((output := self.__return()), dict):
-				if output.stderr:
-					raise stderr("".join(output.stderr))
+				_peek_value, output.stderr = peek(
+                    output.stderr, return_first=2
+                )
+                if _peek_value and not self.__cls._ignore_stderr:
+                    raise stderr("".join(output.stderr))
 
 				conversion_partial = partial(
 					self.__cls._convert_to_type,
@@ -220,29 +223,23 @@ class _return_output:
 			User: https://stackoverflow.com/users/17160/nosklo
 		"""
 
-		capture = []
-
-		def inner():
-			try:
-				output = getattr(p, f"std{std}").readline()
-			except AttributeError:
-				return None
+		if p:
+			if std != "err" and self.__cls._capture == "run":
+				while p.poll() is None:
+					if (output := getattr(p, f"std{std}").read(self.__cls._chunk_size)):
+						print(new_output := (
+							output.decode("utf-8")
+							if isinstance(output, (bytes, bytearray))
+							else output
+						))
+						yield new_output
 			else:
-				if output:
-					output = (
-						output.decode("utf-8")
-						if isinstance(output, (bytes, bytearray))
-						else output
+				with open(p, "r") as file:
+					yield from (
+						line.decode("utf-8")
+						if isinstance(line, (bytes, bytearray))
+						else line
+						for line in file
 					)
-					capture.append(output)
-					return output
-
-		if std != "err" and self.__cls._capture == "run":
-			while p.poll() is None:
-				print(inner())
 		else:
-			while True:
-				if not inner():
-					break
-
-		return capture
+			yield

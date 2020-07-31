@@ -46,6 +46,16 @@ class _short_property_vars:
 		self.__capture = value
 
 	@property
+	def _run(self):
+		return self.__run
+
+	@_run.setter
+	def _run(self, value):
+		self.__run = bool(value)
+		if value:
+			self._capture = "run"
+
+	@property
 	def _print(self):
 		return self.__print
 

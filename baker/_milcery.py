@@ -114,8 +114,9 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		self._settings = D({})
 		self._settings.baked = _baked_settings or D({})
 		self._settings.defaults: Dict[str, Any] = {
-			"_type": list,
+			"_type": iter,
 			"_capture": "stdout",
+			"_run": False,
 			"_shell": None,
 			"_frosting": False,
 			"_str": False,
@@ -152,6 +153,8 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			"_frozen": False,
 			# A dictionary used to pass options to the subprocess Popen class
 			"_popen": {},
+			# Chunk size used when reading with _capture = "run"
+			"_chunk_size": ,
 		}
 
 		self._sub = D({})
@@ -195,7 +198,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 	def _convert_to_generator(self, input):
 		yield from input
 
-	def _convert_to_type(self, input, _type=list):
+	def _convert_to_type(self, input, _type=self._settings.defaults._type):
 
 		if input is None:
 			return "None" if _type.__name__ in ("str", "repr") else None
