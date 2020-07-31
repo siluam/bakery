@@ -96,10 +96,30 @@ class _return_output:
 
 				_ = D({})
 
-				p.wait(self.__cls._timeout)
-
-				_.stdout = self.__capture(p, "out")
-				_.stderr = self.__capture(p, "err")
+				if self.__cls._input:
+					try:
+						stdout, stderr = p.communicate(input=self.__cls._input, timeout=self.__cls._timeout)
+					except TimeoutExpired:
+						p.kill()
+						stdout, stderr = p.communicate(input=self.__cls._input)
+					finally:
+						if isinstance(stdout, (bytes, bytearray)):
+							_.stdout = stdout.decode("utf-8")
+						else:
+							_.stdout = stdout
+						if isinstance(stderr, (bytes, bytearray)):
+							_.stderr = stderr.decode("utf-8")
+						else:
+							_.stderr = stderr
+				else:
+					try:
+						p.wait(self.__cls._timeout)
+					except TimeoutExpired:
+						p.kill()
+						p.wait()
+					finally:
+						_.stdout = self.__capture(p, "out")
+						_.stderr = self.__capture(p, "err")
 
 				if self.__cls._verbosity > 0:
 					_.returns.code = p.returncode
@@ -165,6 +185,11 @@ class _return_output:
 
 	def __set_popen_partial(self):
 
+		if self.__cls._input:
+			stdin = self.__cls._popen.get("stdin", PIPE)
+		else:
+			stdin = self.__cls._popen.get("stdin", None)
+
 		if self.__cls._capture == "stderr":
 			stdout = self.__cls._popen.get("stdout", DEVNULL)
 		elif self.__cls._capture == "run":
@@ -191,7 +216,7 @@ class _return_output:
 			if self.__cls._popen.get("shell", False)
 			else split(self.__command()),
 			bufsize=self.__cls._popen.get("bufsize", -1),
-			stdin=self.__cls._popen.get("stdin", None),
+			stdin=stdin,
 			stdout=stdout,
 			stderr=stderr,
 			executable=self.__cls._popen.get("executable", None),
