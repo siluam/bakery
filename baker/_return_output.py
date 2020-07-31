@@ -1,6 +1,7 @@
 # From Imports
 from addict import Dict as D
 from functools import partial
+from itertools import chain
 from nanite import peek, trim
 from shlex import split, quote
 from subprocess import Popen, PIPE, DEVNULL
@@ -219,9 +220,15 @@ class _return_output:
 
 	def __capture(self, p, std):
 		"""
-			Answer: https://stackoverflow.com/a/519653
+			Answer: https://stackoverflow.com/questions/519633/lazy-method-for-reading-big-file-in-python/519653#519653
 			User: https://stackoverflow.com/users/17160/nosklo
 		"""
+
+		"""
+			Answer: https://stackoverflow.com/questions/13243766/python-empty-generator-function/26271684#26271684
+			User: https://stackoverflow.com/users/289240/zectbumo
+		"""
+		capture = iter(())
 
 		if isinstance(p, Popen):
 			if self.__cls._capture == "run":
@@ -232,10 +239,12 @@ class _return_output:
 							if isinstance(output, (bytes, bytearray))
 							else output
 						))
-						yield new_output
+						capture = chain([new_output], capture)
 					else:
-						break
+						return capture
+				else:
+					return capture
 			else:
-				return getattr(p, f"std{std}")
+				return iter(getattr(p, f"std{std}"))
 		else:
-			return []
+			return capture
