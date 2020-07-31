@@ -1,3 +1,6 @@
+# Imports
+import sys
+
 # From Imports
 from addict import Dict as D
 from functools import partial
@@ -163,18 +166,24 @@ class _return_output:
 	def __set_popen_partial(self):
 
 		if self.__cls._capture == "stderr":
-			stdout = DEVNULL
+			stdout = self.__cls._popen.get("stdout", DEVNULL)
+		elif self.__cls._capture == "run":
+			stdout = self.__cls._popen.get("stdout", None)
 		else:
 			stdout = (
 				self.__cls._popen.get("stdout", DEVNULL)
 				if self.__cls._ignore_stdout
 				else self.__cls._popen.get("stdout", PIPE)
 			)
-		stderr = (
-			self.__cls._popen.get("stderr", DEVNULL)
-			if self.__cls._ignore_stderr
-			else self.__cls._popen.get("stderr", PIPE)
-		)
+
+		if self.__cls._capture == "run":
+			stderr = self.__cls._popen.get("stderr", None)
+		else:
+			stderr = (
+				self.__cls._popen.get("stderr", DEVNULL)
+				if self.__cls._ignore_stderr
+				else self.__cls._popen.get("stderr", PIPE)
+			)
 
 		return partial(
 			Popen,
@@ -228,23 +237,12 @@ class _return_output:
 			Answer: https://stackoverflow.com/questions/13243766/python-empty-generator-function/26271684#26271684
 			User: https://stackoverflow.com/users/289240/zectbumo
 		"""
-		capture = iter(())
-
 		if isinstance(p, Popen):
-			if self.__cls._capture == "run":
-				while p.poll() is None:
-					if (output := getattr(p, f"std{std}").read(self.__cls._chunk_size)):
-						print(new_output := (
-							output.decode("utf-8")
-							if isinstance(output, (bytes, bytearray))
-							else output
-						))
-						capture = chain([new_output], capture)
-					else:
-						return capture
-				else:
-					return capture
-			else:
-				return iter(getattr(p, f"std{std}"))
+			try:
+				return (line.decode("utf-8") if isinstance(line, (bytes, bytearray)) else line for line in getattr(p, f"std{std}"))
+			except ValueError:
+				return iter(())
+			except TypeError:
+				return iter(())
 		else:
-			return capture
+			return iter(())
