@@ -56,6 +56,20 @@ class _short_property_vars:
 			self._str = True
 
 	@property
+	def _freezer(self):
+		return self.__freezer
+
+	@_freezer.setter
+	def _freezer(self, value):
+		try:
+			self.__freezer
+		except NameError:
+			self.__freezer = value
+		else:
+			if self.__freezer != value:
+				self.__freezer = value
+
+	@property
 	def _frosting(self):
 		return self.__frosting
 

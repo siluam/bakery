@@ -23,6 +23,7 @@ class _funky_properties:
 		_ = D({})
 
 		_.program = self._program
+		_.freezer = self._freezer
 		_.ignore_check = self._ignore_check
 		_.attrs.self_class = f"{type(self)=}"
 		_.attrs.type_self = f"{self.__class__=}"

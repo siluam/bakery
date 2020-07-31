@@ -176,7 +176,7 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     teels()
 
     # ls | tee -a /dev/null
-    teels = ls @ devnull
+    teels = ls + devnull
     teels()
 
     # Redirection using frozen objects
@@ -211,7 +211,7 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     nulls = ls << devnull
 
     # ls >> /dev/null
-    nulls = ls + devnull
+    nulls = ls @ devnull
     ```
 
 

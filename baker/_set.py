@@ -99,6 +99,7 @@ class _set:
 			for key, value in tuple(categories.items())[:-1]:
 				if value:
 					cat = key
+					break
 
 			for index, arg in enumerate(self.__args):
 				if not isinstance(

@@ -45,23 +45,20 @@ class _long_property_vars:
 
 	@_program.setter
 	def _program(self, value):
-		if isinstance(value, dict):
-			if not value["fixed"]:
-				value = value.replace("_", "-")
+		if self._ignore_check or self._frozen:
+			self.__program = value
 		else:
 			value = value.replace("_", "-")
-
-		p = Popen(
-			(
-				"where.exe" if os.name == "nt" else "which",
-				value,
-			),
-			stdout = PIPE,
-			stderr = PIPE,
-		)
-		if not self._ignore_check and (stderrput := p.stderr.readline().decode().strip()):
-			raise stderr(stderrput)
-		else:
+			p = Popen(
+				(
+					"where.exe" if os.name == "nt" else "which",
+					value,
+				),
+				stdout = PIPE,
+				stderr = PIPE,
+			)
+			if (stderrput := p.stderr.readline().decode().strip()):
+				raise stderr(stderrput)
 			self.__program = p.stdout.readline().decode().strip()
 
 	@property

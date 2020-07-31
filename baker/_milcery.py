@@ -82,6 +82,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		*args,
 		_program: str = None,
 		_ignore_check: bool = False,
+		_freezer: str = None,
 		_baked_commands: Dict[str, Any] = None,
 		_baked_settings: Dict[str, Any] = None,
 		**kwargs,
@@ -105,6 +106,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		"""
 		self._ignore_check: bool = _ignore_check
 		self._program: str = _program or ""
+		self._freezer: str = _freezer or ""
 
 		self._command = D({})
 		self._command.baked = _baked_commands or D({})
@@ -246,12 +248,33 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		def inner(*args, **kwargs):
 			try:
 				return self._class(
-					*args, **kwargs, _subcommand=subcommand
+					*args, _subcommand=subcommand, **kwargs
 				)
 			finally:
 				self._set(_reset=True)
-
 		return inner
+
+	def _partial_class(self, *args, **kwargs):
+		return partial(
+			self.__class__,
+			_program=self._program,
+			*args,
+			_baked_commands=D(self._command.baked),
+			_baked_settings=D(self._settings.baked),
+			**kwargs,
+		)
+
+	def _class(
+		self,
+		*args,
+		_subcommand="supercalifragilisticexpialidocious",
+		**kwargs,
+	):
+		self._subcommand_check(
+			kwargs.pop("_subcommand", _subcommand)
+		)
+		self._set_and_process(*args, **kwargs)
+		return self._return_frosted_output()
 
 	def _set_and_process(self, *args, **kwargs):
 
@@ -298,6 +321,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		return self.__class__(
 			_program=self._program,
 			_ignore_check=self._ignore_check,
+			_freezer=self._freezer,
 			_baked_commands=D(self._command.baked),
 			_baked_settings=D(self._settings.baked),
 		)
@@ -423,21 +447,18 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 				_ignore_stdout = frozen_dict["out"],
 				_ignore_stderr = frozen_dict["err"],
 			)}),
+			_frozen = True,
 		)
 
-		if reversed:
-			frozen = partially_frozen(
-				None, processed_value, pr, self._program,
-			)
-		else:
-			frozen = partially_frozen(
-				None, pr, processed_value, _program=self._program
-			)
+		program = [self._freezer, pr, processed_value]
+		frozen = partially_frozen(
+			_program = " ".join(program[::-1] if reversed else program)
+		)
 
 		return (
-			frozen.__(_frozen=True)
+			frozen.__()
 			if self.__class__.__name__ == "i"
-			else frozen(_frozen=True)
+			else frozen()
 		)
 
 	def __or__(self, value):
@@ -481,25 +502,3 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 
 	def __rmatmul__(self, value):
 		return self.__assign_to_frozen(">>", value, reversed=True)
-
-	def _partial_class(self, *args, **kwargs):
-		return partial(
-			self.__class__,
-			_program=self._program,
-			*args,
-			_baked_commands=D(self._command.baked),
-			_baked_settings=D(self._settings.baked),
-			**kwargs,
-		)
-
-	def _class(
-		self,
-		*args,
-		_subcommand="supercalifragilisticexpialidocious",
-		**kwargs,
-	):
-		self._subcommand_check(
-			kwargs.pop("_subcommand", _subcommand)
-		)
-		self._set_and_process(*args, **kwargs)
-		return self._return_frosted_output()
