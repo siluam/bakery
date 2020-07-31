@@ -30,8 +30,12 @@ class no_is(Error):
 class _short_property_vars:
 
 	@property
-	def progenitor_(self):
+	def origin_(self):
 		return self.__class__.stores_[0].__callback__
+
+	@property
+	def chain_(self):
+		return (store.__callback__ for store in self.__class__.stores)
 
 	@property
 	def _capture(self):

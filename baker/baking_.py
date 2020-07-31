@@ -92,20 +92,19 @@ class baking_:
 			_cls = self_pak()
 			return _cls
 
-	@classmethod
 	def bake_all_(
-		cls,
+		self,
 		*args,
 		_akar = "add",
 		_sar = "add",
 		_sr = "regular",
 		**kwargs
 	):
-		for store in cls.stores_:
-			store.__callback__.bake_(
+		for store in self.chain_:
+			store.bake_(
 				*args,
 				_g = True,
-				_cls = store.__callback__,
+				_cls = store,
 				_akar = _akar,
 				_sar = _sar,
 				_sr = _sr,
@@ -159,17 +158,16 @@ class baking_:
 		else:
 			inner("_settings" if _settings else "_command")
 
-	@classmethod
 	def splat_all_(
-		cls,
+		self,
 		_all = False,
 		_all_subcommands = False,
 		_settings = False,
 		_args_kwargs = False,
 	):
-		for store in cls.stores_:
-			store.__callback__.splat_(
-				_cls = store.__callback__,
+		for store in self.chain_:
+			store.splat_(
+				_cls = store,
 				_all = _all,
 				_all_subcommands = _all_subcommands,
 				_settings = _settings,
