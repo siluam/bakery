@@ -40,15 +40,6 @@ mixins: Generator[str, None, None] = (
 	)
 )
 
-
-class Error(Exception):
-	pass
-
-
-class not_stb(Error):
-	pass
-
-
 class _melcery(SlotsMeta):
 	"""
 		Answer 1: https://stackoverflow.com/questions/128573/using-property-on-classmethods/1800999#1800999
@@ -392,7 +383,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 						is True
 					)
 				except AssertionError:
-					raise not_stb(
+					raise TypeError(
 						f"Sorry! {value} must be a string, bytes, bytearray, tea, frosting, or bakeriy object!"
 					)
 				else:

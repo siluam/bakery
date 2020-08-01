@@ -5,14 +5,6 @@ import sys
 # From Imports
 from gensing import tea
 
-class Error(Exception):
-	pass
-
-
-class tbr_not_equal_to_args(Error):
-	pass
-
-
 class _create_command:
 	def _create_command(self, _cls = None, _subcommand = "supercalifragilisticexpialidocious"):
 
@@ -76,10 +68,10 @@ class _create_command:
 				if value == tier:
 					to_be_replaced += 1
 					if to_be_replaced > len(self.__args):
-						raise tbr_not_equal_to_args("Sorry! The number of tiered replacements must be equal to the number of arguments provided!")
+						raise TypeError("Sorry! The number of tiered replacements must be equal to the number of arguments provided!")
 
 			if to_be_replaced < len(self.__args):
-				raise tbr_not_equal_to_args("Sorry! The number of tiered replacements must be equal to the number of arguments provided!")
+				raise TypeError("Sorry! The number of tiered replacements must be equal to the number of arguments provided!")
 
 			for index, kv in _command.items(indexed = True):
 				if kv.value == tier:

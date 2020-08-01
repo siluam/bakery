@@ -6,16 +6,6 @@ from gensing import tea
 from itertools import chain
 from typing import Dict, Union, Tuple
 
-genstring = Union[str, tea]
-
-class Error(Exception):
-	pass
-
-
-class not_same_type(Error):
-	pass
-
-
 class baking_:
 
 	def bake_(

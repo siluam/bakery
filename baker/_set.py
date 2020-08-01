@@ -5,14 +5,6 @@ from gensing import tea, frosting
 from itertools import chain
 from toml import load
 
-class Error(Exception):
-	pass
-
-
-class cannot_set_multiple(Error):
-	pass
-
-
 class _set:
 	def _set(
 		self,
@@ -88,7 +80,7 @@ class _set:
 		c_count = bategories.count(True)
 
 		if c_count != 1:
-			raise cannot_set_multiple(f'Sorry! No combination of {", ".join(categories.keys())} may be used! Please choose only a single category!')
+			raise TypeError(f'Sorry! No combination of {", ".join(categories.keys())} may be used! Please choose only a single category!')
 
 		self.__kwargs_mods()
 

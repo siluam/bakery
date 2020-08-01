@@ -6,18 +6,6 @@ from os import name as os_name
 from typing import Union, Any
 from gensing import tea, frosting
 
-class Error(Exception):
-	pass
-
-
-class not_string_dict(Error):
-	pass
-
-
-class cannot_set_multiple(Error):
-	pass
-
-
 class _process_args_kwargs:
 
 	def _process_args_kwargs(
@@ -56,7 +44,7 @@ class _process_args_kwargs:
 		c_count = tuple(value for value in self.__categories.values()).count(True)
 
 		if c_count != 1:
-			raise cannot_set_multiple(
+			raise TypeError(
 				f'Sorry! No combination of {", ".join(self.__categories.keys())} may be used! Please choose only a single category!'
 			)
 
@@ -133,7 +121,7 @@ class _process_args_kwargs:
 					self.__starter_regular
 				].append(arg)
 			else:
-				raise not_string_dict(
+				raise TypeError(
 					f'Sorry! Value "{arg}" must be a string, integer, or dictionary!'
 				)
 
@@ -178,7 +166,7 @@ class _process_args_kwargs:
 						self.__subcommand
 					].components.kwargs.unprocessed[key] = value
 				else:
-					raise not_string_dict(
+					raise TypeError(
 						f'Sorry! Value "{value}" must be a string, integer, or dictionary!'
 					)
 
