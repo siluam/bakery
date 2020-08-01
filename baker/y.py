@@ -6,10 +6,6 @@ from typing import MutableSequence as MS, Dict, Any, Tuple, Union
 
 _milcery = module_installed(fullpath("_milcery.py", f_back = 2))._milcery
 
-_melcery = module_installed(
-	fullpath("_milcery.py", f_back=2)
-)._melcery
-
 i = module_installed(fullpath("i.py", f_back = 2)).i
 
 default: Tuple[None] = namedtuple("default", "")

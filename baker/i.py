@@ -8,10 +8,6 @@ _milcery = module_installed(
 	fullpath("_milcery.py", f_back=2)
 )._milcery
 
-_melcery = module_installed(
-	fullpath("_milcery.py", f_back=2)
-)._melcery
-
 default: Tuple[None] = namedtuple("default", "")
 
 class i(_milcery):

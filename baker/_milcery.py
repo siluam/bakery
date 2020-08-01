@@ -3,6 +3,7 @@ import weakref
 
 # From Imports
 from addict import Dict as D
+from autoslot import SlotsMeta
 from collections import defaultdict
 from functools import partial
 from gensing import tea, frosting
@@ -48,10 +49,13 @@ class not_stb(Error):
 	pass
 
 
-class _melcery(type):
+class _melcery(SlotsMeta):
 	"""
-		Answer: https://stackoverflow.com/questions/128573/using-property-on-classmethods/1800999#1800999
-		User: https://stackoverflow.com/users/36433/a-coady
+		Answer 1: https://stackoverflow.com/questions/128573/using-property-on-classmethods/1800999#1800999
+		User 1: https://stackoverflow.com/users/36433/a-coady
+
+		Answer 2: https://stackoverflow.com/questions/31379485/1-class-inherits-2-different-metaclasses-abcmeta-and-user-defined-meta/31537249#31537249
+		User 2: https://stackoverflow.com/users/302343/timur
 	"""
 
 	@property
@@ -76,7 +80,6 @@ class _melcery(type):
 		cls.stores_ = []
 
 class _milcery(metaclass = _melcery, *(mixinport(mixins))):
-
 	def __init__(
 		self,
 		*args,
