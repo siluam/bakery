@@ -1,6 +1,3 @@
-# Imports
-import sys
-
 # From Imports
 from addict import Dict as D
 from functools import partial
@@ -49,30 +46,11 @@ class _return_output:
 				if _peek_value and not self.__cls._ignore_stderr:
 					raise stderr("".join(output.stderr))
 
-				conversion_partial = partial(
-					self.__cls._convert_to_type,
-					_type=self.__cls._type,
-				)
-
-				if self.__cls._capture == "stdout":
+				for std in ("out", "err"):
+					stdstd = f"std{std}"
 					if self.__cls._verbosity < 1:
-						del output.stderr
-					output.stdout = conversion_partial(
-						output.stdout
-					)
-				elif self.__cls._capture == "stderr":
-					if self.__cls._verbosity > 0:
-						del output.stdout
-					output.stderr = conversion_partial(
-						output.stderr
-					)
-				else:
-					output.stdout = conversion_partial(
-						output.stdout
-					)
-					output.stderr = conversion_partial(
-						output.stderr
-					)
+						if self.__cls._capture == stdstd:
+							del output[stdstd]
 
 			return output
 
@@ -94,25 +72,21 @@ class _return_output:
 
 			with process() as p:
 
-				p.wait()
-
 				_ = D({})
 
-				"""
-					Answer: https://stackoverflow.com/questions/13243766/python-empty-generator-function/26271684#26271684
-					User: https://stackoverflow.com/users/289240/zectbumo
-				"""
 				for std in ("out", "err"):
 					chained = []
 					stdstr = f"std{std}"
-					if (pdot := getattr(p, stdstr)):
-						for line in pdot:
+					if (output := getattr(p, stdstr)):
+						for line in output:
 							chained = chain(chained, [
-								line.decode("utf-8")
+								line.decode("utf-8").strip()
 								if isinstance(line, (bytes, bytearray))
-								else line
+								else line.strip()
 							])
 					_[stdstr] = iter(chained)
+
+				p.wait()
 
 				if self.__cls._verbosity > 0:
 					_.returns.code = p.returncode
@@ -178,11 +152,6 @@ class _return_output:
 
 	def __set_popen_partial(self):
 
-		if self.__cls._input:
-			stdin = self.__cls._popen.get("stdin", PIPE)
-		else:
-			stdin = self.__cls._popen.get("stdin", None)
-
 		if self.__cls._capture == "stderr":
 			stdout = self.__cls._popen.get("stdout", DEVNULL)
 		elif self.__cls._capture == "run":
@@ -209,7 +178,7 @@ class _return_output:
 			if self.__cls._popen.get("shell", False)
 			else split(self.__command()),
 			bufsize=self.__cls._popen.get("bufsize", -1),
-			stdin=stdin,
+			stdin=self.__cls._popen.get("stdin", None),
 			stdout=stdout,
 			stderr=stderr,
 			executable=self.__cls._popen.get("executable", None),

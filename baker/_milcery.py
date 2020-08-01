@@ -221,17 +221,10 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 					return repr(input())
 				else:
 					return input()
-			else:
-				input = [
-					TextWrapper(break_long_words=False,).fill(
-						line
-					)
-					for line in input()[0].split("\n")
-				][:-1]
 
 		if _type.__name__ in ("str", "repr"):
 			return " ".join(input)
-		elif _type.__name__ in ("generator", "iter"):
+		elif _type.__name__ in ("generator", "iter", "chain"):
 			return self._convert_to_generator(input)
 		else:
 			return _type(input)

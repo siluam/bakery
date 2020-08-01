@@ -45,14 +45,12 @@ class _run_frosting:
 	def _return_frosted_output(self, _cls = None):
 		_cls = self._cls_check(_cls)
 		output = _cls._run_frosting(_subcommand=_cls._sub.unprocessed)
-		if _cls._frozen:
+		if _cls._frozen or not (_cls._wait and _cls._wait is None):
 			return output
 		else:
 			if isinstance(output, (dict, tea, frosting)):
-				return frosting(output, _cls._capture)
+				return output
 			elif _cls._wait is None:
 				return "None" if _cls._type.__name__ in ("str", "repr") else None
-			elif not _cls._wait:
-				return output
 			else:
-				return _cls._convert_to_type(frosting(output, _cls._capture), _type = type(output))
+				return _cls._convert_to_type(frosting(output, _cls._capture), _type = _cls._type)
