@@ -28,6 +28,7 @@ from typing import (
 mixins: Generator[str, None, None] = (
 	fullpath(f"{mixin}.py", f_back=2)
 	for mixin in (
+		"_alt_property_vars",
 		"_create_command",
 		"_funky_properties",
 		"_long_property_vars",
@@ -155,12 +156,6 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 
 		self._is_bakery_object = True
 
-		self._settings.functions = (
-			"frosting_",
-			"f_",
-			"print_",
-		)
-
 		self._captures: Tuple[str] = (
 			"stdout",
 			"stderr",
@@ -221,8 +216,8 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			return _type(input)
 
 	def _subcommand_check(self, subcommand):
-		if subcommand in self._settings.functions:
-			self._sub.function = subcommand
+		if subcommand[-1] == "_":
+			self._sub.function = f"_{subcommand}"
 			self._sub.unprocessed = (
 				"supercalifragilisticexpialidocious"
 			)

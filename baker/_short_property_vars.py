@@ -1,7 +1,5 @@
 # From Imports
 from gensing import tea, frosting
-from nanite import check_type, fullpath
-from toml import load
 
 class _short_property_vars:
 
@@ -27,16 +25,6 @@ class _short_property_vars:
 				f'Sorry! Capture type "{value}" is not permitted! Choose from one of: [{(", ").join(self._captures)}]'
 			)
 		self.__capture = value
-
-	@property
-	def _run(self):
-		return self.__run
-
-	@_run.setter
-	def _run(self, value):
-		self.__run = bool(value)
-		if value:
-			self._capture = "run"
 
 	@property
 	def _print(self):

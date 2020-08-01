@@ -82,7 +82,8 @@ class _set:
 		if c_count != 1:
 			raise TypeError(f'Sorry! No combination of {", ".join(categories.keys())} may be used! Please choose only a single category!')
 
-		self.__kwargs_mods()
+		if self.__cls._sub.function:
+			self.__kwargs[function] = True
 
 		if any(bategories[:-1]):
 
@@ -125,11 +126,3 @@ class _set:
 				self.__cls._settings.final[self.__subcommand].update(
 					D(self.__cls._settings[category][self.__subcommand])
 				)
-
-	def __kwargs_mods(self):
-
-		if self.__cls._sub.function in ("frosting_", "f_"):
-			self.__kwargs["_frosting"] = True
-
-		if self.__cls._sub.function == "print_":
-			self.__kwargs["_print"] = True
