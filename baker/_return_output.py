@@ -7,15 +7,6 @@ from shlex import split, quote
 from subprocess import Popen, PIPE, DEVNULL
 from typing import Dict, Any
 
-
-class Error(Exception):
-	pass
-
-
-class stderr(Error):
-	pass
-
-
 class _return_output:
 	def _return_output(
 		self,
@@ -44,7 +35,7 @@ class _return_output:
 					output.stderr, return_first=2
 				)
 				if _peek_value and not self.__cls._ignore_stderr:
-					raise stderr("".join(output.stderr))
+					raise SystemError("".join(output.stderr))
 
 				stds = ["out", "err"]
 				for std, opp in zip(stds, stds[::-1]):
