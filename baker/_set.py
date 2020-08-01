@@ -83,7 +83,7 @@ class _set:
 			raise TypeError(f'Sorry! No combination of {", ".join(categories.keys())} may be used! Please choose only a single category!')
 
 		if self.__cls._sub.function:
-			self.__kwargs[function] = True
+			self.__kwargs[self.__cls._sub.function] = True
 
 		if any(bategories[:-1]):
 
