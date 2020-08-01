@@ -46,11 +46,13 @@ class _return_output:
 				if _peek_value and not self.__cls._ignore_stderr:
 					raise stderr("".join(output.stderr))
 
-				for std in ("out", "err"):
+				stds = ["out", "err"]
+				for std, opp in zip(stds, stds[::-1]):
 					stdstd = f"std{std}"
+					stdopp = f"std{opp}"
 					if self.__cls._verbosity < 1:
 						if self.__cls._capture == stdstd:
-							del output[stdstd]
+							del output[stdopp]
 
 			return output
 
