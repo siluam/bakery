@@ -11,6 +11,7 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.8"
 addict = "*"
+autoslot = "*"
 pout = "*"
 sarge = "*"
 toml = "*"
