@@ -12,7 +12,7 @@ class _short_property_vars:
 
 	@property
 	def chain_(self):
-		return (store.__callback__ for store in self.__class__.stores if store is not None)
+		return (store.__callback__ for store in self.__class__.stores_ if store is not None)
 
 	@property
 	def _capture(self):
