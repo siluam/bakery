@@ -145,6 +145,11 @@ class _return_output:
 
 	def __set_popen_partial(self):
 
+		if self.__cls._input is None:
+			stdin = self.__cls._popen.get("stdin", None)
+		else:
+			stdin = self.__cls._input
+
 		if self.__cls._capture == "stderr":
 			stdout = self.__cls._popen.get("stdout", DEVNULL)
 		elif self.__cls._capture == "run":
@@ -168,16 +173,16 @@ class _return_output:
 		return partial(
 			Popen,
 			quote(self.__command())
-			if self.__cls._popen.get("shell", False)
+			if self.__cls._popen.get("shell", True)
 			else split(self.__command()),
 			bufsize=self.__cls._popen.get("bufsize", -1),
-			stdin=self.__cls._popen.get("stdin", None),
+			stdin=stdin,
 			stdout=stdout,
 			stderr=stderr,
 			executable=self.__cls._popen.get("executable", None),
 			preexec_fn=self.__cls._popen.get("preexec_fn", None),
 			close_fds=self.__cls._popen.get("close_fds", True),
-			shell=self.__cls._popen.get("shell", False),
+			shell=self.__cls._popen.get("shell", True),
 			cwd=self.__cls._popen.get("cwd", None),
 			env=self.__cls._popen.get("env", None),
 			universal_newlines=True
