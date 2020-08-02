@@ -2,6 +2,7 @@
 from addict import Dict as D
 from collections import namedtuple
 from nanite import module_installed, fullpath
+from subprocess import Popen
 from typing import MutableSequence as MS, Dict, Any, Tuple, Union
 
 _milcery = module_installed(fullpath("_milcery.py", f_back = 2))._milcery
@@ -34,14 +35,11 @@ class y(_milcery):
 
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		try:
-			if (
-				self._wait is not None and not
-				self._wait
-			):
+			if isinstance(self.__output, Popen):
 				self.__output.close()
 		finally:
-			self.__output = None
 			self._set(_reset = True)
+			self.__output = None
 
 	def __call__(self, *args, **kwargs):
 		try:
