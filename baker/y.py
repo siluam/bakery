@@ -30,7 +30,15 @@ class y(_milcery):
 		)
 
 	def __call__(self, *args, **kwargs):
-		return self._classes(*args, **kwargs)
+		decorator_mode = False
+		def wrapper(func = None):
+			if func is not None:
+				decorator_mode = True
+				return self._classes(func(*args, **kwargs))
+		if decorator_mode:
+			return wrapper
+		else:
+			return self._classes(*args, **kwargs)
 
 	@property
 	def __(self, *args, **kwargs):

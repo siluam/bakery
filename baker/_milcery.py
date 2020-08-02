@@ -247,29 +247,24 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		subcommand = "supercalifragilisticexpialidocious",
 		**kwargs
 	):
-		for arg in args:
-			if type(arg).__name__ == "function":
-				pass
-				break
+		if _partial:
+			return partial(
+				self.__class__,
+				_program=self._program,
+				*args,
+				_baked_commands=D(self._command.baked),
+				_baked_settings=D(self._settings.baked),
+				**kwargs,
+			)
 		else:
-			if _partial:
-				return partial(
-					self.__class__,
-					_program=self._program,
-					*args,
-					_baked_commands=D(self._command.baked),
-					_baked_settings=D(self._settings.baked),
-					**kwargs,
+			try:
+				self._subcommand_check(
+					kwargs.pop("_subcommand", subcommand)
 				)
-			else:
-				try:
-					self._subcommand_check(
-						kwargs.pop("_subcommand", subcommand)
-					)
-					self._set_and_process(*args, **kwargs)
-					return self._return_frosted_output()
-				finally:
-					self._set(_reset=True)
+				self._set_and_process(*args, **kwargs)
+				return self._return_frosted_output()
+			finally:
+				self._set(_reset=True)
 
 	def _set_and_process(self, *args, **kwargs):
 
