@@ -1,6 +1,7 @@
 # From Imports
 from addict import Dict as D
 from collections import namedtuple
+from functools import partial
 from nanite import module_installed, fullpath
 from subprocess import Popen
 from typing import MutableSequence as MS, Dict, Any, Tuple, Union
@@ -27,29 +28,18 @@ class y(_milcery):
 			_baked_settings = _baked_settings or D({}),
 			**kwargs,
 		)
-		self.__output = None
-
-	def __enter__(self):
-		self.__output = self._class(*args, **kwargs)
-		return self.__output
-
-	def __exit__(self, exc_type, exc_val, exc_tb):
-		try:
-			if isinstance(self.__output, Popen):
-				self.__output.close()
-		finally:
-			self._set(_reset = True)
-			self.__output = None
 
 	def __call__(self, *args, **kwargs):
-		try:
-			return self._class(*args, **kwargs)
-		finally:
-			self._set(_reset = True)
+		return self._classes(*args, **kwargs)
 
 	@property
 	def __(self, *args, **kwargs):
-		return self._partial_class(*args, **kwargs)
+		return self._classes(*args, _partial = True, **kwargs)
+
+ext_ = partial(
+	module_installed(fullpath("extensions.py", f_back = 2)).ext_,
+	y,
+)
 
 def __getattr__(_program):
 	"""
@@ -58,8 +48,6 @@ def __getattr__(_program):
 
 		Answer 2: https://stackoverflow.com/questions/56786604/import-modules-that-dont-exist-yet/56795585#56795585
 		User 2:   https://stackoverflow.com/users/3830997/matthias-fripp
-
-		Modified by me
 	"""
 	if _program == "__path__":
 		raise AttributeError

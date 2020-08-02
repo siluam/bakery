@@ -209,7 +209,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 					return input()
 
 		if _type.__name__ in ("str", "repr"):
-			return " ".join(input)
+			return "\n".join(input)
 		elif _type.__name__ in ("generator", "iter", "chain"):
 			return self._convert_to_generator(input)
 		else:
@@ -231,35 +231,45 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 
 	def __getattr__(self, subcommand):
 		def inner(*args, **kwargs):
-			try:
-				return self._class(
-					*args, _subcommand=subcommand, **kwargs
-				)
-			finally:
-				self._set(_reset=True)
+			return self._classes(*args, _subcommand=subcommand, **kwargs)
 		return inner
 
-	def _partial_class(self, *args, **kwargs):
-		return partial(
-			self.__class__,
-			_program=self._program,
-			*args,
-			_baked_commands=D(self._command.baked),
-			_baked_settings=D(self._settings.baked),
-			**kwargs,
-		)
+	def __enter__(self):
+		return self
 
-	def _class(
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		pass
+
+	def _classes(
 		self,
 		*args,
-		_subcommand="supercalifragilisticexpialidocious",
-		**kwargs,
+		_partial = False,
+		subcommand = "supercalifragilisticexpialidocious",
+		**kwargs
 	):
-		self._subcommand_check(
-			kwargs.pop("_subcommand", _subcommand)
-		)
-		self._set_and_process(*args, **kwargs)
-		return self._return_frosted_output()
+		for arg in args:
+			if type(arg).__name__ == "function":
+				pass
+				break
+		else:
+			if _partial:
+				return partial(
+					self.__class__,
+					_program=self._program,
+					*args,
+					_baked_commands=D(self._command.baked),
+					_baked_settings=D(self._settings.baked),
+					**kwargs,
+				)
+			else:
+				try:
+					self._subcommand_check(
+						kwargs.pop("_subcommand", subcommand)
+					)
+					self._set_and_process(*args, **kwargs)
+					return self._return_frosted_output()
+				finally:
+					self._set(_reset=True)
 
 	def _set_and_process(self, *args, **kwargs):
 
@@ -344,16 +354,10 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			raise StopIteration
 
 	def __str__(self):
-		try:
-			return self._class(_type = str)
-		finally:
-			self._set(_reset = True)
+		return self._classes(_type = str)
 
 	def __repr__(self):
-		try:
-			return self._class(_type = repr)
-		finally:
-			self._set(_reset = True)
+		return self._classes(_type = repr)
 
 	def __assign_to_frozen(self, pr, value, reversed=False):
 

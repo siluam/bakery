@@ -16,22 +16,11 @@ def __getattr__(_program):
 
 		Answer 2: https://stackoverflow.com/questions/56786604/import-modules-that-dont-exist-yet/56795585#56795585
 		User 2:   https://stackoverflow.com/users/3830997/matthias-fripp
-
-		Modified by me
 	"""
 	if _program == "__path__":
 		raise AttributeError
 
-	extension = module_installed(fullpath("extensions.py", f_back = 1))
-	prog_parts = _program.partition("_")
-	bakeriy = i if prog_parts[2] == "i" else y
-
 	try:
-		if prog_parts[0] == "ext":
-			return partial(extension.ext_, bakeriy)
-		elif prog_parts[0] == "baker":
-			return partial(extension.baker_, bakeriy)
-		else:
-			return y.y(_program = _program)
+		return y.y(_program = _program)
 	except Exception as e:
 		return e
