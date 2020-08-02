@@ -1,7 +1,7 @@
 # From Imports
 from addict import Dict as D
 from collections import namedtuple
-from functools import partial
+from functools import partial, wraps
 from nanite import module_installed, fullpath
 from subprocess import Popen
 from typing import MutableSequence as MS, Dict, Any, Tuple, Union
@@ -30,15 +30,15 @@ class y(_milcery):
 		)
 
 	def __call__(self, *args, **kwargs):
-		decorator_mode = False
 		def wrapper(func = None):
-			if func is not None:
-				decorator_mode = True
-				return self._classes(func(*args, **kwargs))
-		if decorator_mode:
-			return wrapper
-		else:
-			return self._classes(*args, **kwargs)
+			@wraps(func)
+			def wrapped():
+				if func is None:
+					return self._classes(*args, **kwargs)
+				else:
+					return self._classes(func(*args, **kwargs))
+			return wrapped
+		return wrapper
 
 	@property
 	def __(self, *args, **kwargs):

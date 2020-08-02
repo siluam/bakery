@@ -33,15 +33,15 @@ class i(_milcery):
 
 	@property
 	def __call__(self, *args, **kwargs):
-		decorator_mode = False
 		def wrapper(func = None):
-			if func is not None:
-				decorator_mode = True
-				return self._classes(func(*args, **kwargs), _partial = True)
-		if decorator_mode:
-			return wrapper
-		else:
-			return self._classes(*args, _partial = True, **kwargs)
+			@wraps(func)
+			def wrapped():
+				if func is None:
+					return self._classes(*args, **kwargs, _partial = True)
+				else:
+					return self._classes(func(*args, **kwargs), _partial = True)
+			return wrapped
+		return wrapper
 
 ext_ = partial(
 	module_installed(fullpath("extensions.py", f_back = 2)).ext_,
