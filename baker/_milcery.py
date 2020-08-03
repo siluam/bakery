@@ -142,17 +142,20 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			"_input": None,
 			# Dict must be in the form {"i" : user} or {"s" : user}, to use or not use the
 			# configuration files of the specified user
-			"_sudo": {},
+			"_sudo": dict(),
 			# If "_frozen" has a truthy value, freeze this bakery object such that another bakery object
 			# may act on it; else keep it active
 			"_frozen": False,
 			# A dictionary used to pass options to the subprocess Popen class
-			"_popen": {},
+			"_popen": dict(),
 			# Chunk size used when reading with _capture = "run"
 			"_chunk_size": 512,
+			"_regular_args": [],
+			"_regular_kwargs": dict(),
 		}
 
 		self._sub = D({})
+		self._subcommand = "supercalifragilisticexpialidocious"
 
 		self._is_bakery_object = True
 
@@ -181,8 +184,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			if isinstance(sa, (str, bytes, bytearray))
 			else list(sa)
 		)
-		kwargs.update(ska)
-		self._kwargs = kwargs
+		self._kwargs = kwargs | ska
 
 	def _convert_to_generator(self, input):
 		yield from input
@@ -219,11 +221,11 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		if subcommand[-1] == "_":
 			self._sub.function = f"_{subcommand}"
 			self._sub.unprocessed = (
-				"supercalifragilisticexpialidocious"
+				self._subcommand
 			)
-		elif subcommand == "supercalifragilisticexpialidocious":
+		elif subcommand == self._subcommand:
 			self._sub.unprocessed = (
-				"supercalifragilisticexpialidocious"
+				self._subcommand
 			)
 		else:
 			self._sub.unprocessed = subcommand
@@ -320,7 +322,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		self.n = 0
 
 		self._subcommand_check(
-			"supercalifragilisticexpialidocious"
+			self._subcommand
 		)
 		self._set_and_process()
 
@@ -385,8 +387,8 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 					# The values of "frozen_dict" are meant to be overwritten!
 					for cat in ("planetary", "baked"):
 						for std in ("out", "err"):
-							if value._settings[cat].supercalifragilisticexpialidocious[f"_ignore_std{std}"]:
-								frozen_dict[std] = value._settings[cat].supercalifragilisticexpialidocious[f"_ignore_std{std}"]
+							if value._settings[cat][self._subcommand][f"_ignore_std{std}"]:
+								frozen_dict[std] = value._settings[cat][self._subcommand][f"_ignore_std{std}"]
 					return value._program
 
 		if isinstance(value, tuple):
@@ -427,7 +429,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		partially_frozen = partial(
 			self.__class__,
 			_ignore_check=True,
-			_baked_settings=D({"supercalifragilisticexpialidocious" : dict(
+			_baked_settings=D({self._subcommand : dict(
 				_ignore_stdout = frozen_dict["out"],
 				_ignore_stderr = frozen_dict["err"],
 			)}),

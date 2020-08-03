@@ -12,8 +12,8 @@ include = [
 python = "^3.8"
 addict = "*"
 autoslot = "*"
+fabric = "*"
 pout = "*"
-sarge = "*"
 toml = "*"
 nanite = {git = "https://gitlab.com/picotech/nanotech/nanite.git", branch = "master"}
 gensing = {git = "https://gitlab.com/picotech/nanotech/gensing.git", branch = "master"}

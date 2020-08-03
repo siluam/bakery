@@ -29,14 +29,32 @@ class y(_milcery):
 			**kwargs,
 		)
 
-	def __call__(self, *args, **kwargs):
+	def __call__(
+		self,
+		*args,
+		_rab = None,
+		_raa = None,
+		_sa = None,
+		_sk = None,
+		_rk = None,
+		**kwargs
+	):
 		def wrapper(func = None):
 			@wraps(func)
 			def wrapped():
 				if func is None:
-					return self._classes(*args, **kwargs)
+					return self._classes(*args, **kwargs, _partial = True)
 				else:
-					return self._classes(func(*args, **kwargs))
+					return self._classes(
+						_starter_args = _sa or [],
+						_starter_kwargs = _sk or dict(),
+						_regular_args = chain(
+							_rab or [],
+							[func(*args, **kwargs)],
+							_raa or [],
+						),
+						_regular_kwargs = _rk or dict(),
+					)
 			return wrapped
 		return wrapper
 

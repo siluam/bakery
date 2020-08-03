@@ -136,7 +136,7 @@ class baking_:
 				getattr(_cls, category)["planetary" if _global else "baked"] = D({})
 			elif _all_subcommands:
 				for key in getattr(_cls, category)["planetary" if _global else "baked"].keys():
-					if key != "supercalifragilisticexpialidocious":
+					if key != self._subcommand:
 						getattr(_cls, category)["planetary" if _global else "baked"][key] = D({})
 			else:
 				for sub in _subcommands:

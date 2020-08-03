@@ -2,6 +2,7 @@
 from addict import Dict as D
 from collections import namedtuple
 from functools import partial
+from itertools import chain
 from nanite import module_installed, fullpath
 from typing import MutableSequence as MS, Dict, Any, Tuple, Union
 
@@ -32,14 +33,33 @@ class i(_milcery):
 		return self._classes(*args, **kwargs)
 
 	@property
-	def __call__(self, *args, **kwargs):
+	def __call__(
+		self,
+		*args,
+		_rab = None,
+		_raa = None,
+		_sa = None,
+		_sk = None,
+		_rk = None,
+		**kwargs
+	):
 		def wrapper(func = None):
 			@wraps(func)
 			def wrapped():
 				if func is None:
 					return self._classes(*args, **kwargs, _partial = True)
 				else:
-					return self._classes(func(*args, **kwargs), _partial = True)
+					return self._classes(
+						_partial = True,
+						_starter_args = _sa or [],
+						_starter_kwargs = _sk or dict(),
+						_regular_args = chain(
+							_rab or [],
+							[func(*args, **kwargs)],
+							_raa or [],
+						),
+						_regular_kwargs = _rk or dict(),
+					)
 			return wrapped
 		return wrapper
 

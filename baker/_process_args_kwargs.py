@@ -62,19 +62,21 @@ class _process_args_kwargs:
 							*self.__cls._command[cat][self.__subcommand].components[ak][sr]
 						)
 
-			if self.__subcommand != "supercalifragilisticexpialidocious":
-				if not self.__cls._command.planetary.supercalifragilisticexpialidocious.components.kwargs.starter:
-					self.__cls._command.planetary.supercalifragilisticexpialidocious.components.kwargs.starter = tea()
-				if not self.__cls._command.baked.supercalifragilisticexpialidocious.components.kwargs.starter:
-					self.__cls._command.baked.supercalifragilisticexpialidocious.components.kwargs.starter = tea()
+			if self.__subcommand != self._subcommand:
+				if not self.__cls._command.planetary[self._subcommand].components.kwargs.starter:
+					self.__cls._command.planetary[self._subcommand].components.kwargs.starter = tea()
+				if not self.__cls._command.baked[self._subcommand].components.kwargs.starter:
+					self.__cls._command.baked[self._subcommand].components.kwargs.starter = tea()
 				self.__cls._command.final[self.__subcommand].components.kwargs.starter.extend(
-					*self.__cls._command.planetary.supercalifragilisticexpialidocious.components.kwargs.starter,
-					*self.__cls._command.baked.supercalifragilisticexpialidocious.components.kwargs.starter,
+					*self.__cls._command.planetary[self._subcommand].components.kwargs.starter,
+					*self.__cls._command.baked[self._subcommand].components.kwargs.starter,
 				)
 		else:
 			if self.__args:
+				self.__args += self.__cls._regular_args
 				self.__process_args()
 			if self.__kwargs:
+				self.__kwargs |= self.__cls._regular_kwargs
 				self.__add_kwargs()
 				self.__process_kwargs()
 
