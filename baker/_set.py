@@ -112,12 +112,11 @@ class _set:
 			self.__kwargs = D(_)
 
 		else:
-			self.__cls._settings.final[self.__subcommand] |= D(self.__cls._settings.defaults)
+			self.__cls._settings.final[self.__subcommand].update(D(self.__cls._settings.defaults))
 			if self.__subcommand != self._subcommand:
-				self.__cls._settings.final[self.__subcommand] |= D(
-					self.__cls._settings.planetary[self._subcommand] | self.__cls._settings.baked[self._subcommand]
-				)
+				self.__cls._settings.final[self.__subcommand].update(D(self.__cls._settings.planetary[self._subcommand]))
+				self.__cls._settings.final[self.__subcommand].update(D(self.__cls._settings.baked[self._subcommand]))
 
 			# Careful! The order of the categories here matters!
 			for category in tuple(categories.keys())[:-1]:
-				self.__cls._settings.final[self.__subcommand] |= D(self.__cls._settings[category][self.__subcommand])
+				self.__cls._settings.final[self.__subcommand].update(D(self.__cls._settings[category][self.__subcommand]))

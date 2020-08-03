@@ -76,7 +76,7 @@ class _process_args_kwargs:
 				self.__args += self.__cls._regular_args
 				self.__process_args()
 			if self.__kwargs:
-				self.__kwargs |= self.__cls._regular_kwargs
+				self.__kwargs.update(self.__cls._regular_kwargs)
 				self.__add_kwargs()
 				self.__process_kwargs()
 

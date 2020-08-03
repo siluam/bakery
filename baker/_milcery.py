@@ -184,7 +184,8 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			if isinstance(sa, (str, bytes, bytearray))
 			else list(sa)
 		)
-		self._kwargs = kwargs | ska
+		kwargs.update(ska)
+		self._kwargs = kwargs
 
 	def _convert_to_generator(self, input):
 		yield from input
