@@ -2,6 +2,7 @@
 from addict import Dict as D
 from collections import namedtuple
 from functools import partial, wraps
+from itertools import chain
 from nanite import module_installed, fullpath
 from subprocess import Popen
 from typing import MutableSequence as MS, Dict, Any, Tuple, Union
@@ -39,12 +40,16 @@ class y(_milcery):
 		_rk = None,
 		**kwargs
 	):
-		def wrapper(func = None):
-			@wraps(func)
-			def wrapped():
-				if func is None:
-					return self._classes(*args, **kwargs)
-				else:
+
+		def func_check(_func = None):
+			return _func
+
+		if (func := func_check()) is None:
+			return self._classes(*args, **kwargs)
+		else:
+			def wrapper():
+				@wraps(func)
+				def wrapped():
 					return self._classes(
 						_starter_args = _sa or [],
 						_starter_kwargs = _sk or dict(),
@@ -55,8 +60,8 @@ class y(_milcery):
 						),
 						_regular_kwargs = _rk or dict(),
 					)
-			return wrapped
-		return wrapper
+				return wrapped
+			return wrapper
 
 	@property
 	def __(self, *args, **kwargs):

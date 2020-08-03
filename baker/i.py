@@ -43,12 +43,16 @@ class i(_milcery):
 		_rk = None,
 		**kwargs
 	):
-		def wrapper(func = None):
-			@wraps(func)
-			def wrapped():
-				if func is None:
-					return self._classes(*args, **kwargs, _partial = True)
-				else:
+
+		def func_check(_func = None):
+			return _func
+
+		if (func := func_check()) is None:
+			return self._classes(*args, _partial = True, **kwargs)
+		else:
+			def wrapper():
+				@wraps(func)
+				def wrapped():
 					return self._classes(
 						_partial = True,
 						_starter_args = _sa or [],
@@ -60,8 +64,8 @@ class i(_milcery):
 						),
 						_regular_kwargs = _rk or dict(),
 					)
-			return wrapped
-		return wrapper
+				return wrapped
+			return wrapper
 
 ext_ = partial(
 	module_installed(fullpath("extensions.py", f_back = 2)).ext_,
