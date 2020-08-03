@@ -29,43 +29,12 @@ class i(_milcery):
 			**kwargs,
 		)
 
-	def __(self, *args, **kwargs):
-		return self._classes(*args, **kwargs)
-
 	@property
-	def __call__(
-		self,
-		*args,
-		_rab = None,
-		_raa = None,
-		_sa = None,
-		_sk = None,
-		_rk = None,
-		**kwargs
-	):
+	def __call__(self, *args, **kwargs):
+		return self._classes(*args, _partial = True, **kwargs)
 
-		def func_check(_func = None):
-			return _func
-
-		if (func := func_check()) is None:
-			return self._classes(*args, _partial = True, **kwargs)
-		else:
-			def wrapper():
-				@wraps(func)
-				def wrapped():
-					return self._classes(
-						_partial = True,
-						_starter_args = _sa or [],
-						_starter_kwargs = _sk or dict(),
-						_regular_args = chain(
-							_rab or [],
-							[func(*args, **kwargs)],
-							_raa or [],
-						),
-						_regular_kwargs = _rk or dict(),
-					)
-				return wrapped
-			return wrapper
+	def a_(self, *args, **kwargs):
+		return self._classes(*args, **kwargs)
 
 ext_ = partial(
 	module_installed(fullpath("extensions.py", f_back = 2)).ext_,

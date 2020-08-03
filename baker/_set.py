@@ -103,11 +103,17 @@ class _set:
 					self.__args = list(self.__args)
 					del self.__args[index]
 
-			for key in self.__kwargs.keys():
-				if key[0] == "_":
-					self.__cls._settings[cat][self.__subcommand][key] = self.__kwargs[key]
-				else:
-					_[key] = self.__kwargs[key]
+			def inner(dct):
+				for key, value in dct.items():
+					if key[0] == "_":
+						if key == "_regular_kwargs":
+							inner(value)
+						else:
+							self.__cls._settings[cat][self.__subcommand][key] = value
+					else:
+						_[key] = value
+
+			inner(self.__kwargs)
 
 			self.__kwargs = D(_)
 

@@ -5,7 +5,7 @@ import weakref
 from addict import Dict as D
 from autoslot import SlotsMeta
 from collections import defaultdict
-from functools import partial
+from functools import partial, wraps
 from gensing import tea, frosting
 from itertools import chain
 from nanite import (
@@ -151,7 +151,6 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			# Chunk size used when reading with _capture = "run"
 			"_chunk_size": 512,
 			"_regular_args": [],
-			"_regular_kwargs": dict(),
 		}
 
 		self._sub = D({})
@@ -233,6 +232,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			self._sub.processed = subcommand.replace("_", "-")
 
 	def __getattr__(self, subcommand):
+		__getattr__.d_ = self.d_
 		def inner(*args, **kwargs):
 			return self._classes(*args, _subcommand=subcommand, **kwargs)
 		return inner
@@ -268,6 +268,41 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 				return self._return_frosted_output()
 			finally:
 				self._set(_reset=True)
+
+	"""
+		From: https://realpython.com/primer-on-python-decorators/
+	"""
+	def d_(
+		self,
+		_func = None,
+		*,
+		subcommand = "supercalifragilisticexpialidocious",
+		_rab = None,
+		_raa = None,
+		_sa = None,
+		_sk = None,
+		_rk = None,
+	):
+		def wrapper(func):
+			@wraps(func)
+			def wrapped(*args, **kwargs):
+				return self._classes(
+					_partial = self.__class__.__name__ == "i",
+					subcommand = subcommand,
+					_starter_args = _sa or [],
+					_starter_kwargs = _sk or dict(),
+					_regular_args = chain(
+						_rab or [],
+						[func(*args, **kwargs)],
+						_raa or [],
+					),
+					_regular_kwargs = _rk or dict(),
+				)
+			return wrapped
+		if _func is None:
+			return wrapper
+		else:
+			return wrapper(_func)
 
 	def _set_and_process(self, *args, **kwargs):
 
@@ -443,7 +478,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		)
 
 		return (
-			frozen.__()
+			frozen.a_()
 			if self.__class__.__name__ == "i"
 			else frozen()
 		)

@@ -1,7 +1,7 @@
 # From Imports
 from addict import Dict as D
 from collections import namedtuple
-from functools import partial, wraps
+from functools import partial
 from itertools import chain
 from nanite import module_installed, fullpath
 from subprocess import Popen
@@ -30,41 +30,11 @@ class y(_milcery):
 			**kwargs,
 		)
 
-	def __call__(
-		self,
-		*args,
-		_rab = None,
-		_raa = None,
-		_sa = None,
-		_sk = None,
-		_rk = None,
-		**kwargs
-	):
-
-		def func_check(_func = None):
-			return _func
-
-		if (func := func_check()) is None:
-			return self._classes(*args, **kwargs)
-		else:
-			def wrapper():
-				@wraps(func)
-				def wrapped():
-					return self._classes(
-						_starter_args = _sa or [],
-						_starter_kwargs = _sk or dict(),
-						_regular_args = chain(
-							_rab or [],
-							[func(*args, **kwargs)],
-							_raa or [],
-						),
-						_regular_kwargs = _rk or dict(),
-					)
-				return wrapped
-			return wrapper
+	def __call__(self, *args, **kwargs):
+		return self._classes(*args, **kwargs)
 
 	@property
-	def __(self, *args, **kwargs):
+	def a_(self, *args, **kwargs):
 		return self._classes(*args, _partial = True, **kwargs)
 
 ext_ = partial(
