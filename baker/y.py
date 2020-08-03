@@ -43,7 +43,7 @@ class y(_milcery):
 			@wraps(func)
 			def wrapped():
 				if func is None:
-					return self._classes(*args, **kwargs, _partial = True)
+					return self._classes(*args, **kwargs)
 				else:
 					return self._classes(
 						_starter_args = _sa or [],
