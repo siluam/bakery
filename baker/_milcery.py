@@ -151,6 +151,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			# Chunk size used when reading with _capture = "run"
 			"_chunk_size": 512,
 			"_regular_args": [],
+			"_decorator": False,
 		}
 
 		self._sub = D({})
@@ -231,8 +232,49 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			self._sub.unprocessed = subcommand
 			self._sub.processed = subcommand.replace("_", "-")
 
+	"""
+		From: https://realpython.com/primer-on-python-decorators/
+	"""
+	def __call__(
+		self,
+		_func = None,
+		*,
+		_rab = None,
+		_raa = None,
+		_sa = None,
+		_sk = None,
+		**dwargs,
+	):
+		if dwargs.get("_decorator", False):
+			def wrapper(func):
+				@wraps(func)
+				def wrapped(*args, **kwargs):
+					return self._classes(
+						_partial = self.__class__.__name__ == "i",
+						_starter_args = _sa or [],
+						_starter_kwargs = _sk or dict(),
+						_regular_args = chain(
+							_rab or [],
+							[func(*args, **kwargs)],
+							_raa or [],
+						),
+						_regular_kwargs = dwargs,
+					)
+				return wrapped
+			if _func is None:
+				return wrapper
+			else:
+				return wrapper(_func)
+		else:
+			for kwarg in (f"_{kw}" for kw in ("func", "rab", "raa", "sa", "sk")):
+				kwargs.pop(kwarg, None)
+			return self._classes(*args, _partial = self.__class__.__name__ == "i", **kwargs)
+
+	def a_(self, *args, **kwargs):
+		return self._classes(*args, _partial = not(self.__class__.__name__ == "i"), **kwargs)
+
 	def __getattr__(self, subcommand):
-		__getattr__.d_ = self.d_
+		self._sub.passon = subcommand
 		def inner(*args, **kwargs):
 			return self._classes(*args, _subcommand=subcommand, **kwargs)
 		return inner
@@ -268,41 +310,6 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 				return self._return_frosted_output()
 			finally:
 				self._set(_reset=True)
-
-	"""
-		From: https://realpython.com/primer-on-python-decorators/
-	"""
-	def d_(
-		self,
-		_func = None,
-		*,
-		subcommand = "supercalifragilisticexpialidocious",
-		_rab = None,
-		_raa = None,
-		_sa = None,
-		_sk = None,
-		_rk = None,
-	):
-		def wrapper(func):
-			@wraps(func)
-			def wrapped(*args, **kwargs):
-				return self._classes(
-					_partial = self.__class__.__name__ == "i",
-					subcommand = subcommand,
-					_starter_args = _sa or [],
-					_starter_kwargs = _sk or dict(),
-					_regular_args = chain(
-						_rab or [],
-						[func(*args, **kwargs)],
-						_raa or [],
-					),
-					_regular_kwargs = _rk or dict(),
-				)
-			return wrapped
-		if _func is None:
-			return wrapper
-		else:
-			return wrapper(_func)
 
 	def _set_and_process(self, *args, **kwargs):
 
