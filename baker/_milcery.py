@@ -237,8 +237,10 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 	"""
 	def __call__(
 		self,
+		*dargs,
 		_func = None,
 		*,
+		_partial = self.__class__.__name__ == "i",
 		_rab = None,
 		_raa = None,
 		_sa = None,
@@ -250,7 +252,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 				@wraps(func)
 				def wrapped(*args, **kwargs):
 					return self._classes(
-						_partial = self.__class__.__name__ == "i",
+						_partial = _partial,
 						_starter_args = _sa or [],
 						_starter_kwargs = _sk or dict(),
 						_regular_args = chain(
@@ -266,17 +268,47 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			else:
 				return wrapper(_func)
 		else:
-			for kwarg in (f"_{kw}" for kw in ("func", "rab", "raa", "sa", "sk")):
-				kwargs.pop(kwarg, None)
-			return self._classes(*args, _partial = self.__class__.__name__ == "i", **kwargs)
-
-	def a_(self, *args, **kwargs):
-		return self._classes(*args, _partial = not(self.__class__.__name__ == "i"), **kwargs)
+			for dwarg in (f"_{kw}" for kw in ("func", "rab", "raa", "sa", "sk")):
+				dwargs.pop(dwarg, None)
+			return self._classes(*dargs, _partial = _partial, **dwargs)
 
 	def __getattr__(self, subcommand):
-		self._sub.passon = subcommand
-		def inner(*args, **kwargs):
-			return self._classes(*args, _subcommand=subcommand, **kwargs)
+		def inner(
+			self,
+			*dargs,
+			_func = None,
+			*,
+			_partial = self.__class__.__name__ == "i",
+			_rab = None,
+			_raa = None,
+			_sa = None,
+			_sk = None,
+			**dwargs,
+		):
+			if dwargs.get("_decorator", False):
+				def wrapper(func):
+					@wraps(func)
+					def wrapped(*args, **kwargs):
+						return self._classes(
+							_partial = _partial,
+							_starter_args = _sa or [],
+							_starter_kwargs = _sk or dict(),
+							_regular_args = chain(
+								_rab or [],
+								[func(*args, **kwargs)],
+								_raa or [],
+							),
+							_regular_kwargs = dwargs,
+						)
+					return wrapped
+				if _func is None:
+					return wrapper
+				else:
+					return wrapper(_func)
+			else:
+				for dwarg in (f"_{kw}" for kw in ("func", "rab", "raa", "sa", "sk")):
+					dwargs.pop(dwarg, None)
+				return self._classes(*dargs, _partial = _partial, **dwargs)
 		return inner
 
 	def __enter__(self):
@@ -484,11 +516,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			_program = " ".join(program[::-1] if reversed else program)
 		)
 
-		return (
-			frozen.a_()
-			if self.__class__.__name__ == "i"
-			else frozen()
-		)
+		return frozen(_partial = False)
 
 	def __or__(self, value):
 		return self.__assign_to_frozen("|", value)

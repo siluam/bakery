@@ -13,7 +13,6 @@ _milcery = module_installed(
 default: Tuple[None] = namedtuple("default", "")
 
 class i(_milcery):
-	__call__ = property(fget = __call__)
 	def __init__(
 		self,
 		*args,
@@ -29,6 +28,7 @@ class i(_milcery):
 			_baked_settings = _baked_settings or D({}),
 			**kwargs,
 		)
+		self.__call__ = property(fget = self.__call__)
 
 ext_ = partial(
 	module_installed(fullpath("extensions.py", f_back = 2)).ext_,

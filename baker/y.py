@@ -14,7 +14,6 @@ i = module_installed(fullpath("i.py", f_back = 2)).i
 default: Tuple[None] = namedtuple("default", "")
 
 class y(_milcery):
-	a_ = property(fget = a_)
 	def __init__(
 		self,
 		*args,
