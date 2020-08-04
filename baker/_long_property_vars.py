@@ -8,28 +8,6 @@ from subprocess import Popen, PIPE
 class _long_property_vars:
 
 	@property
-	def _program(self):
-		return self.__program
-
-	@_program.setter
-	def _program(self, value):
-		if self._ignore_check or self._frozen:
-			self.__program = value
-		else:
-			value = value.replace("_", "-")
-			p = Popen(
-				(
-					"where.exe" if os.name == "nt" else "which",
-					value,
-				),
-				stdout = PIPE,
-				stderr = PIPE,
-			)
-			if (stderrput := p.stderr.readline().decode().strip()):
-				raise ImportError(stderrput)
-			self.__program = p.stdout.readline().decode().strip()
-
-	@property
 	def _n_lines(self):
 		return self.__n_lines
 
