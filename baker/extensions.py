@@ -4,7 +4,6 @@ def ext_(
 	bakeriy,
 	*args,
 	_program: str = None,
-	_ignore_check: bool = False,
 	_baked_commands: Dict[str, Any] = None,
 	_baked_settings: Dict[str, Any] = None,
 	**kwargs,
@@ -17,7 +16,6 @@ def ext_(
 	return bakeriy(
 		*args,
 		_program = _program or "",
-		_ignore_check = _ignore_check,
 		_baked_commands = _baked_commands or D({}),
 		_baked_settings = _baked_settings or D({}),
 		**kwargs,

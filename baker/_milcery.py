@@ -76,7 +76,6 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		self,
 		*args,
 		_program: str = None,
-		_ignore_check: bool = False,
 		_freezer: str = None,
 		_baked_commands: Dict[str, Any] = None,
 		_baked_settings: Dict[str, Any] = None,
@@ -99,7 +98,6 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			A good way to debug commands is to see what the command actually was, using the "_str"
 			keyword argument.
 		"""
-		self._ignore_check: bool = _ignore_check
 		self._program: str = _program or ""
 		self._freezer: str = _freezer or ""
 
@@ -387,7 +385,6 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 	def __deepcopy__(self):
 		return self.__class__(
 			_program=self._program,
-			_ignore_check=self._ignore_check,
 			_freezer=self._freezer,
 			_baked_commands=D(self._command.baked),
 			_baked_settings=D(self._settings.baked),
@@ -503,7 +500,6 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 
 		partially_frozen = partial(
 			self.__class__,
-			_ignore_check=True,
 			_baked_settings=D({self._subcommand : dict(
 				_ignore_stdout = frozen_dict["out"],
 				_ignore_stderr = frozen_dict["err"],

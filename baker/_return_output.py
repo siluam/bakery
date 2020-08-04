@@ -2,8 +2,8 @@
 from addict import Dict as D
 from functools import partial
 from itertools import chain
-from nanite import peek, trim
-from shlex import split, join
+from nanite import peek, trim, fullpath
+from shlex import split, quote
 from subprocess import Popen, PIPE, DEVNULL
 from typing import Dict, Any
 
@@ -172,14 +172,14 @@ class _return_output:
 
 		return partial(
 			Popen,
-			join(self.__command.values())
+			quote(self.__command())
 			if self.__cls._popen.get("shell", True)
 			else split(self.__command()),
 			bufsize=self.__cls._popen.get("bufsize", -1),
 			stdin=stdin,
 			stdout=stdout,
 			stderr=stderr,
-			executable=self.__cls._popen.get("executable", None),
+			executable=fullpath(self.__cls._popen.get("executable", "/bin/sh")),
 			preexec_fn=self.__cls._popen.get("preexec_fn", None),
 			close_fds=self.__cls._popen.get("close_fds", True),
 			shell=self.__cls._popen.get("shell", True),
