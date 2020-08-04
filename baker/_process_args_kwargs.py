@@ -73,7 +73,7 @@ class _process_args_kwargs:
 				)
 		else:
 			if self.__args:
-				self.__args += self.__cls._regular_args
+				self.__args += tuple(self.__cls._regular_args)
 				self.__process_args()
 			if self.__kwargs:
 				self.__add_kwargs()
@@ -121,6 +121,8 @@ class _process_args_kwargs:
 				self.__cls._command[self.__cat][self.__subcommand].components.args[
 					self.__starter_regular
 				].append(arg)
+			elif type(arg).__name__ == "function":
+				pass
 			else:
 				raise TypeError(
 					f'Sorry! Value "{arg}" must be a string, integer, or dictionary!'

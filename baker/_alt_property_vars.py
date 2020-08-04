@@ -19,9 +19,9 @@ class _alt_property_vars:
 			self._type = list
 
 	@property
-	def _deck(self):
+	def _d(self):
 		return self._decorator
 
-	@_deck.setter
-	def _deck(self, value):
+	@_d.setter
+	def _d(self, value):
 		self._decorator = bool(value)

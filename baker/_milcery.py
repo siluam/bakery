@@ -239,15 +239,15 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 		self,
 		*dargs,
 		_func = None,
-		*,
-		_partial = self.__class__.__name__ == "i",
+		_partial = False,
 		_rab = None,
 		_raa = None,
 		_sa = None,
 		_sk = None,
 		**dwargs,
 	):
-		if dwargs.get("_decorator", False):
+		_partial = self.__class__.__name__ == "i"
+		if dwargs.get("_decorator", False) or dwargs.get("_d", False):
 			def wrapper(func):
 				@wraps(func)
 				def wrapped(*args, **kwargs):
@@ -277,15 +277,15 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			self,
 			*dargs,
 			_func = None,
-			*,
-			_partial = self.__class__.__name__ == "i",
+			_partial = False,
 			_rab = None,
 			_raa = None,
 			_sa = None,
 			_sk = None,
 			**dwargs,
 		):
-			if dwargs.get("_decorator", False):
+			_partial = self.__class__.__name__ == "i"
+			if dwargs.get("_decorator", False) or dwargs.get("_d", False):
 				def wrapper(func):
 					@wraps(func)
 					def wrapped(*args, **kwargs):
