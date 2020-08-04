@@ -72,7 +72,7 @@ class _process_args_kwargs:
 					*self.__cls._command.baked[self._subcommand].components.kwargs.starter,
 				)
 		else:
-			if self.__args:
+			if self.__args or self.__cls._regular_args:
 				self.__args += tuple(self.__cls._regular_args)
 				self.__process_args()
 			if self.__kwargs:

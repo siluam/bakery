@@ -3,7 +3,7 @@ from addict import Dict as D
 from functools import partial
 from itertools import chain
 from nanite import peek, trim
-from shlex import split, quote
+from shlex import split, join
 from subprocess import Popen, PIPE, DEVNULL
 from typing import Dict, Any
 
@@ -172,7 +172,7 @@ class _return_output:
 
 		return partial(
 			Popen,
-			quote(self.__command())
+			join(self.__command.values())
 			if self.__cls._popen.get("shell", True)
 			else split(self.__command()),
 			bufsize=self.__cls._popen.get("bufsize", -1),
