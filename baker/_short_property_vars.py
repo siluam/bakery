@@ -27,6 +27,16 @@ class _short_property_vars:
 		self.__capture = value
 
 	@property
+	def _str(self):
+		return self.__str
+
+	@_str.setter
+	def _str(self, value):
+		self.__str = bool(value)
+		if value:
+			self._type = str
+
+	@property
 	def _print(self):
 		return self.__print
 

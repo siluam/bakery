@@ -17,11 +17,3 @@ class _alt_property_vars:
 	def _list(self, value):
 		if value:
 			self._type = list
-
-	@property
-	def _d(self):
-		return self._decorator
-
-	@_d.setter
-	def _d(self, value):
-		self._decorator = bool(value)

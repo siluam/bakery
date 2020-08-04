@@ -35,7 +35,7 @@ class _return_output:
 					output.stderr, return_first=2
 				)
 				if _peek_value and not self.__cls._ignore_stderr:
-					raise SystemError("".join(output.stderr))
+					raise SystemError("\n".join(output.stderr))
 
 				stds = ["out", "err"]
 				for std, opp in zip(stds, stds[::-1]):

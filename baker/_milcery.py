@@ -150,7 +150,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			"_popen": dict(),
 			# Chunk size used when reading with _capture = "run"
 			"_chunk_size": 512,
-			"_regular_args": [],
+			"_regular_args": tuple(),
 			"_decorator": False,
 		}
 
@@ -274,7 +274,6 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 
 	def __getattr__(self, subcommand):
 		def inner(
-			self,
 			*dargs,
 			_func = None,
 			_partial = False,
@@ -291,6 +290,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 					def wrapped(*args, **kwargs):
 						return self._classes(
 							_partial = _partial,
+							subcommand = subcommand,
 							_starter_args = _sa or [],
 							_starter_kwargs = _sk or dict(),
 							_regular_args = chain(
@@ -308,7 +308,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			else:
 				for dwarg in (f"_{kw}" for kw in ("func", "rab", "raa", "sa", "sk")):
 					dwargs.pop(dwarg, None)
-				return self._classes(*dargs, _partial = _partial, **dwargs)
+				return self._classes(*dargs, _partial = _partial, subcommand = subcommand, **dwargs)
 		return inner
 
 	def __enter__(self):
