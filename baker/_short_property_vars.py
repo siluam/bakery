@@ -86,3 +86,13 @@ class _short_property_vars:
 		if not isinstance(value, (dict, tea, frosting)):
 			raise TypeError('Sorry! "_starter_kwargs" needs to be a tea, frosting, or dict-like object!')
 		self.__starter_kwargs = value
+
+	@property
+	def _regular_kwargs(self):
+		return self.__regular_args
+
+	@_regular_kwargs.setter
+	def _regular_kwargs(self, value):
+		if not isinstance(value, (dict, tea, frosting)):
+			raise TypeError('Sorry! "_regular_kwargs" needs to be a tea, frosting, or dict-like object!')
+		self.__regular_kwargs = value
