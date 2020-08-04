@@ -150,6 +150,7 @@ class _milcery(metaclass = _melcery, *(mixinport(mixins))):
 			"_chunk_size": 512,
 			"_regular_args": tuple(),
 			"_decorator": False,
+			"_exe_env": False,
 		}
 
 		self._sub = D({})
