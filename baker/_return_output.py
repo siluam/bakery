@@ -172,7 +172,7 @@ class _return_output:
 
 		return partial(
 			Popen,
-			join(self.__command.values())
+			join(split(self.__command()))
 			if self.__cls._popen.get("shell", True)
 			else split(self.__command()),
 			bufsize=self.__cls._popen.get("bufsize", -1),
