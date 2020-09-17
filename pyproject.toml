@@ -15,8 +15,11 @@ autoslot = "*"
 fabric = "*"
 pout = "*"
 toml = "*"
-nanite = {git = "https://gitlab.com/picotech/nanotech/nanite.git", branch = "master"}
-gensing = {git = "https://gitlab.com/picotech/nanotech/gensing.git", branch = "master"}
+nanite = {git = "https://gitlab.com/picotech/nanotech/nanite.git", branch = "master", optional = true}
+gensing = {git = "https://gitlab.com/picotech/nanotech/gensing.git", branch = "master", optional = true}
+
+[tool.poetry.extras]
+full = ["nanite", "gensing"]
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
