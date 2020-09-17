@@ -48,6 +48,7 @@ def __getattr__(_program):
 
 	bakeri_menu = (
         "git",
+        "yadm",
     )
 
 	bakeriy = i if _program in bakeri_menu else y
