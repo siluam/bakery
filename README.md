@@ -114,7 +114,7 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     ls("/", _sudo = dict(s = "root"))
     ```
 
-* If you want visible prompts, use the kwarg setting `_capture = "run"`; otherwise, prompts will be captured in the output, while the process still halts for input.
+* If you want visible prompts, use the kwarg settings `_capture = "run"` or `_run = True`; otherwise, prompts will be captured in the output, while the process still halts for input (help me fix this, please?)
     ```python !
     from baker.y import zfs
 
@@ -214,6 +214,31 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     nulls = ls @ devnull
     ```
 
+* `bakery` objects may be used as decorators as well, using the `_d` or `_decorator` kwarg settings:
+    ```python !
+    from baker.y import ls, zfs
+
+    # ls /
+    @ls(_d = True, _run = True)
+    def root():
+        return "/"
+    root()
+
+    # zfs list chimchar
+    @zfs.list(_d = True, _run = True)
+    def root(pool):
+        return pool
+    root("chimchar")
+    ```
+
+* Context manager functionality exists as well:
+    ```python
+    import baker.y
+
+    # ls
+    with baker.y.ls as _list:
+        _list(_run = True)
+    ```
 
 ***
 
