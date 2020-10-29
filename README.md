@@ -22,7 +22,7 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
 
 &nbsp;&nbsp;&nbsp;&nbsp; `bakery` is a python module heavily inspired by [`sh`](https://amoffat.github.io/sh/), written by [`Andrew Moffat / amoffat`](https://github.com/amoffat); I loved the concept of `baking` a command so much that I created an entire module based on it.
 
-&nbsp;&nbsp;&nbsp;&nbsp; While amoffat's `sh` runs only Unix-based systems at the moment, `bakery's` use of [`sarge`](https://sarge.readthedocs.io/en/latest/), written by [`Vinay Sajip / vsajip`](https://github.com/vsajip), allows it to run on DOS-based systems, such as `Microsoft Windows`, as well. Here are a few more differences:
+&nbsp;&nbsp;&nbsp;&nbsp; While amoffat's `sh` runs only Unix-based systems at the moment, `bakery` is able to run on DOS-based systems as well, such as `Microsoft Windows`. Here are a few more differences:
 * Subcommands cannot be passed in as arguments, only as attributes or as `kwarg settings`, such as the following:
     ```python
     from baker.y import git
