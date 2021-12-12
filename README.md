@@ -63,7 +63,7 @@ mdsh-lang-python() { /usr/bin/env python3.8; }
     )
     ```
 
-* While I'm not sure how different the following behavious is, you can iterate over the `bakeriy` object itself to get its output:
+* While I'm not sure how different the following behavious is, you can iterate over the `bakery` object itself to get its output:
     ```python
     from baker.y import ls
 
