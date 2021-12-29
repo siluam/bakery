@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "baker"
+name = "bakery"
 version = "1.0.0.0"
 description = "An \"sh\" alternative"
 authors = ["shadowrylander <titaniumfiles@outlook.com>"]
 license = "GPL-3.0"
 include = [
-	"baker/**/*.py",
+	"bakery/**/*.py",
 ]
 
 [tool.poetry.dependencies]

@@ -1,8 +1,10 @@
+# Imports
+import pout
+
 # From Imports
 from addict import Dict as D
 from collections import OrderedDict
 from gensing import tea, frosting
-from itertools import chain
 from toml import load
 
 class _set:
@@ -68,6 +70,7 @@ class _set:
 
 	def __set(self):
 
+		# Careful! The order of the categories here matters!
 		categories = OrderedDict({
 			"planetary" : self.__global,
 			"baked" : self.__baking,
@@ -86,7 +89,6 @@ class _set:
 			self.__kwargs[self.__cls._sub.function] = True
 
 		if any(bategories[:-1]):
-
 			_ = dict()
 
 			for key, value in tuple(categories.items())[:-1]:
@@ -123,6 +125,5 @@ class _set:
 				self.__cls._settings.final[self.__subcommand].update(D(self.__cls._settings.planetary[self._subcommand]))
 				self.__cls._settings.final[self.__subcommand].update(D(self.__cls._settings.baked[self._subcommand]))
 
-			# Careful! The order of the categories here matters!
 			for category in tuple(categories.keys())[:-1]:
 				self.__cls._settings.final[self.__subcommand].update(D(self.__cls._settings[category][self.__subcommand]))

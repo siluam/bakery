@@ -2,9 +2,6 @@
 from addict import Dict as D
 from copy import deepcopy
 from functools import partial
-from gensing import tea
-from itertools import chain
-from typing import Dict, Union, Tuple
 
 class baking_:
 
@@ -41,10 +38,10 @@ class baking_:
 		_cls = self._cls_check(_cls)
 
 		if _akar == "replace":
-			_cls._command["planetary" if _g else "baked"][_subcommand] = D({})
+			_cls._command["planetary" if _g else "baked"][_sc] = D({})
 
 		if _sar == "replace":
-			_cls._settings["planetary" if _g else "baked"][_subcommand] = D({})
+			_cls._settings["planetary" if _g else "baked"][_sc] = D({})
 
 		self._set(_setup = True)
 
@@ -79,7 +76,7 @@ class baking_:
 		if _cls == self:
 			self_pak()
 		else:
-			_cls = self_pak()
+			args, kwargs, _cls = self_pak()
 			return _cls
 
 	def bake_all_(

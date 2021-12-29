@@ -3,11 +3,9 @@
 """
 
 # From Imports
-from functools import partial
 from nanite import module_installed, fullpath
 
-i = module_installed(fullpath("i.py", f_back = 2))
-y = module_installed(fullpath("y.py", f_back = 2))
+_milcery = module_installed(fullpath("_milcery.py", f_back = 2))._milcery
 
 def __getattr__(_program):
 	"""
@@ -21,6 +19,6 @@ def __getattr__(_program):
 		raise AttributeError
 
 	try:
-		return y.y(_program = _program)
+		return _milcery(_program = _program)
 	except Exception as e:
 		return e
