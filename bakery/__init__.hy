@@ -1015,7 +1015,8 @@
             (for [[key value] (.items itr)]
                  (if (setx var/process/key-prefix (.cls/is-attr self.__class__ key))
                      (let [var/process/key (.cls/process-attr self.__class__ key var/process/key-prefix)]
-                          (cond [(= var/process/key "m/starter-args") (.var/process-args self #* value :starter True)]
+                          (cond [(= var/process/key "m/starter-args")
+                                 (.var/process-args self #* (if (isinstance value str) (, value) value) :starter True)]
                                 [(= var/process/key "m/starter-kwargs") (inner value :starter True)]
 ;; Keyword Arguments:1 ends here
 

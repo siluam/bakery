@@ -1,31 +1,3 @@
-* Arguments are appended to the end of the command; however, arguments can be set at the beginning by using the kwarg setting `_starter_args`, which can be a string or an iterable:
-    ```python
-    from baker.y import ls, find
-
-    # ls -l -a ~
-    ls("~", l = True, a = True)
-
-    # find . -name hello
-    find(
-        "hello",
-        name = True,
-        _kwarg_one_dash = True,
-        _starter_args = "."
-    )
-    ```
-
-* While I'm not sure how different the following behavious is, you can iterate over the `bakery` object itself to get its output:
-    ```python
-    from baker.y import ls
-
-    # And no, I didn't miss the brackets;
-    # that's what I was confused about initially.
-
-    # ls
-    for item in ls:
-        print(item)
-    ```
-
 * You can use specific shells to run commands as well:
     ```python
     from baker.y import ls

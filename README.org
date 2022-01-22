@@ -1,21 +1,21 @@
 * Welcome to the ~bakery~! May I wrap your program?
 
-~bakery~ is a [[https://docs.hylang.org/en/alpha/][hylang]] module heavily inspired by [[https://amoffat.github.io/sh/][~sh~]],
-written by [[https://github.com/amoffat][~Andrew Moffat / amoffat~]];
+~bakery~ is a [[https://docs.hylang.org/en/alpha/][hylang]] module heavily inspired by [[https://amoffat.github.io/sh/][sh]],
+written by [[https://github.com/amoffat][Andrew Moffat / amoffat]];
 I loved the concept of ~baking~ a command so much that I created an entire module based on it.
 
 While amoffat's ~sh~ runs only Unix-based systems at the moment, ~bakery~ is able to run on DOS-based systems as well, such as ~Microsoft Windows~.
-Here are a few more differences:
+Here are a few more differences (note that in python, ~m/option~ becomes ~_option~):
 
 - Program options can be directly set without baking them in first (heresy, I know!):
-
-~git -C "..." status~
 
 ~Python:~
 
 #+begin_src python
 import hy
 from bakery import git
+
+# git -C "..." status
 git(C = "...").status()
 #+end_src
 
@@ -23,9 +23,81 @@ git(C = "...").status()
 
 #+begin_src hy
 (import bakery [git])
+
+;; git -C "..." status
 (.status (git :C "..."))
 #+end_src
 
-~Note:~ Because ~git~ and ~yadm~ are in a list called ~gitea.list~, they can be imported with the ability to set program options;
+~Note:~ Because ~git~ and ~yadm~ are in a list called ~m/gitea.list~, they can be imported with the ability to set program options;
 setting ~program.m/gitea.bool~ to ~True~, or adding to the list, will trigger this as well,
-while setting ~program.m/gitea.off~ to ~False~ will override both of the former. In ~python~, replace ~m/gitea~ with ~_gitea~.
+while setting ~program.m/gitea.off~ to ~False~ will override both of the former.
+
+- The general command string will end up like this:
+
+#+begin_src hy
+f"{m/shell} -c {m/program}
+               {m/starter-kwargs}
+               {m/subcommand}
+               {m/starter-args}
+               {m/regular-kwargs}
+               {m/regular-args}"
+#+end_src
+
+~Python:~
+
+#+begin_src python
+import hy
+from bakery import ls, find
+
+# ls -l -a ~
+ls("~", l = True, a = True)
+
+# find . -empty -type d -delete
+find(
+    empty = True,
+    delete = True,
+    type = "d",
+    _one_dash = True,
+    _starter_args = "."
+)
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(import bakery [ls find])
+
+;; ls -l -a ~
+(ls "~" :l True :a True)
+
+;; find . -empty -type d -delete
+(find :empty True :delete True :type "d" :m/one-dash True :m/starter-args ".")
+#+end_src
+
+~Note:~ To use single dashes for options, set ~m/one-dash~ to ~True~.
+
+- While I'm not sure how different the following behavious is, you can iterate over the ~bakery~ object itself to get its output:
+
+~Python:~
+
+#+begin_src python
+import hy
+from bakery import ls
+
+# And no, I didn't miss the brackets.
+
+# ls
+for item in ls:
+    print(item)
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(import bakery [ls])
+
+;; And no, I didn't miss the brackets.
+
+;; ls
+(for [item ls] (print item))
+#+end_src
