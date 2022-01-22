@@ -3,17 +3,19 @@ name = "bakery"
 version = "1.0.0.0"
 description = "An \"sh\" alternative"
 authors = ["shadowrylander <titaniumfiles@outlook.com>"]
-license = "GPL-3.0"
+license = "OREO"
 include = [
 	"bakery/**/*.py",
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 addict = "*"
 autoslot = "*"
 fabric = "*"
+hy = "^1.0a4+4.gaa2e878"
 pout = "*"
+rich = {git = "https://github.com/shadowrylander/rich.git", branch = "master"}
 toml = "*"
 nanite = {git = "https://gitlab.com/picotech/nanotech/nanite.git", branch = "master"}
 gensing = {git = "https://gitlab.com/picotech/nanotech/gensing.git", branch = "master"}
