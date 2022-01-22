@@ -1,0 +1,31 @@
+* Welcome to the ~bakery~! May I wrap your program?
+
+~bakery~ is a [[https://docs.hylang.org/en/alpha/][hylang]] module heavily inspired by [[https://amoffat.github.io/sh/][~sh~]],
+written by [[https://github.com/amoffat][~Andrew Moffat / amoffat~]];
+I loved the concept of ~baking~ a command so much that I created an entire module based on it.
+
+While amoffat's ~sh~ runs only Unix-based systems at the moment, ~bakery~ is able to run on DOS-based systems as well, such as ~Microsoft Windows~.
+Here are a few more differences:
+
+- Program options can be directly set without baking them in first (heresy, I know!):
+
+~git -C "..." status~
+
+~Python:~
+
+#+begin_src python
+import hy
+from bakery import git
+git(C = "...").status()
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(import bakery [git])
+(.status (git :C "..."))
+#+end_src
+
+~Note:~ Because ~git~ and ~yadm~ are in a list called ~gitea.list~, they can be imported with the ability to set program options;
+setting ~program.m/gitea.bool~ to ~True~, or adding to the list, will trigger this as well,
+while setting ~program.m/gitea.off~ to ~False~ will override both of the former. In ~python~, replace ~m/gitea~ with ~_gitea~.

@@ -875,7 +875,7 @@
                                                        (return (pretty-repr frosted-input))
                                                        (return frosted-input))])))
     (cond [(.misc/type-name-is-string self :type/type type/type/type) (return (.join "\n" input))]
-          [(in type/type/type.__name__ self.m/type-groups.generators) (return (.convert/generator self ))]
+          [(in type/type/type.__name__ self.m/type-groups.generators) (return (.convert/generator self input))]
           [True (return (type/type/type input))]))
 ;; Type:1 ends here
 
@@ -1361,18 +1361,18 @@
                                (-> output (.values) (iter) (next))
                                output))
       (cond [(or self.m/frozen (= self.m/wait False)) (return frosted-output)]
-            [self.m/print-command (print output)]
-            [self.m/dazzle (for [cat (deepcopy frosted-output)]
-                                  (setv outcat (get output cat))
-                                  (if (or (isinstance outcat int)
-                                          (isinstance outcat (, str bytes bytearray)))
-                                      (print f"{cat}: {outcat}")
-                                      (do (if (not (in cat self.m/captures))
-                                              (print (+ cat ": ")))
-                                          (if (= cat "return-codes")
-                                              (print outcat)
-                                              (for [line outcat]
-                                                   (print line))))))])
+            [self.m/print-command (print frosted-output)]
+            [self.m/dazzle (for [cat (deepcopy output)]
+                                (setv outcat (get output cat))
+                                (if (or (isinstance outcat int)
+                                        (isinstance outcat (, str bytes bytearray)))
+                                    (print f"{cat}: {outcat}")
+                                    (do (if (not (in cat self.m/captures))
+                                            (print (+ cat ": ")))
+                                        (if (= cat "return-codes")
+                                            (print outcat)
+                                            (for [line outcat]
+                                                 (print line))))))])
       (cond [(isinstance frosted-output (, dict tea frosting))
              (for [std (, "out" "err")]
                   (setv stdstd (+ "std" std))
@@ -1433,7 +1433,7 @@
            (.command/process-all self)
            (.command/create self)
            (return (.return/frosting self))
-           (finally (if self.m/debug (.print-current-values self))
+           (finally (if self.m/debug (.inspect- self))
                     (.m/reset-all self))))
 ;; Run:1 ends here
 
@@ -1587,11 +1587,10 @@ freezer- (if reversed (py "freezer_[::-1]") freezer-))
 
 ;; [[file:~/bakery/bakery/__init__.org::*Current Values][Current Values:1]]
 (defn current-values [self]
-      (setv __slots__ (D (dfor var
-                               self.__slots__
-                               :if (!= var "__dict__")
-                               [var (getattr self var)])))
-      (return (D { "__slots__" (.misc/recursive-unmangle self __slots__)
+      (return (D { "__slots__" (.misc/recursive-unmangle self (dfor var
+                                                                    self.__slots__
+                                                                    :if (!= var "__dict__")
+                                                                    [var (getattr self var)]))
                    "__dict__" self.__dict__ })))
 ;; Current Values:1 ends here
 
@@ -1601,7 +1600,7 @@ freezer- (if reversed (py "freezer_[::-1]") freezer-))
 
 
 ;; [[file:~/bakery/bakery/__init__.org::*Print][Print:1]]
-(defn print-current-values [self]
+(defn inspect- [self]
       (defn inner [string] (return (+ "[bold hot_pink]" string "[/bold hot_pink]")))
       (print (inner "#########"))
       (print (inner "# [bold orange_red1]Rich:[/bold orange_red1] #"))
@@ -1894,7 +1893,7 @@ slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__
 
 
 ;; [[file:~/bakery/bakery/__init__.org::*__repr__][__repr__:1]]
-(defn __repr__ [self] (.print-current-values self) (return (str self)))
+(defn __repr__ [self] (.inspect- self) (return (str self)))
 ;; __repr__:1 ends here
 
 ;; __or__
