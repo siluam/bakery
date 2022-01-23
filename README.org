@@ -101,3 +101,380 @@ for item in ls:
 ;; ls
 (for [item ls] (print item))
 #+end_src
+
+** You can use specific shells to run commands as well:
+
+~Python:~
+
+#+begin_src python
+import hy
+from bakery import ls
+
+# bash -c 'ls'
+ls(_shell = "bash")
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(import bakery [ls])
+
+# bash -c 'ls'
+ls(:m/shell "bash")
+#+end_src
+
+** Want to get the command you're about to run?
+
+~Python:~
+
+#+begin_src python
+import hy
+from bakery import ls
+
+# bash -c 'ls'
+ls(_shell = "bash", _return_command = True)
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(import bakery [ls])
+
+;; bash -c 'ls'
+ls(:m/shell "bash" :m/return-command True)
+#+end_src
+
+** Want to /see/ the command you're about to run?
+
+~Python:~
+
+#+begin_src python
+import hy
+from bakery import ls
+
+# bash -c 'ls'
+ls(_shell = "bash", _print_command = True)
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(import bakery [ls])
+
+;; bash -c 'ls'
+ls(:m/shell "bash" :m/print-command True)
+#+end_src
+
+** Want some more details?
+
+~Python:~
+
+#+begin_src python
+import hy
+from bakery import ls
+
+ls(_debug = True)
+
+# OR
+ls.inspect_()
+
+# OR
+ls
+
+# OR
+repr(ls)
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(import bakery [ls])
+
+(ls :m/debug True)
+
+;; OR
+(.inspect- ls)
+
+# OR
+(repr ls)
+#+end_src
+
+** Here's how to use ~sudo~:
+
+~Python:~
+
+#+begin_src python
+import hy
+from bakery import ls
+
+# sudo -i -u user ls /
+ls("/", _sudo = dict(i = "user"))
+
+# sudo -s -u user ls /
+ls("/", _sudo = dict(s = "user"))
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(import bakery [ls])
+
+;; sudo -i -u user ls /
+(ls "/" :m/sudo { "i" "user" })
+
+;; sudo -s -u user ls /
+(ls "/" :m/sudo { "s" "user" })
+#+end_src
+
+** If you want visible prompts, set ~:m/capture~ to ~run~, or ~:m/run~ to ~True~
+
+Otherwise, prompts will be captured in the output, while the process still halts for input.
+
+~Python:~
+
+#+begin_src python
+import hy
+from bakery import zfs
+
+# Will show input prompt
+
+# zfs load-key pool
+zfs.load_key(pool, _capture = "run")
+
+
+
+# Will NOT show input prompt
+
+# zfs load-key pool
+zfs.load_key(pool)
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(import bakery [zfs])
+
+;; Will show input prompt
+
+;; zfs load-key pool
+(.load-key zfs pool :m/capture "run")
+
+
+
+;; Will NOT show input prompt
+
+;; zfs load-key pool
+(.load-key zfs pool)
+#+end_src
+
+~Note:~ This does not happen with the use of ~sudo~, or the ~m/sudo~ keyword argument, due to it setting ~m/capture~ to ~run~ in the process;
+the password prompt will still be shown, and input will still be passed to ~sudo~.
+
+** Freeze ~bakery~ objects, allowing other ~bakery~ objects to act on them
+
+Freeze using anything but [[https://gitlab.com/picotech/nanotech/gensing][tea or frosting objects]], strings, integers, or the ~milcery~ class in this module;
+frozen objects are simply ~deepcopies~ of the instance they were called from, after all settings and program arguments and options are set, but not reset.
+
+~Python:~
+
+#+begin_src python
+import hy
+from bakery import ls
+
+# ls
+ls([])
+
+# Some Alternatives
+ls(None)
+ls(False)
+ls(bool(0))
+ls(bool(""))
+
+# Freeze using the keyword (but it's longer; why would you want to do that? :P)
+ls(_frozen = True)
+
+# Freeze using... Nothing! :D
+ls
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(import bakery [ls])
+
+;; ls
+(ls [])
+
+;; Some Alternatives
+(ls None)
+(ls False)
+(ls bool(0))
+(ls bool(""))
+
+;; Freeze using the keyword (but it's longer; why would you want to do that? :P)
+(ls :m/frozen True)
+
+;; Freeze using... Nothing! :D
+ls
+#+end_src
+
+~Note:~ In the last example, assume all bakery objects are frozen by default, with default settings.
+
+** Piping and Redirection is implemented through the use of frozen ~bakery~ objects and strings...
+
+... or [[https://gitlab.com/picotech/nanotech/gensing][tea or frosting objects]].
+
+Mind that, while freezing the ~bakery~ objects, the settings on the right-hand side will override those on the right-hand side,
+if the same setting is set while freezing both objects.
+
+~Python:~
+
+#+begin_src python
+import hy
+from os import devnull
+from bakery import ls, tail
+
+# Piping using frozen objects
+
+# ls | tail
+
+tails = ls | tail
+tails = "ls" | tail
+tails = ls | "tail"
+
+tails = ls([]) | tail([])
+tails = "ls" | tail([])
+tails = ls([]) | "tail"
+
+tails()
+
+
+# Piping to tee
+
+# ls | tee /dev/null
+teels = ls & devnull
+teels()
+
+# ls | tee -a /dev/null
+teels = ls + devnull
+teels()
+
+# Redirection using frozen objects
+
+# ls > /dev/null
+nulls = ls > devnull
+nulls()
+
+# ls >> /dev/null
+nulls = ls >> devnull
+nulls()
+
+# ls < /dev/null
+nulls = ls < devnull
+nulls()
+
+# ls << /dev/null
+nulls = ls << devnull
+nulls()
+
+# Any of the above pipes or redirections with a tuple
+
+# ls 2>&1 /dev/null
+nulls = ls | (devnull, "2>&1")
+nulls()
+
+# ls &> /dev/null
+nulls = ls > (devnull, "&>")
+nulls()
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(import os [devnull])
+(import bakery [ls tail])
+
+;; Piping using frozen objects
+
+;; ls | tail
+
+(setv tails (| ls tail))
+(setv tails (| "ls" tail))
+(setv tails (| ls "tail"))
+
+(setv tails (| (ls []) (tail [])))
+(setv tails (| (ls []) "tail"))
+(setv tails (| "ls" (tail [])))
+
+(tails)
+
+
+;; Piping to tee
+
+;; ls | tee /dev/null
+(setv teels (& ls devnull))
+(teels)
+
+;; ls | tee -a /dev/null
+(setv teels (+ ls devnull))
+(teels)
+
+;; Redirection using frozen objects
+
+;; ls > /dev/null
+(setv nulls (> ls devnull))
+(nulls)
+
+;; ls >> /dev/null
+(setv nulls (>> ls devnull))
+(nulls)
+
+;; ls < /dev/null
+(setv nulls (< ls devnull))
+(nulls)
+
+;; ls << /dev/null
+(setv nulls (<< ls devnull))
+(nulls)
+
+;; Any of the above pipes or redirections with a tuple
+
+;; ls 2>&1 /dev/null
+(setv nulls (| ls (, devnull "2>&1")))
+(nulls)
+
+;; ls &> /dev/null
+(setv nulls (> ls (, devnull "&>")))
+(nulls)
+#+end_src
+
+** Use a ~bakery~ object with a context manager:
+
+~Python:~
+
+#+begin_src python
+import hy
+from bakery import ls
+
+# ls -l -a
+with ls(_c = True, l = True) as lsl:
+    lsl(a = True)
+
+# ls -l -a | tail
+with ls([], l = True, a = True) | tail as tails:
+    tails()
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(import bakery [ls tail])
+
+;; ls -l -a
+(with [lsl (ls :m/c True :l True)]
+      (lsl :a True))
+
+;; ls -l -a | tail
+(with [tails (| (ls [] :l True :a True) tail)]
+      (tails))
+#+end_src

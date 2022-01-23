@@ -245,15 +245,6 @@ Pretty print the output:
     (setv self.internal/n-lines (D value))))
 #+end_src
 
-*** Decorator
-
-Use function as decorator:
-
-#+begin_src hy
-#@(property (defn m/d [self] (return self.m/decorator)))
-#@(m/d.setter (defn m/d [self value] (setv self.m/decorator (bool value))))
-#+end_src
-
 *** Context Manager
 
 Use function as context manager:
@@ -286,7 +277,7 @@ Capture types, consisting of ~stdout~, ~stderr~, and both:
                        (if (> (len value) 1)
                            (raise (ValueError "Sorry! The `m/sudo' object can only have a single key-value item!")))
                        (if (and value
-                                (-> value (.keys) (next) (iter) (in (, "i" "s")) (not)))
+                                (-> value (.keys) (iter) (next) (in (, "i" "s")) (not)))
                            (raise (ValueError "Sorry! The `m/sudo' object can only take `i' or `s' as a key!")))
                        (setv self.internal/sudo value)))
 #+end_src
@@ -456,14 +447,6 @@ Set ~m/capture~ to ~run~, for interactive output without capturing the stream:
 
 #+begin_src hy :tangle no
 (setv self.m/run False)
-#+end_src
-
-**** Decorator
-
-Set ~m/decorator~ to ~True~:
-
-#+begin_src hy :tangle no
-(setv self.m/d True)
 #+end_src
 
 **** Context Manager
@@ -652,17 +635,9 @@ An alternate way to pass options to the program as a separate dictionary:
 <<m/(setting="regular-kwargs", value="(D {})")>>
 #+end_src
 
-**** Decorator
-
-Whether the bakery is being used as a decorator:
-
-#+begin_src hy
-<<m/(setting="decorator", value="False")>>
-#+end_src
-
 **** Context Manager
 
-Whether the bakery is being used as a decorator:
+Whether the bakery is being used with a context manager:
 
 #+begin_src hy
 <<m/(setting="context", value="False")>>
@@ -1003,7 +978,7 @@ Adapted from [[https://stackoverflow.com/users/2988730/mad-physicist][Mad Physic
 #+begin_src hy
 (defn var/apply [self]
     (for [[key value] (.items self.m/settings.current)]
-         (setattr self (.cls/process-if-attr self.__class__ key) value)))
+         (setattr self key value)))
 #+end_src
 
 ** Command
@@ -1376,10 +1351,43 @@ otherwise ~(isinstance value int)~ will catch both cases.
 ** Apply Pipe or Redirect
 
 #+begin_src hy
-(defn m/apply-pipe-redirect [self pr value [reversed False]]
-    (setv is-milcery (isinstance value self.__class__)
-          kwargs {})
+(defn m/apply-pipe-redirect [self pr value]
+    (setv is-milcery (isinstance value self.__class__))
+    (defn inner [v]
+          (let [type-string (.join ", " (lfor t (+ (list self.m/type-groups.genstrings)
+                                                   self.m/type-groups.this-class-subclass
+                                                   [str]) t.__name__))]
+               (return (cond [(isinstance v self.m/type-groups.genstrings) [(v)]]
+                             [is-milcery (or v.m/freezer (.values v.m/command) [v.m/program])]
+                             [(isinstance v str) [v]]
+                             [True (raise (NotImplemented f"Sorry! Value {v} can only be of the following types: {type-string}"))]))))
+#+end_src
 
+If the value is a tuple, assume the first item is the value itself, while the second item is the pr;
+this allows for more compilcated redirects, such as ~&>~, ~2>&1~, etc.
+
+#+begin_src hy
+    (if (isinstance value tuple)
+        (if (= (len value) 2)
+            (setv processed-value (inner (first value))
+                  processed-pr (get value 1))
+            (raise (NotImplemented "Sorry! A tuple value may only contain 2 items: (value, pr)")))
+        (setv processed-value (inner value)
+              processed-pr pr))
+#+end_src
+
+#+begin_src hy
+    (setv kwargs {}
+          base-program- (or self.m/base-program self.m/program)
+#+end_src
+
+Note that ~freezer-~ will always use the ~m/freezer~ value from the bakery on the left-hand side of the operation calling it:
+
+#+begin_src hy
+          freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [processed-pr processed-value]))
+#+end_src
+
+#+begin_src hy
     (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.world))
     (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.world)))
 
@@ -1397,41 +1405,6 @@ otherwise ~(isinstance value int)~ will catch both cases.
     (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.called))
     (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.called)))
 
-    (defn inner [v]
-          (let [type-string (.join ", " (lfor t (+ (list self.m/type-groups.genstrings)
-                                                   self.m/type-groups.this-class-subclass
-                                                   [str]) t.__name__))]
-               (return (cond [(isinstance v self.m/type-groups.genstrings) [(v)]]
-                             [is-milcery (or v.m/freezer (.values v.m/command) [v.m/program])]
-                             [(isinstance v str) [v]]
-                             [True (raise (TypeError f"Sorry! Value {v} can only be of the following types: {type-string}"))]))))
-#+end_src
-
-If the value is a tuple, assume the first item is the value itself, while the second item is the pr;
-this allows for more compilcated redirects, such as ~&>~, ~2>&1~, etc.
-
-#+begin_src hy
-    (if (isinstance value tuple)
-        (if (= (len value) 2)
-            (setv processed-value (inner (first value))
-                  processed-pr (get value 1))
-            (raise (ValueError "Sorry! A tuple value may only contain 2 items: (value, pr)")))
-        (setv processed-value (inner value)
-              processed-pr pr))
-#+end_src
-
-#+begin_src hy
-    (setv base-program- (or self.m/base-program self.m/program)
-#+end_src
-
-Note that ~freezer-~ will always use the ~m/freezer~ value from the bakery on the left-hand side of the operation calling it:
-
-#+begin_src hy
-          freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [processed-pr processed-value])
-#+end_src
-
-#+begin_src hy
-          freezer- (if reversed (py "freezer_[::-1]") freezer-))
     (return (.__class__ self :freezer- freezer-
                              :base-program- base-program-
                              #** kwargs)))
@@ -1521,16 +1494,10 @@ can be used for debugging purposes or otherwise.
 Debug the current function:
 
 #+begin_src hy
-(defn inspect- [self]
-      (defn inner [string] (return (+ "[bold hot_pink]" string "[/bold hot_pink]")))
-      (print (inner "#########"))
-      (print (inner "# [bold orange_red1]Rich:[/bold orange_red1] #"))
-      (print (inner "#########\n"))
-      (pprint (setx cv (.current-values self)))
-      (print (inner "\n#################"))
-      (print (inner "# [bold orange_red1]Rich Inspect:[/bold orange_red1] #"))
-      (print (inner "#################"))
-      (inspect self :all True))
+(defn inspect- [self #** kwargs] 
+      (if (not kwargs)
+          (setv kwargs { "all" True }))
+      (inspect self #** kwargs))
 #+end_src
 
 *** Bakeries
@@ -1552,21 +1519,6 @@ Return a list of all bakeries:
 
 ** Magic Methods
 
-#+call: hash() :exports none
-
-#+RESULTS:
-: 20220101211017222161829
-
-#+name: 20220101211017222161829
-#+begin_src emacs-lisp :var *list='nil
-(setq left (if *list "\\\"" "[")
-      right (if *list "\\\"" " (,)]"))
-(string-join (mapcar #'(lambda (arg) (interactive) (concat left arg right)) '(
-    "func-"
-    "args-before-func"
-)) "\n")
-#+end_src
-
 Adapted from [[https://realpython.com/primer-on-python-decorators/][Primer on Python Decorators]]:
 
 #+call: hash() :exports none
@@ -1577,19 +1529,7 @@ Adapted from [[https://realpython.com/primer-on-python-decorators/][Primer on Py
 #+name: 20220101204858374153059
 #+begin_src emacs-lisp :var subcommand='nil
 (format-spec
-"(cond [(or (.cls/get-attr self.__class__ kwargs \"m/decorator\" False)
-           (.cls/get-attr self.__class__ kwargs \"m/d\" False))
-       (do (defn wrapper [wrapper-func]
-                 #@((wraps wrapper-func) (defn wrapped [#* wrapper-args #** wrapper-kwargs]
-                                               (return (.m/spin self
-                                                               %s
-                                                               :m/regular-args (chain args-before-func
-                                                                                      (wrapper-func #* wrapper-args #** wrapper-kwargs)
-                                                                                      args)
-                                                               :m/regular-kwargs kwargs))))
-                 (return wrapped))
-           (return (if func- (wrapper func-) wrapper)))]
-      [(or (.cls/get-attr self.__class__ kwargs \"m/context\" False)
+"(cond [(or (.cls/get-attr self.__class__ kwargs \"m/context\" False)
            (.cls/get-attr self.__class__ kwargs \"m/c\" False))
        (return (.deepcopy- self #* args %s #** kwargs))]
       [True (return (.m/spin self #* args %s #** kwargs))])"
@@ -1602,7 +1542,7 @@ Adapted from [[https://realpython.com/primer-on-python-decorators/][Primer on Py
 (defn __call__ [
         self
         #* args
-        <<20220101211017222161829()>>
+        [args-before-func (,)]
         #** kwargs ]
     (if (and (not self.m/gitea.off)
              (or self.m/gitea.bool
@@ -1625,7 +1565,7 @@ Adapted from [[https://realpython.com/primer-on-python-decorators/][Primer on Py
         (getattr self __getattr__/attr (raise (AttributeError f"Sorry! `{(unmangle subcommand)}' doesn't exist as an attribute!")))
         (do (defn inner [
                     #* args
-                    <<20220101211017222161829()>>
+                    [args-before-func (,)]
                     #** kwargs ]
                   <<20220101204858374153059(subcommand='t)>>)
             (return inner))))
@@ -1771,15 +1711,15 @@ Return updated instance
 
 *** __str__
 
-If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self :all True)~ trigger in infinite loop.
+If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in infinite loop when getting the title of the report.
 
 #+begin_src hy
-(defn __str__ [self] (return (pretty-repr (.current-values self))))
+(defn __str__ [self] (return f"<{self.__class__.__module__}.{self.__class__.__name__} object at {(hex (id self))}>"))
 #+end_src
 
 *** __repr__
 
-If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self :all True)~ trigger in infinite loop.
+If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in infinite loop when getting the title of the report.
 
 #+begin_src hy
 (defn __repr__ [self] (.inspect- self) (return (str self)))
@@ -1791,22 +1731,10 @@ If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self :all True)~ trig
 (defn __or__ [self value] (return (.m/apply-pipe-redirect self "|" value)))
 #+end_src
 
-*** __ror__
+*** __and__
 
 #+begin_src hy
-(defn __ror__ [self value] (return (.m/apply-pipe-redirect self "|" value :reversed True)))
-#+end_src
-
-*** __xor__
-
-#+begin_src hy
-(defn __xor__ [self value] (return (.m/apply-pipe-redirect self "| tee" value)))
-#+end_src
-
-*** __rxor__
-
-#+begin_src hy
-(defn __rxor__ [self value] (return (.m/apply-pipe-redirect self "| tee" value :reversed True)))
+(defn __and__ [self value] (return (.m/apply-pipe-redirect self "| tee" value)))
 #+end_src
 
 *** __add__
@@ -1815,28 +1743,16 @@ If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self :all True)~ trig
 (defn __add__ [self value] (return (.m/apply-pipe-redirect self "| tee -a" value)))
 #+end_src
 
-*** __radd__
-
-#+begin_src hy
-(defn __radd__ [self value] (return (.m/apply-pipe-redirect self "| tee -a" value :reversed True)))
-#+end_src
-
-*** __lshift__
-
-#+begin_src hy
-(defn __lshift__ [self value] (return (.m/apply-pipe-redirect self "<" value)))
-#+end_src
-
 *** __lt__
 
 #+begin_src hy
 (defn __lt__ [self value] (return (.m/apply-pipe-redirect self "<" value)))
 #+end_src
 
-*** __rlshift__
+*** __lshift__
 
 #+begin_src hy
-(defn __rlshift__ [self value] (return (.m/apply-pipe-redirect self "<" value :reversed True)))
+(defn __lshift__ [self value] (return (.m/apply-pipe-redirect self "<<" value)))
 #+end_src
 
 *** __gt__
@@ -1848,31 +1764,13 @@ If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self :all True)~ trig
 *** __rshift__
 
 #+begin_src hy
-(defn __rshift__ [self value] (return (.m/apply-pipe-redirect self ">" value)))
-#+end_src
-
-*** __rrshift__
-
-#+begin_src hy
-(defn __rrshift__ [self value] (return (.m/apply-pipe-redirect self ">" value :reversed True)))
-#+end_src
-
-*** __matmul__
-
-#+begin_src hy
-(defn __matmul__ [self value] (return (.m/apply-pipe-redirect self ">>" value)))
-#+end_src
-
-*** __rmatmul__
-
-#+begin_src hy
-(defn __rmatmul__ [self value] (return (.m/apply-pipe-redirect self ">>" value :reversed True)))
+(defn __rshift__ [self value] (return (.m/apply-pipe-redirect self ">>" value)))
 #+end_src
 
 *** __enter__
 
 #+begin_src hy
-(defn __enter__ [self] (return self))
+(defn __enter__ [self] (return (deepcopy self)))
 #+end_src
 
 *** __exit__

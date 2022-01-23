@@ -260,16 +260,6 @@
     (setv self.internal/n-lines (D value))))
 ;; Number of Lines:1 ends here
 
-;; Decorator
-
-;; Use function as decorator:
-
-
-;; [[file:~/bakery/bakery/__init__.org::*Decorator][Decorator:1]]
-#@(property (defn m/d [self] (return self.m/decorator)))
-#@(m/d.setter (defn m/d [self value] (setv self.m/decorator (bool value))))
-;; Decorator:1 ends here
-
 ;; Context Manager
 
 ;; Use function as context manager:
@@ -305,7 +295,7 @@
                        (if (> (len value) 1)
                            (raise (ValueError "Sorry! The `m/sudo' object can only have a single key-value item!")))
                        (if (and value
-                                (-> value (.keys) (next) (iter) (in (, "i" "s")) (not)))
+                                (-> value (.keys) (iter) (next) (in (, "i" "s")) (not)))
                            (raise (ValueError "Sorry! The `m/sudo' object can only take `i' or `s' as a key!")))
                        (setv self.internal/sudo value)))
 ;; Sudo:1 ends here
@@ -674,19 +664,9 @@
 (setv self.m/settings.defaults.m/regular-kwargs (deepcopy self.m/regular-kwargs))
 ;; Regular Kwargs:1 ends here
 
-;; Decorator
-
-;; Whether the bakery is being used as a decorator:
-
-
-;; [[file:~/bakery/bakery/__init__.org::*Decorator][Decorator:1]]
-(setv self.m/decorator False)
-(setv self.m/settings.defaults.m/decorator (deepcopy self.m/decorator))
-;; Decorator:1 ends here
-
 ;; Context Manager
 
-;; Whether the bakery is being used as a decorator:
+;; Whether the bakery is being used with a context manager:
 
 
 ;; [[file:~/bakery/bakery/__init__.org::*Context Manager][Context Manager:1]]
@@ -1069,7 +1049,7 @@
 ;; [[file:~/bakery/bakery/__init__.org::*Apply][Apply:1]]
 (defn var/apply [self]
     (for [[key value] (.items self.m/settings.current)]
-         (setattr self (.cls/process-if-attr self.__class__ key) value)))
+         (setattr self key value)))
 ;; Apply:1 ends here
 
 ;; Reset
@@ -1442,27 +1422,8 @@
 
 
 ;; [[file:~/bakery/bakery/__init__.org::*Apply Pipe or Redirect][Apply Pipe or Redirect:1]]
-(defn m/apply-pipe-redirect [self pr value [reversed False]]
-    (setv is-milcery (isinstance value self.__class__)
-          kwargs {})
-
-    (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.world))
-    (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.world)))
-
-    (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.instantiated))
-    (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.instantiated)))
-
-    (.update kwargs
-             (.cls/remove-if-not-attr self.__class__ (. self m/kwargs baked [(or self.m/subcommand.current.unprocessed self.m/subcommand.default)])))
-    (if is-milcery
-        (.update kwargs (.cls/remove-if-not-attr value.__class__ (. value
-                                                                    m/kwargs
-                                                                    baked
-                                                                    [(or value.m/subcommand.current.unprocessed value.m/subcommand.default)]))))
-
-    (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.called))
-    (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.called)))
-
+(defn m/apply-pipe-redirect [self pr value]
+    (setv is-milcery (isinstance value self.__class__))
     (defn inner [v]
           (let [type-string (.join ", " (lfor t (+ (list self.m/type-groups.genstrings)
                                                    self.m/type-groups.this-class-subclass
@@ -1470,7 +1431,7 @@
                (return (cond [(isinstance v self.m/type-groups.genstrings) [(v)]]
                              [is-milcery (or v.m/freezer (.values v.m/command) [v.m/program])]
                              [(isinstance v str) [v]]
-                             [True (raise (TypeError f"Sorry! Value {v} can only be of the following types: {type-string}"))]))))
+                             [True (raise (NotImplemented f"Sorry! Value {v} can only be of the following types: {type-string}"))]))))
 ;; Apply Pipe or Redirect:1 ends here
 
 
@@ -1484,13 +1445,14 @@
     (if (= (len value) 2)
         (setv processed-value (inner (first value))
               processed-pr (get value 1))
-        (raise (ValueError "Sorry! A tuple value may only contain 2 items: (value, pr)")))
+        (raise (NotImplemented "Sorry! A tuple value may only contain 2 items: (value, pr)")))
     (setv processed-value (inner value)
           processed-pr pr))
 ;; Apply Pipe or Redirect:2 ends here
 
 ;; [[file:~/bakery/bakery/__init__.org::*Apply Pipe or Redirect][Apply Pipe or Redirect:3]]
-(setv base-program- (or self.m/base-program self.m/program)
+(setv kwargs {}
+      base-program- (or self.m/base-program self.m/program)
 ;; Apply Pipe or Redirect:3 ends here
 
 
@@ -1499,11 +1461,27 @@
 
 
 ;; [[file:~/bakery/bakery/__init__.org::*Apply Pipe or Redirect][Apply Pipe or Redirect:4]]
-freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [processed-pr processed-value])
+freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [processed-pr processed-value]))
 ;; Apply Pipe or Redirect:4 ends here
 
 ;; [[file:~/bakery/bakery/__init__.org::*Apply Pipe or Redirect][Apply Pipe or Redirect:5]]
-freezer- (if reversed (py "freezer_[::-1]") freezer-))
+(.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.world))
+(if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.world)))
+
+(.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.instantiated))
+(if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.instantiated)))
+
+(.update kwargs
+         (.cls/remove-if-not-attr self.__class__ (. self m/kwargs baked [(or self.m/subcommand.current.unprocessed self.m/subcommand.default)])))
+(if is-milcery
+    (.update kwargs (.cls/remove-if-not-attr value.__class__ (. value
+                                                                m/kwargs
+                                                                baked
+                                                                [(or value.m/subcommand.current.unprocessed value.m/subcommand.default)]))))
+
+(.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.called))
+(if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.called)))
+
 (return (.__class__ self :freezer- freezer-
                          :base-program- base-program-
                          #** kwargs)))
@@ -1601,16 +1579,10 @@ freezer- (if reversed (py "freezer_[::-1]") freezer-))
 
 
 ;; [[file:~/bakery/bakery/__init__.org::*Print][Print:1]]
-(defn inspect- [self]
-      (defn inner [string] (return (+ "[bold hot_pink]" string "[/bold hot_pink]")))
-      (print (inner "#########"))
-      (print (inner "# [bold orange_red1]Rich:[/bold orange_red1] #"))
-      (print (inner "#########\n"))
-      (pprint (setx cv (.current-values self)))
-      (print (inner "\n#################"))
-      (print (inner "# [bold orange_red1]Rich Inspect:[/bold orange_red1] #"))
-      (print (inner "#################"))
-      (inspect self :all True))
+(defn inspect- [self #** kwargs] 
+      (if (not kwargs)
+          (setv kwargs { "all" True }))
+      (inspect self #** kwargs))
 ;; Print:1 ends here
 
 ;; Original
@@ -1638,26 +1610,13 @@ freezer- (if reversed (py "freezer_[::-1]") freezer-))
 (defn __call__ [
         self
         #* args
-        [func- (,)]
         [args-before-func (,)]
         #** kwargs ]
     (if (and (not self.m/gitea.off)
              (or self.m/gitea.bool
                  (in self.m/program self.m/gitea.list)))
         (return (.deepcopy- self :m/starter-args args :m/starter-kwargs kwargs))
-        (cond [(or (.cls/get-attr self.__class__ kwargs "m/decorator" False)
-                   (.cls/get-attr self.__class__ kwargs "m/d" False))
-               (do (defn wrapper [wrapper-func]
-                         #@((wraps wrapper-func) (defn wrapped [#* wrapper-args #** wrapper-kwargs]
-                                                       (return (.m/spin self
-                                                                       
-                                                                       :m/regular-args (chain args-before-func
-                                                                                              (wrapper-func #* wrapper-args #** wrapper-kwargs)
-                                                                                              args)
-                                                                       :m/regular-kwargs kwargs))))
-                         (return wrapped))
-                   (return (if func- (wrapper func-) wrapper)))]
-              [(or (.cls/get-attr self.__class__ kwargs "m/context" False)
+        (cond [(or (.cls/get-attr self.__class__ kwargs "m/context" False)
                    (.cls/get-attr self.__class__ kwargs "m/c" False))
                (return (.deepcopy- self #* args  #** kwargs))]
               [True (return (.m/spin self #* args  #** kwargs))])))
@@ -1679,22 +1638,9 @@ freezer- (if reversed (py "freezer_[::-1]") freezer-))
         (getattr self __getattr__/attr (raise (AttributeError f"Sorry! `{(unmangle subcommand)}' doesn't exist as an attribute!")))
         (do (defn inner [
                     #* args
-                    [func- (,)]
                     [args-before-func (,)]
                     #** kwargs ]
-                  (cond [(or (.cls/get-attr self.__class__ kwargs "m/decorator" False)
-                             (.cls/get-attr self.__class__ kwargs "m/d" False))
-                         (do (defn wrapper [wrapper-func]
-                                   #@((wraps wrapper-func) (defn wrapped [#* wrapper-args #** wrapper-kwargs]
-                                                                 (return (.m/spin self
-                                                                                 :subcommand- subcommand
-                                                                                 :m/regular-args (chain args-before-func
-                                                                                                        (wrapper-func #* wrapper-args #** wrapper-kwargs)
-                                                                                                        args)
-                                                                                 :m/regular-kwargs kwargs))))
-                                   (return wrapped))
-                             (return (if func- (wrapper func-) wrapper)))]
-                        [(or (.cls/get-attr self.__class__ kwargs "m/context" False)
+                  (cond [(or (.cls/get-attr self.__class__ kwargs "m/context" False)
                              (.cls/get-attr self.__class__ kwargs "m/c" False))
                          (return (.deepcopy- self #* args :subcommand- subcommand #** kwargs))]
                         [True (return (.m/spin self #* args :subcommand- subcommand #** kwargs))]))
@@ -1881,16 +1827,16 @@ slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__
 
 ;; __str__
 
-;; If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self :all True)~ trigger in infinite loop.
+;; If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in infinite loop when getting the title of the report.
 
 
 ;; [[file:~/bakery/bakery/__init__.org::*__str__][__str__:1]]
-(defn __str__ [self] (return (pretty-repr (.current-values self))))
+(defn __str__ [self] (return f"<{self.__class__.__module__}.{self.__class__.__name__} object at {(hex (id self))}>"))
 ;; __str__:1 ends here
 
 ;; __repr__
 
-;; If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self :all True)~ trigger in infinite loop.
+;; If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in infinite loop when getting the title of the report.
 
 
 ;; [[file:~/bakery/bakery/__init__.org::*__repr__][__repr__:1]]
@@ -1904,26 +1850,12 @@ slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__
 (defn __or__ [self value] (return (.m/apply-pipe-redirect self "|" value)))
 ;; __or__:1 ends here
 
-;; __ror__
+;; __and__
 
 
-;; [[file:~/bakery/bakery/__init__.org::*__ror__][__ror__:1]]
-(defn __ror__ [self value] (return (.m/apply-pipe-redirect self "|" value :reversed True)))
-;; __ror__:1 ends here
-
-;; __xor__
-
-
-;; [[file:~/bakery/bakery/__init__.org::*__xor__][__xor__:1]]
-(defn __xor__ [self value] (return (.m/apply-pipe-redirect self "| tee" value)))
-;; __xor__:1 ends here
-
-;; __rxor__
-
-
-;; [[file:~/bakery/bakery/__init__.org::*__rxor__][__rxor__:1]]
-(defn __rxor__ [self value] (return (.m/apply-pipe-redirect self "| tee" value :reversed True)))
-;; __rxor__:1 ends here
+;; [[file:~/bakery/bakery/__init__.org::*__and__][__and__:1]]
+(defn __and__ [self value] (return (.m/apply-pipe-redirect self "| tee" value)))
+;; __and__:1 ends here
 
 ;; __add__
 
@@ -1932,20 +1864,6 @@ slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__
 (defn __add__ [self value] (return (.m/apply-pipe-redirect self "| tee -a" value)))
 ;; __add__:1 ends here
 
-;; __radd__
-
-
-;; [[file:~/bakery/bakery/__init__.org::*__radd__][__radd__:1]]
-(defn __radd__ [self value] (return (.m/apply-pipe-redirect self "| tee -a" value :reversed True)))
-;; __radd__:1 ends here
-
-;; __lshift__
-
-
-;; [[file:~/bakery/bakery/__init__.org::*__lshift__][__lshift__:1]]
-(defn __lshift__ [self value] (return (.m/apply-pipe-redirect self "<" value)))
-;; __lshift__:1 ends here
-
 ;; __lt__
 
 
@@ -1953,12 +1871,12 @@ slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__
 (defn __lt__ [self value] (return (.m/apply-pipe-redirect self "<" value)))
 ;; __lt__:1 ends here
 
-;; __rlshift__
+;; __lshift__
 
 
-;; [[file:~/bakery/bakery/__init__.org::*__rlshift__][__rlshift__:1]]
-(defn __rlshift__ [self value] (return (.m/apply-pipe-redirect self "<" value :reversed True)))
-;; __rlshift__:1 ends here
+;; [[file:~/bakery/bakery/__init__.org::*__lshift__][__lshift__:1]]
+(defn __lshift__ [self value] (return (.m/apply-pipe-redirect self "<<" value)))
+;; __lshift__:1 ends here
 
 ;; __gt__
 
@@ -1971,35 +1889,14 @@ slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__
 
 
 ;; [[file:~/bakery/bakery/__init__.org::*__rshift__][__rshift__:1]]
-(defn __rshift__ [self value] (return (.m/apply-pipe-redirect self ">" value)))
+(defn __rshift__ [self value] (return (.m/apply-pipe-redirect self ">>" value)))
 ;; __rshift__:1 ends here
-
-;; __rrshift__
-
-
-;; [[file:~/bakery/bakery/__init__.org::*__rrshift__][__rrshift__:1]]
-(defn __rrshift__ [self value] (return (.m/apply-pipe-redirect self ">" value :reversed True)))
-;; __rrshift__:1 ends here
-
-;; __matmul__
-
-
-;; [[file:~/bakery/bakery/__init__.org::*__matmul__][__matmul__:1]]
-(defn __matmul__ [self value] (return (.m/apply-pipe-redirect self ">>" value)))
-;; __matmul__:1 ends here
-
-;; __rmatmul__
-
-
-;; [[file:~/bakery/bakery/__init__.org::*__rmatmul__][__rmatmul__:1]]
-(defn __rmatmul__ [self value] (return (.m/apply-pipe-redirect self ">>" value :reversed True)))
-;; __rmatmul__:1 ends here
 
 ;; __enter__
 
 
 ;; [[file:~/bakery/bakery/__init__.org::*__enter__][__enter__:1]]
-(defn __enter__ [self] (return self))
+(defn __enter__ [self] (return (deepcopy self)))
 ;; __enter__:1 ends here
 
 ;; __exit__
