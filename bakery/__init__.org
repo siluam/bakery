@@ -17,7 +17,7 @@ import hy
 Adapted from [[https://stackoverflow.com/users/799163/remcogerlich][RemcoGerlich's]] answer [[https://stackoverflow.com/a/21139466][here]]:
 
 #+begin_src py
-from .bakery import milcery
+from .bakery import milcery as notToBeConfusedWithMilcery
 #+end_src
 
 ** Rest of __init__
@@ -26,5 +26,8 @@ from .bakery import milcery
 def __getattr__(program_):
     if program_ == "__path__":
         raise AttributeError
-    return milcery(program_ = program_)
+    elif program_ == "steakery":
+        return notToBeConfusedWithMilcery
+    else:
+        return notToBeConfusedWithMilcery(program_ = program_)
 #+end_src

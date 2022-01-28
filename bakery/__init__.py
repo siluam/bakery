@@ -11,7 +11,7 @@ import hy
 
 
 # [[file:__init__.org::*Relative Import][Relative Import:1]]
-from .bakery import milcery
+from .bakery import milcery as notToBeConfusedWithMilcery
 # Relative Import:1 ends here
 
 # Rest of __init__
@@ -21,5 +21,8 @@ from .bakery import milcery
 def __getattr__(program_):
     if program_ == "__path__":
         raise AttributeError
-    return milcery(program_ = program_)
+    elif program_ == "steakery":
+        return notToBeConfusedWithMilcery
+    else:
+        return notToBeConfusedWithMilcery(program_ = program_)
 # Rest of __init__:1 ends here

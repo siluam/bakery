@@ -1893,6 +1893,55 @@ slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__
 (defn __rshift__ [self value] (return (.m/apply-pipe-redirect self ">>" value)))
 ;; __rshift__:1 ends here
 
+;; __ror__
+
+
+;; [[file:bakery.org::*__ror__][__ror__:1]]
+(defn __or__ [self value] (return (.m/apply-pipe-redirect self "|" value)))
+;; __ror__:1 ends here
+
+;; __rand__
+
+
+;; [[file:bakery.org::*__rand__][__rand__:1]]
+(defn __and__ [self value] (return (.m/apply-pipe-redirect self "| tee" value)))
+;; __rand__:1 ends here
+
+;; __radd__
+
+
+;; [[file:bakery.org::*__radd__][__radd__:1]]
+(defn __add__ [self value] (return (.m/apply-pipe-redirect self "| tee -a" value)))
+;; __radd__:1 ends here
+
+;; __rlt__
+
+
+;; [[file:bakery.org::*__rlt__][__rlt__:1]]
+(defn __lt__ [self value] (return (.m/apply-pipe-redirect self "<" value)))
+;; __rlt__:1 ends here
+
+;; __rlshift__
+
+
+;; [[file:bakery.org::*__rlshift__][__rlshift__:1]]
+(defn __lshift__ [self value] (return (.m/apply-pipe-redirect self "<<" value)))
+;; __rlshift__:1 ends here
+
+;; __rgt__
+
+
+;; [[file:bakery.org::*__rgt__][__rgt__:1]]
+(defn __gt__ [self value] (return (.m/apply-pipe-redirect self ">" value)))
+;; __rgt__:1 ends here
+
+;; __rrshift__
+
+
+;; [[file:bakery.org::*__rrshift__][__rrshift__:1]]
+(defn __rshift__ [self value] (return (.m/apply-pipe-redirect self ">>" value)))
+;; __rrshift__:1 ends here
+
 ;; __enter__
 
 

@@ -1768,6 +1768,48 @@ If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in inf
 (defn __rshift__ [self value] (return (.m/apply-pipe-redirect self ">>" value)))
 #+end_src
 
+*** __ror__
+
+#+begin_src hy
+(defn __or__ [self value] (return (.m/apply-pipe-redirect self "|" value)))
+#+end_src
+
+*** __rand__
+
+#+begin_src hy
+(defn __and__ [self value] (return (.m/apply-pipe-redirect self "| tee" value)))
+#+end_src
+
+*** __radd__
+
+#+begin_src hy
+(defn __add__ [self value] (return (.m/apply-pipe-redirect self "| tee -a" value)))
+#+end_src
+
+*** __rlt__
+
+#+begin_src hy
+(defn __lt__ [self value] (return (.m/apply-pipe-redirect self "<" value)))
+#+end_src
+
+*** __rlshift__
+
+#+begin_src hy
+(defn __lshift__ [self value] (return (.m/apply-pipe-redirect self "<<" value)))
+#+end_src
+
+*** __rgt__
+
+#+begin_src hy
+(defn __gt__ [self value] (return (.m/apply-pipe-redirect self ">" value)))
+#+end_src
+
+*** __rrshift__
+
+#+begin_src hy
+(defn __rshift__ [self value] (return (.m/apply-pipe-redirect self ">>" value)))
+#+end_src
+
 *** __enter__
 
 #+begin_src hy
