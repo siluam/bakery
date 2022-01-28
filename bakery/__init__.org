@@ -6,6 +6,12 @@
 
 Adapted from the entirety of [[https://stackoverflow.com/questions/56786604/import-modules-that-dont-exist-yet][this question]]:
 
+** Import Hy
+
+#+begin_src py
+import hy
+#+end_src
+
 ** Relative Import
 
 Adapted from [[https://stackoverflow.com/users/799163/remcogerlich][RemcoGerlich's]] answer [[https://stackoverflow.com/a/21139466][here]]:
@@ -17,8 +23,6 @@ from .bakery import milcery
 ** Rest of __init__
 
 #+begin_src py
-import hy
-
 def __getattr__(program_):
     if program_ == "__path__":
         raise AttributeError

@@ -1,3 +1,10 @@
+# Import Hy
+
+
+# [[file:__init__.org::*Import Hy][Import Hy:1]]
+import hy
+# Import Hy:1 ends here
+
 # Relative Import
 
 # Adapted from [[https://stackoverflow.com/users/799163/remcogerlich][RemcoGerlich's]] answer [[https://stackoverflow.com/a/21139466][here]]:
@@ -11,8 +18,6 @@ from .bakery import milcery
 
 
 # [[file:__init__.org::*Rest of __init__][Rest of __init__:1]]
-import hy
-
 def __getattr__(program_):
     if program_ == "__path__":
         raise AttributeError
