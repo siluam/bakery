@@ -14,6 +14,7 @@ addict = "*"
 autoslot = "*"
 fabric = "*"
 hy = "^1.0a4+4.gaa2e878"
+toolz = "*"
 pout = "*"
 rich = {git = "https://github.com/shadowrylander/rich.git", branch = "master"}
 toml = "*"
