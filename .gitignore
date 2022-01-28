@@ -1,16 +1,1 @@
-_gsdata_
-.git
-.boar
-**/*.sync
-**/*.swp
-**/*.!sync
-**/*.bts
-**/*.tmp
-**/__pycache__
-**/*.test.*
-**/*.envrc
-**/dist
-**/tests
-**/deprecated
-**/unfinished
-**/.vscode
+__pycache__

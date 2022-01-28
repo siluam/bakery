@@ -962,7 +962,8 @@ Adapted from [[https://stackoverflow.com/users/2988730/mad-physicist][Mad Physic
 #+begin_src hy
                                 [(let [trimmed-attr (-> self.__class__ (.cls/trim-attr-prefix var/process/key) (get 1))]
                                       (and (not (in trimmed-attr self.m/type-groups.excluded-classes))
-                                           (class? (setx literal-attr (.get (globals) trimmed-attr (getattr builtins trimmed-attr None))))))
+                                           (class? (setx literal-attr (.get (globals) trimmed-attr (getattr builtins trimmed-attr None))))
+                                           value))
                                  (setv self.m/settings.current.m/type literal-attr)]
 #+end_src
 

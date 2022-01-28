@@ -1031,8 +1031,10 @@
 
 ;; [[file:bakery.org::*Keyword Arguments][Keyword Arguments:4]]
 [(let [trimmed-attr (-> self.__class__ (.cls/trim-attr-prefix var/process/key) (get 1))]
+      (print (, trimmed-attr value))
       (and (not (in trimmed-attr self.m/type-groups.excluded-classes))
-           (class? (setx literal-attr (.get (globals) trimmed-attr (getattr builtins trimmed-attr None))))))
+           (class? (setx literal-attr (.get (globals) trimmed-attr (getattr builtins trimmed-attr None))))
+           value))
  (setv self.m/settings.current.m/type literal-attr)]
 ;; Keyword Arguments:4 ends here
 
