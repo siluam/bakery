@@ -9,3 +9,11 @@ tangle:
 |make -f $(mkfileDir)/settings/makefile tangle-setup
 |yes ";;" | $(mkfileDir)/settings/org-tangle.sh $(mkfileDir)/bakery/bakery.org
 |yes "#" | $(mkfileDir)/settings/org-tangle.sh $(mkfileDir)/bakery/__init__.org
+
+install:
+|pip install .
+
+test:
+|hy
+
+test-all: tangle install test

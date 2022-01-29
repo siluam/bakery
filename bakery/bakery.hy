@@ -20,6 +20,7 @@
 (import functools [partial wraps])
 (import gensing [frosting tea])
 (import hy [mangle unmangle])
+(import hyrule [coll?])
 (import inspect [isclass :as class?])
 (import itertools [chain tee])
 (import nanite [fullpath peek trim])
@@ -77,22 +78,41 @@
 (setv __slots__ [ "__weakref__" ])
 ;; The Milcery Class:2 ends here
 
+;; Flatten Iterable
+
+;; # TODO: Add to nanite
+
+
+;; [[file:bakery.org::*Flatten Iterable][Flatten Iterable:1]]
+#@(classmethod (defn cls/flatten [cls iterable [times None]]
+                     (setv lst [])
+                     (for [i iterable]
+                          (if (and (coll? i)
+                                   (or (is times None)
+                                       times))
+                              (.extend lst (.cls/flatten cls i :times (if times (dec times) times)))
+                              (.append lst i)))
+                     (return lst)))
+;; Flatten Iterable:1 ends here
+
+;; Split and Flatten
+
+
+;; [[file:bakery.org::*Split and Flatten][Split and Flatten:1]]
+#@(classmethod (defn cls/split-and-flatten [cls iterable] (.cls/flatten cls (gfor j (.cls/flatten cls iterable) (.split j)))))
+;; Split and Flatten:1 ends here
+
 ;; Freezer
 
 
 ;; [[file:bakery.org::*Freezer][Freezer:1]]
 #@(classmethod (defn cls/freezer [cls value freezer]
                       (cond [(not value) (setv freezer [])]
-                            [(isinstance value list)
+                            [(coll? value)
                              (do (if (not (isinstance freezer list)) (setv freezer []))
                                  (.extend freezer value)
-                                 (setv freezer (->> (lfor i
-                                                          (lfor j freezer :if j j)
-                                                          (if (isinstance i list) i [i]))
-                                                    (unpack-iterable)
-                                                    (chain)
-                                                    (list))))]
-                            [True (raise (TypeError f"Sorry! The 'm/freezer' can only accept lists or non-truthy values!"))])
+                                 (setv freezer (.cls/flatten cls (gfor i freezer :if i i))))]
+                            [True (raise (TypeError f"Sorry! The 'm/freezer' can only accept non-string iterables or non-truthy values!"))])
                       (return freezer)))
 ;; Freezer:1 ends here
 
@@ -215,19 +235,6 @@
 #@(m/run.setter (defn m/run [self value] (if value (setv self.m/capture "run"))))
 ;; Run Interactively:1 ends here
 
-;; Pretty Print
-
-;; Pretty print the output:
-
-
-;; [[file:bakery.org::*Pretty Print][Pretty Print:1]]
-#@(property (defn m/dazzle [self] (return self.internal/dazzle)))
-#@(m/dazzle.setter (defn m/dazzle [self value]
-                           (setv self.internal/dazzle (bool value))
-                           (if value
-                               (setv self.m/type self.m/settings.defaults.m/type))))
-;; Pretty Print:1 ends here
-
 ;; Number of Lines
 
 ;; ~ordinal~ will shave off the first or last ~n~ lines off of ~std~, whether that be ~stdout~ or ~stderr~:
@@ -290,7 +297,7 @@
 ;; [[file:bakery.org::*Sudo][Sudo:1]]
 #@(property (defn m/sudo [self] (return self.internal/sudo)))
 #@(m/sudo.setter (defn m/sudo [self value]
-                       (if (not (isinstance value (, dict tea frosting)))
+                       (if (not (isinstance value self.m/type-groups.dict-like))
                            (raise (TypeError "Sorry! `m/sudo' needs to be a tea, frosting, or dict-like object!")))
                        (if (> (len value) 1)
                            (raise (ValueError "Sorry! The `m/sudo' object can only have a single key-value item!")))
@@ -351,12 +358,20 @@
 (.extend self.m/type-groups.acceptable-args self.m/type-groups.this-class-subclass)
 ;; This Class and its Subclasses:1 ends here
 
+;; Dict-Like
+
+
+;; [[file:bakery.org::*Dict-Like][Dict-Like:1]]
+(setv self.m/type-groups.dict-like [dict])
+;; Dict-Like:1 ends here
+
 ;; Genstrings
 
 
 ;; [[file:bakery.org::*Genstrings][Genstrings:1]]
 (setv self.m/type-groups.genstrings [tea frosting])
 (.extend self.m/type-groups.acceptable-args self.m/type-groups.genstrings)
+(.extend self.m/type-groups.acceptable-args self.m/type-groups.dict-like)
 (setv self.m/type-groups.genstrings (tuple self.m/type-groups.genstrings))
 ;; Genstrings:1 ends here
 
@@ -373,6 +388,13 @@
 ;; [[file:bakery.org::*Excluded classes][Excluded classes:1]]
 (setv self.m/type-groups.excluded-classes (, "type"))
 ;; Excluded classes:1 ends here
+
+;; Post
+
+
+;; [[file:bakery.org::*Post][Post:1]]
+(setv self.m/type-groups.dict-like (tuple self.m/type-groups.dict-like))
+;; Post:1 ends here
 
 
 
@@ -525,8 +547,8 @@
 
 
 ;; [[file:bakery.org::*Pretty Prining][Pretty Prining:1]]
-(setv self.internal/dazzle False)
-(setv self.m/settings.defaults.m/dazzle (deepcopy self.internal/dazzle))
+(setv self.m/dazzle False)
+(setv self.m/settings.defaults.m/dazzle (deepcopy self.m/dazzle))
 ;; Pretty Prining:1 ends here
 
 ;; Ignore Output
@@ -715,6 +737,16 @@
 (setv self.m/settings.defaults.m/type (deepcopy self.m/type))
 ;; Type of Output:1 ends here
 
+;; Split Output By Whitespace
+
+;; Split the output by newlines, tabs, spaces, etc.
+
+
+;; [[file:bakery.org::*Split Output By Whitespace][Split Output By Whitespace:1]]
+(setv self.m/split False)
+(setv self.m/settings.defaults.m/split (deepcopy self.m/split))
+;; Split Output By Whitespace:1 ends here
+
 ;; Use Single Forward Slash Instead of Dash
 
 ;; Use a single forward slash instead of a dash for options, as ~DOS~ expects:
@@ -848,7 +880,7 @@
     (if (is input None) (return (.misc/return-none-if-tnis self :type/type type/type/type)))
     (if (and input (isinstance input frosting))
         (let [frosted-input (input)]
-             (cond [(isinstance frosted-input (, str bytes bytearray))
+             (cond [(isinstance frosted-input str)
                     (setv input [(.fill (TextWrapper :break-long-words False :break-on-hyphens False) frosted-input)])]
                    [(is frosted-input None) (return (.misc/return-none-if-tnis self :type/type type/type/type))]
                    [(isinstance frosted-input int) (if (.misc/type-name-is-string self :type/type type/type/type)
@@ -1119,57 +1151,68 @@
      (if value
          (let [aa (tuple (+ self.m/type-groups.acceptable-args [dict bool]))]
               (if (isinstance value aa)
-                  (cond [(isinstance value dict) 
-                         (let [options (, "fixed" "dos" "one-dash" "repeat" "repeat-with-values")
-                               option-string (.join ", " options)]
-                              (for [[k v] (.items command/process-kwargs/value)]
-                                   (if (in k options)
-                                       (do (setv command/process-kwargs/key (if (= k "fixed")
-                                                                                command/process-kwargs/key
-                                                                                (.replace command/process-kwargs/key "_" "-"))
-                                                 command/process-kwargs/key (cond [(= k "dos") (+ "/" command/process-kwargs/key)]
-                                                                                  [(= k "one-dash") (+ "-" command/process-kwargs/key)]
-                                                                                  [True (+ (if (= (len command/process-kwargs/key) 1)
-                                                                                               "-"
-                                                                                               "--") command/process-kwargs/key)])
-                                                 command/process-kwargs/key-values (cond [(= k "repeat") (lfor i (range (inc v)) command/process-kwargs/key)]
-                                                                                         [(= k "repeat-with-values")
-                                                                                          (do (setv key-values [])
-                                                                                              (for [j v]
-                                                                                                   (.append key-values command/process-kwargs/key)
-                                                                                                   (if (setx l (inner j))
-                                                                                                       (do (if (isinstance (. self
-                                                                                                                                   m/kwargs
-                                                                                                                                   current
-                                                                                                                                   processed
-                                                                                                                                   [(if starter
-                                                                                                                                        "starter-values"
-                                                                                                                                        "regular-values")]) list)
-                                                                                                               (.append (. self
-                                                                                                                           m/kwargs
-                                                                                                                           current
-                                                                                                                           processed
-                                                                                                                           [(if starter
-                                                                                                                                "starter-values"
-                                                                                                                                "regular-values")]) l)
-                                                                                                               (assoc self.m/kwargs.current.processed
-                                                                                                                      (if starter
-                                                                                                                          "starter-values"
-                                                                                                                          "regular-values") [l]))
-                                                                                                           (.append key-values l))))
-                                                                                              key-values)]
-                                                                                         [True None])))
-                                       (raise (AttributeError f"Sorry! A keyword argument value of type dict can only have the following keys: {option-string}")))))]
+                  (if (isinstance value dict)
+                      (let [no-value-options ["repeat" "repeat-with-values" "rwv"]
+                            no-value-option-string (.join ", " no-value-options)
+                            options (+ no-value-options ["fixed" "dos" "one-dash" "value"])
+                            option-string (.join ", " options)
+                            dct-value (.get value "value" None)]
+                           (cond [dct-value (setv command/process-kwargs/value (inner dct-value))]
+                                 [(any (gfor o (.keys value) (in o no-value-options))) None]
+                                 [True (raise (AttributeError f"Sorry! You must use the 'value' keyword if you do not use any of the following: {no-value-option-string}"))])
+                           (for [[k v] (.items value)]
+                                 (if (in k options)
+                                     (if (and v (!= k "value"))
+                                         (setv command/process-kwargs/key (if (or (= k "fixed")
+                                                                                  self.m/fixed)
+                                                                              key
+                                                                              (.replace key "_" "-"))
+                                               command/process-kwargs/key (cond [(or (= k "dos")
+                                                                                     self.m/dos)
+                                                                                 (+ "/" command/process-kwargs/key)]
+                                                                                [(or (= k "one-dash")
+                                                                                     self.m/one-dash
+                                                                                     (= (len command/process-kwargs/key) 1))
+                                                                                 (+ "-" command/process-kwargs/key)]
+                                                                                [True (+ "--" command/process-kwargs/key)])
+                                               command/process-kwargs/key-values (cond [(= k "repeat") (lfor i (range (inc v)) command/process-kwargs/key)]
+                                                                                       [(in k (, "repeat-with-values" "rwv"))
+                                                                                        (do (setv key-values [])
+                                                                                            (for [j v]
+                                                                                                 (.append key-values command/process-kwargs/key)
+                                                                                                 (if (setx l (inner j))
+                                                                                                     (do (if (isinstance (. self
+                                                                                                                            m/kwargs
+                                                                                                                            current
+                                                                                                                            processed
+                                                                                                                            [(if starter
+                                                                                                                                 "starter-values"
+                                                                                                                                 "regular-values")]) list)
+                                                                                                             (.append (. self
+                                                                                                                         m/kwargs
+                                                                                                                         current
+                                                                                                                         processed
+                                                                                                                         [(if starter
+                                                                                                                              "starter-values"
+                                                                                                                              "regular-values")]) l)
+                                                                                                             (assoc self.m/kwargs.current.processed
+                                                                                                                    (if starter
+                                                                                                                        "starter-values"
+                                                                                                                        "regular-values") [l]))
+                                                                                                         (.append key-values l))))
+                                                                                            key-values)]
+                                                                                       [True None])))
+                                     (raise (AttributeError f"Sorry! A keyword argument value of type dict can only have the following keys: {option-string}")))))
                         [True (setv command/process-kwargs/value (inner value)
                                     command/process-kwargs/key (if self.m/fixed key (.replace key "_" "-"))
                                     command/process-kwargs/key (cond [self.m/dos (+ "/" command/process-kwargs/key)]
-                                                                     [self.m/one-dash (+ "-" command/process-kwargs/key)]
-                                                                     [True (+ (if (= (len command/process-kwargs/key) 1)
-                                                                                  "-"
-                                                                                  "--") command/process-kwargs/key)])
+                                                                     [(or self.m/one-dash
+                                                                          (= (len command/process-kwargs/key) 1))
+                                                                      (+ "-" command/process-kwargs/key)]
+                                                                     [True (+ "--" command/process-kwargs/key)])
                                     command/process-kwargs/key-values None)])
-                  (let [aas (.join ", " (lfor arg aa arg.__name__))]
-                       (raise (TypeError f"Sorry! Keyword argument value '{value}' of type '{(type value)}' must be one of the following: {aas}"))))
+                  (let [aas (.join ", " (gfor arg aa arg.__name__))]
+                       (raise (TypeError f"Sorry! Keyword argument value '{value}' of type '{(type value)}' must be one of the following types: {aas}"))))
      (if (isinstance (. self m/kwargs current processed [(if starter "starter" "regular")]) list)
          (if command/process-kwargs/key-values
              (.extend (. self m/kwargs current processed [(if starter "starter" "regular")]) command/process-kwargs/key-values)
@@ -1338,31 +1381,46 @@
 ;; [[file:bakery.org::*Frosting][Frosting:1]]
 (defn return/frosting [self]
       (setv output (.return/output self)
-            frosted-output (if (and (isinstance output (, dict tea frosting))
+            frosted-output (if (and (isinstance output self.m/type-groups.dict-like)
                                     (= (len output) 1))
                                (-> output (.values) (iter) (next))
-                               output))
+                               output)
+            dict-like-frosted-output (isinstance frosted-output self.m/type-groups.dict-like)
+            frosted-output (if self.m/dazzle
+                               (cond [dict-like-frosted-output frosted-output]
+                                     [(coll? frosted-output) (list frosted-output)]
+                                     [True [frosted-output]])
+                               frosted-output))
       (cond [(or self.m/frozen (= self.m/wait False)) (return frosted-output)]
             [self.m/print-command (print frosted-output)]
-            [self.m/dazzle (for [cat (deepcopy output)]
-                                (setv outcat (get output cat))
-                                (if (or (isinstance outcat int)
-                                        (isinstance outcat (, str bytes bytearray)))
-                                    (print f"{cat}: {outcat}")
-                                    (do (if (not (in cat self.m/captures))
-                                            (print (+ cat ": ")))
-                                        (if (= cat "return-codes")
-                                            (print outcat)
-                                            (for [line outcat]
-                                                 (print line))))))])
-      (cond [(isinstance frosted-output (, dict tea frosting))
+            [self.m/dazzle (if dict-like-frosted-output
+                               (for [cat frosted-output]
+                                    (setv outcat (get output cat))
+                                    (if (or (isinstance outcat int)
+                                            (isinstance outcat str))
+                                        (print f"{cat}: {outcat}")
+                                        (do (if (not (in cat self.m/captures))
+                                                (print (+ cat ": ")))
+                                            (if (= cat "return-codes")
+                                                (print outcat)
+                                                (for [line outcat]
+                                                     (print line))))))
+                               (for [line frosted-output]
+                                    (print line)))])
+      (cond [dict-like-frosted-output
              (for [std (, "out" "err")]
                   (setv stdstd (+ "std" std))
                   (if (hasattr frosted-output stdstd)
-                      (assoc frosted-output stdstd (.convert/type self (get frosted-output stdstd))))
-                  (else (return frosted-output)))]
+                      (let [new-frosted-output (get frosted-output stdstd)]
+                           (if self.m/split
+                               (setv new-frosted-output (.cls/split-and-flatten self.__class__ new-frosted-output)))
+                           (assoc frosted-output stdstd (.convert/type self new-frosted-output))))
+                  (else (return new-frosted-output)))]
             [(is self.m/wait None) (return (.misc/return-none-if-tnis self))]
-            [True (return (.convert/type self (frosting frosted-output self.m/capture)))]))
+            [True (let [new-frosted-output (frosting frosted-output self.m/capture)]
+                       (if self.m/split
+                           (setv new-frosted-output (.cls/split-and-flatten self.__class__ new-frosted-output)))
+                       (return (.convert/type self new-frosted-output)))]))
 ;; Frosting:1 ends here
 
 ;; Popen Partial
@@ -1426,7 +1484,7 @@
 (defn m/apply-pipe-redirect [self pr value]
     (setv is-milcery (isinstance value self.__class__))
     (defn inner [v]
-          (let [type-string (.join ", " (lfor t (+ (list self.m/type-groups.genstrings)
+          (let [type-string (.join ", " (gfor t (+ (list self.m/type-groups.genstrings)
                                                    self.m/type-groups.this-class-subclass
                                                    [str]) t.__name__))]
                (return (cond [(isinstance v self.m/type-groups.genstrings) [(v)]]
