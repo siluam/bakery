@@ -247,8 +247,7 @@
     (setv ordinal (.get value "ordinal" "first"))
     (if ordinal
         (if (not (in ordinal (setx ordinals (, "first" "last"))))
-            (let [ordinal-string (.join ", " ordinals)]
-                (raise (TypeError f"Sorry! You must choose and `ordinal' from: [{ordinal-string}]"))))
+            (raise (TypeError #[f[Sorry! You must choose an `ordinal' value from: {(.join ", " ordinals)}]f])))
         (assoc value "ordinal" "first"))
 
     (setv number (.get value "number" 0))
@@ -260,8 +259,7 @@
     (setv std (.get value "std" "stdout"))
     (if std
         (if (not (in std (setx stds (, "stdout" "stderr" "both"))))
-            (let [std-string (.join ", " stds)]
-                (raise (TypeError f"Sorry! You must choose and `std' from: [{std-string}]")))
+            (raise (TypeError #[f[Sorry! You must choose an `std' value from: {(.join ", " stds)}]f]))
         (assoc value "std" "stdout")))
     
     (setv self.internal/n-lines (D value))))
@@ -286,8 +284,7 @@
 #@(property (defn m/capture [self] (return self.internal/capture)))
 #@(m/capture.setter (defn m/capture [self value]
                           (if (not (in value self.m/captures))
-                              (let [capture-string (.join ", " self.m/captures)]
-                                   (raise (TypeError f"Sorry! Capture type '{value}' is not permitted! Choose from one of: {cature-string}"))))
+                              (raise (TypeError #[f[Sorry! Capture type "{value}" is not permitted! Choose from one of: {(.join ", " self.m/captures)}]f])))
                           (setv self.internal/capture value)))
 ;; Capture:1 ends here
 
@@ -1153,13 +1150,11 @@
               (if (isinstance value aa)
                   (if (isinstance value dict)
                       (let [no-value-options ["repeat" "repeat-with-values" "rwv"]
-                            no-value-option-string (.join ", " no-value-options)
                             options (+ no-value-options ["fixed" "dos" "one-dash" "value"])
-                            option-string (.join ", " options)
                             dct-value (.get value "value" None)]
                            (cond [dct-value (setv command/process-kwargs/value (inner dct-value))]
                                  [(any (gfor o (.keys value) (in o no-value-options))) None]
-                                 [True (raise (AttributeError f"Sorry! You must use the 'value' keyword if you do not use any of the following: {no-value-option-string}"))])
+                                 [True (raise (AttributeError #[f[Sorry! You must use the "value" keyword if you do not use any of the following: {(.join ", " no-value-options)}]f]))])
                            (for [[k v] (.items value)]
                                  (if (in k options)
                                      (if (and v (!= k "value"))
@@ -1202,7 +1197,7 @@
                                                                                                          (.append key-values l))))
                                                                                             key-values)]
                                                                                        [True None])))
-                                     (raise (AttributeError f"Sorry! A keyword argument value of type dict can only have the following keys: {option-string}")))))
+                                     (raise (AttributeError #[f[Sorry! A keyword argument value of type dict can only have the following keys: {(.join ", " options)}]f])))))
                         [True (setv command/process-kwargs/value (inner value)
                                     command/process-kwargs/key (if self.m/fixed key (.replace key "_" "-"))
                                     command/process-kwargs/key (cond [self.m/dos (+ "/" command/process-kwargs/key)]
@@ -1211,8 +1206,7 @@
                                                                       (+ "-" command/process-kwargs/key)]
                                                                      [True (+ "--" command/process-kwargs/key)])
                                     command/process-kwargs/key-values None)])
-                  (let [aas (.join ", " (gfor arg aa arg.__name__))]
-                       (raise (TypeError f"Sorry! Keyword argument value '{value}' of type '{(type value)}' must be one of the following types: {aas}"))))
+                  (raise (TypeError #[f[Sorry! Keyword argument value "{value}" of type "{(type value)}" must be one of the following types: {(.join ", " (gfor arg aa arg.__name__))}]f])))
      (if (isinstance (. self m/kwargs current processed [(if starter "starter" "regular")]) list)
          (if command/process-kwargs/key-values
              (.extend (. self m/kwargs current processed [(if starter "starter" "regular")]) command/process-kwargs/key-values)
@@ -1490,7 +1484,7 @@
                (return (cond [(isinstance v self.m/type-groups.genstrings) [(v)]]
                              [is-milcery (or v.m/freezer (.values v.m/command) [v.m/program])]
                              [(isinstance v str) [v]]
-                             [True (raise (NotImplemented f"Sorry! Value {v} can only be of the following types: {type-string}"))]))))
+                             [True (raise (NotImplemented f"Sorry! Value '{v}' can only be of the following types: {type-string}"))]))))
 ;; Apply Pipe or Redirect:1 ends here
 
 
