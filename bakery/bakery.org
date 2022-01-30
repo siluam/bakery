@@ -1075,13 +1075,12 @@ otherwise ~(isinstance value int)~ will catch both cases.
                             (let [no-value-options ["repeat" "repeat-with-values" "rwv"]
                                   options (+ no-value-options ["fixed" "dos" "one-dash" "value"])
                                   dct-value (.get value "value" None)]
-                                 (cond [dct-value (setv command/process-kwargs/value (inner dct-value)
-                                                        command/process-kwargs/key-values None)]
+                                 (cond [dct-value (setv command/process-kwargs/value (inner dct-value))]
                                        [(any (gfor o (.keys value) (in o no-value-options))) None]
                                        [True (raise (AttributeError #[f[Sorry! You must use the "value" keyword if you do not use any of the following: {(.join ", " no-value-options)}]f]))])
                                  (for [[k v] (.items value)]
                                        (if (in k options)
-                                           (if (and v (!= k "value"))
+                                           (if v
                                                (setv command/process-kwargs/key (if (or (= k "fixed")
                                                                                         self.m/fixed)
                                                                                     key
@@ -1120,7 +1119,10 @@ otherwise ~(isinstance value int)~ will catch both cases.
                                                                                                                               "regular-values") [l]))
                                                                                                                (.append key-values l))))
                                                                                                   key-values)]
-                                                                                             [True None])))
+                                                                                             [True None]))
+                                               (setv command/process-kwargs/key None
+                                                     command/process-kwargs/value None
+                                                     command/process-kwargs/key-values None))
                                            (raise (AttributeError #[f[Sorry! A keyword argument value of type dict can only have the following keys: {(.join ", " options)}]f])))))
                               [True (setv command/process-kwargs/value (inner value)
                                           command/process-kwargs/key (if self.m/fixed key (.replace key "_" "-"))
@@ -1131,14 +1133,17 @@ otherwise ~(isinstance value int)~ will catch both cases.
                                                                            [True (+ "--" command/process-kwargs/key)])
                                           command/process-kwargs/key-values None)])
                         (raise (TypeError #[f[Sorry! Keyword argument value "{value}" of type "{(type value)}" must be one of the following types: {(.join ", " (gfor arg aa arg.__name__))}]f])))
-           (if (isinstance (. self m/kwargs current processed [(if starter "starter" "regular")]) list)
-               (if command/process-kwargs/key-values
-                   (.extend (. self m/kwargs current processed [(if starter "starter" "regular")]) command/process-kwargs/key-values)
-                   (.append (. self m/kwargs current processed [(if starter "starter" "regular")]) command/process-kwargs/key))
-               (if command/process-kwargs/key-values
-                   (assoc self.m/kwargs.current.processed (if starter "starter" "regular") command/process-kwargs/key-values)
-                   (assoc self.m/kwargs.current.processed (if starter "starter" "regular") [command/process-kwargs/key])))
-           (if (and (not command/process-kwargs/key-values) command/process-kwargs/value)
+           (if (or command/process-kwargs/key-values
+                   command/process-kwargs/key)
+               (do (if (isinstance (. self m/kwargs current processed [(if starter "starter" "regular")]) list)
+                       (if command/process-kwargs/key-values
+                           (.extend (. self m/kwargs current processed [(if starter "starter" "regular")]) command/process-kwargs/key-values)
+                           (.append (. self m/kwargs current processed [(if starter "starter" "regular")]) command/process-kwargs/key))
+                       (if command/process-kwargs/key-values
+                           (assoc self.m/kwargs.current.processed (if starter "starter" "regular") command/process-kwargs/key-values)
+                           (assoc self.m/kwargs.current.processed (if starter "starter" "regular") [command/process-kwargs/key])))))
+           (if (and command/process-kwargs/value
+                    (not command/process-kwargs/key-values))
                (do (if (isinstance (. self
                                       m/kwargs
                                       current
