@@ -1321,7 +1321,7 @@
                                      stds (, "out" "err"))
                                (if (and peek-value
                                         (not self.m/ignore-stderr))
-                                   (raise (SystemError (.join "\n" output.stderr))))
+                                   (raise (SystemError (+ f"In trying to run {(.m/command self)}:\n\n" (.join "\n" output.stderr)))))
                                (for [[std opp] (zip stds (py "stds[::-1]"))]
                                     (setv stdstd (+ "std" std)
                                           stdopp (+ "std" opp))
