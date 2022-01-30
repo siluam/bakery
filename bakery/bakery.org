@@ -1516,7 +1516,7 @@ Note that ~freezer-~ will always use the ~m/freezer~ value from the bakery on th
 [["Bake"][https://amoffat.github.io/sh/sections/baking.html]] arguments and options into all bakeries:
 
 #+begin_src hy
-(defn bake-all [self #* args #** kwargs ]
+(defn bake-all- [self #* args #** kwargs ]
       (for [store (.chain- self)]
            (.extend store.m/args.world args)
            (.update store.m/kwargs.world kwargs)))
@@ -1535,7 +1535,7 @@ Remove baked arguments and options; accepts keyword arguments taken by ~reset-~:
 Remove arguments and options from all bakeries; accepts keyword arguments taken by ~reset-~:
 
 #+begin_src hy
-(defn splat-all [self [set-defaults False] #** kwargs]
+(defn splat-all- [self [set-defaults False] #** kwargs]
       (for [store (.chain- self)]
            (.reset- self :set-defaults set-defaults #** kwargs)))
 #+end_src
@@ -1546,7 +1546,7 @@ Return an ~addict~ dictionary with all the current values for the class variable
 can be used for debugging purposes or otherwise.
 
 #+begin_src hy
-(defn current-values [self]
+(defn current-values- [self]
       (return (D { "__slots__" (.misc/recursive-unmangle self (dfor var
                                                                     self.__slots__
                                                                     :if (!= var "__dict__")
@@ -1779,7 +1779,7 @@ Return updated instance
 If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in infinite loop when getting the title of the report.
 
 #+begin_src hy
-(defn __str__ [self] (return f"<{self.__class__.__module__}.{self.__class__.__name__} object at {(hex (id self))}>"))
+(defn __str__ [self] (return (or (.m/command self) f"<{self.__class__.__module__}.{self.__class__.__name__} object at {(hex (id self))}>")))
 #+end_src
 
 *** __repr__

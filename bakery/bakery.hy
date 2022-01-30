@@ -1600,7 +1600,7 @@ freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [proce
 
 
 ;; [[file:bakery.org::*Bake All][Bake All:1]]
-(defn bake-all [self #* args #** kwargs ]
+(defn bake-all- [self #* args #** kwargs ]
       (for [store (.chain- self)]
            (.extend store.m/args.world args)
            (.update store.m/kwargs.world kwargs)))
@@ -1621,7 +1621,7 @@ freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [proce
 
 
 ;; [[file:bakery.org::*Unbake All][Unbake All:1]]
-(defn splat-all [self [set-defaults False] #** kwargs]
+(defn splat-all- [self [set-defaults False] #** kwargs]
       (for [store (.chain- self)]
            (.reset- self :set-defaults set-defaults #** kwargs)))
 ;; Unbake All:1 ends here
@@ -1633,7 +1633,7 @@ freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [proce
 
 
 ;; [[file:bakery.org::*Current Values][Current Values:1]]
-(defn current-values [self]
+(defn current-values- [self]
       (return (D { "__slots__" (.misc/recursive-unmangle self (dfor var
                                                                     self.__slots__
                                                                     :if (!= var "__dict__")
@@ -1899,7 +1899,7 @@ slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__
 
 
 ;; [[file:bakery.org::*__str__][__str__:1]]
-(defn __str__ [self] (return f"<{self.__class__.__module__}.{self.__class__.__name__} object at {(hex (id self))}>"))
+(defn __str__ [self] (return (or (.m/command self) f"<{self.__class__.__module__}.{self.__class__.__name__} object at {(hex (id self))}>")))
 ;; __str__:1 ends here
 
 ;; __repr__
