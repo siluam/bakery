@@ -1142,7 +1142,8 @@
                       (let [no-value-options ["repeat" "repeat-with-values" "rwv"]
                             options (+ no-value-options ["fixed" "dos" "one-dash" "value"])
                             dct-value (.get value "value" None)]
-                           (cond [dct-value (setv command/process-kwargs/value (inner dct-value))]
+                           (cond [dct-value (setv command/process-kwargs/value (inner dct-value)
+                                                  command/process-kwargs/key-values None)]
                                  [(any (gfor o (.keys value) (in o no-value-options))) None]
                                  [True (raise (AttributeError #[f[Sorry! You must use the "value" keyword if you do not use any of the following: {(.join ", " no-value-options)}]f]))])
                            (for [[k v] (.items value)]
