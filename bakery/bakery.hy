@@ -1143,7 +1143,7 @@
                             options (+ no-value-options ["fixed" "dos" "one-dash" "value"])
                             dct-value (.get value "value" None)]
                            (cond [dct-value (setv command/process-kwargs/value (inner dct-value))]
-                                 [(any (gfor o (.keys value) (in o no-value-options))) None]
+                                 [(any (gfor o (.keys value) (in o no-value-options))) (setv command/process-kwargs/value None)]
                                  [True (raise (AttributeError #[f[Sorry! You must use the "value" keyword if you do not use any of the following: {(.join ", " no-value-options)}]f]))])
                            (for [[k v] (.items value)]
                                  (if (in k options)
