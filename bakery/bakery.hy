@@ -909,7 +909,7 @@
 (defn subcommand/process [self]
     (setv self.m/subcommand.current.processed (if self.m/subcommand.current.intact
                                                   self.m/subcommand.current.unprocessed
-                                                  (.replace self.m/subcommand.current.unprocessed "_" "-"))))
+                                                  (unmangle self.m/subcommand.current.unprocessed))))
 ;; Process:1 ends here
 
 ;; Set Defaults

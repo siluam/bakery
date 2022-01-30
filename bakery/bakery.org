@@ -849,7 +849,7 @@ Print all the current values after attempting to return the result of the comman
 (defn subcommand/process [self]
     (setv self.m/subcommand.current.processed (if self.m/subcommand.current.intact
                                                   self.m/subcommand.current.unprocessed
-                                                  (.replace self.m/subcommand.current.unprocessed "_" "-"))))
+                                                  (unmangle self.m/subcommand.current.unprocessed))))
 #+end_src
 
 ** Variables
