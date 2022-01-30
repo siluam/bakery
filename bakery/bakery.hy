@@ -548,24 +548,14 @@
 (setv self.m/settings.defaults.m/dazzle (deepcopy self.m/dazzle))
 ;; Pretty Prining:1 ends here
 
-;; Ignore Output
-
-;; Ignore output:
-
-
-;; [[file:bakery.org::*Ignore Output][Ignore Output:1]]
-(setv self.m/ignore (D {}))
-(setv self.m/settings.defaults.m/ignore (deepcopy self.m/ignore))
-;; Ignore Output:1 ends here
-
 ;; Stdout
 
 ;; Ignore standard output:
 
 
 ;; [[file:bakery.org::*Stdout][Stdout:1]]
-(setv self.m/ignore.stdout False)
-(setv self.m/settings.defaults.m/ignore.stdout (deepcopy self.m/ignore.stdout))
+(setv self.m/ignore-stdout False)
+(setv self.m/settings.defaults.m/ignore-stdout (deepcopy self.m/ignore-stdout))
 ;; Stdout:1 ends here
 
 ;; Stderr
@@ -574,8 +564,8 @@
 
 
 ;; [[file:bakery.org::*Stderr][Stderr:1]]
-(setv self.m/ignore.stderr False)
-(setv self.m/settings.defaults.m/ignore.stderr (deepcopy self.m/ignore.stderr))
+(setv self.m/ignore-stderr False)
+(setv self.m/settings.defaults.m/ignore-stderr (deepcopy self.m/ignore-stderr))
 ;; Stderr:1 ends here
 
 ;; Verbosity
@@ -1311,7 +1301,7 @@
                            (do (setv [peek-value output.stderr] (peek output.stderr :return-first 2)
                                      stds (, "out" "err"))
                                (if (and peek-value
-                                        (not self.m/ignore.stderr))
+                                        (not self.m/ignore-stderr))
                                    (raise (SystemError (.join "\n" output.stderr))))
                                (for [[std opp] (zip stds (py "stds[::-1]"))]
                                     (setv stdstd (+ "std" std)
@@ -1425,12 +1415,12 @@
       (setv pp-stdout (cond [stdout]
                             [(= self.m/capture "stderr") (.get self.m/popen "stdout" DEVNULL)]
                             [(= self.m/capture "run") (.get self.m/popen "stdout" None)]
-                            [True (if self.m/ignore.stdout
+                            [True (if self.m/ignore-stdout
                                       (.get self.m/popen "stdout" DEVNULL)
                                       (.get self.m/popen "stdout" PIPE))])
             pp-stderr (or stderr (if (= self.m/capture "run")
                           (.get self.m/popen "stderr" None)
-                          (if self.m/ignore.stderr
+                          (if self.m/ignore-stderr
                               (.get self.m/popen "stderr" DEVNULL)
                               (.get self.m/popen "stderr" PIPE))))
             bufsize (.get self.m/popen "bufsize" -1)

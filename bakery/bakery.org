@@ -543,19 +543,12 @@ Pretty print the output:
 #+end_src
 
 **** Ignore Output
-
-Ignore output:
-
-#+begin_src hy
-<<m/(setting="ignore", value="(D {})")>>
-#+end_src
-
 ***** Stdout
 
 Ignore standard output:
 
 #+begin_src hy
-<<m/(setting="ignore.stdout", value="False")>>
+<<m/(setting="ignore-stdout", value="False")>>
 #+end_src
 
 ***** Stderr
@@ -563,7 +556,7 @@ Ignore standard output:
 Ignore standard error:
 
 #+begin_src hy
-<<m/(setting="ignore.stderr", value="False")>>
+<<m/(setting="ignore-stderr", value="False")>>
 #+end_src
 
 **** Verbosity
@@ -1240,7 +1233,7 @@ otherwise ~(isinstance value int)~ will catch both cases.
                            (do (setv [peek-value output.stderr] (peek output.stderr :return-first 2)
                                      stds (, "out" "err"))
                                (if (and peek-value
-                                        (not self.m/ignore.stderr))
+                                        (not self.m/ignore-stderr))
                                    (raise (SystemError (.join "\n" output.stderr))))
                                (for [[std opp] (zip stds (py "stds[::-1]"))]
                                     (setv stdstd (+ "std" std)
@@ -1351,12 +1344,12 @@ otherwise ~(isinstance value int)~ will catch both cases.
       (setv pp-stdout (cond [stdout]
                             [(= self.m/capture "stderr") (.get self.m/popen "stdout" DEVNULL)]
                             [(= self.m/capture "run") (.get self.m/popen "stdout" None)]
-                            [True (if self.m/ignore.stdout
+                            [True (if self.m/ignore-stdout
                                       (.get self.m/popen "stdout" DEVNULL)
                                       (.get self.m/popen "stdout" PIPE))])
             pp-stderr (or stderr (if (= self.m/capture "run")
                           (.get self.m/popen "stderr" None)
-                          (if self.m/ignore.stderr
+                          (if self.m/ignore-stderr
                               (.get self.m/popen "stderr" DEVNULL)
                               (.get self.m/popen "stderr" PIPE))))
             bufsize (.get self.m/popen "bufsize" -1)
