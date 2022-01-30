@@ -11,7 +11,13 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 (import pout weakref)
 #+end_src
 
-~From~ imports:
+** For Nuitka
+
+#+begin_src hy
+(import hyrule)
+#+end_src
+
+** From
 
 #+begin_src hy
 (import addict [Dict :as D])
@@ -849,7 +855,7 @@ Print all the current values after attempting to return the result of the comman
 (defn subcommand/process [self]
     (setv self.m/subcommand.current.processed (if self.m/subcommand.current.intact
                                                   self.m/subcommand.current.unprocessed
-                                                  (unmangle self.m/subcommand.current.unprocessed))))
+                                                  (unmangle (.replace self.m/subcommand.current.unprocessed "_" "-")))))
 #+end_src
 
 ** Variables

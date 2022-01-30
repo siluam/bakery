@@ -6,12 +6,17 @@
 (import pout weakref)
 ;; Imports:1 ends here
 
+;; For Nuitka
 
 
-;; ~From~ imports:
+;; [[file:bakery.org::*For Nuitka][For Nuitka:1]]
+(import hyrule)
+;; For Nuitka:1 ends here
+
+;; From
 
 
-;; [[file:bakery.org::*Imports][Imports:2]]
+;; [[file:bakery.org::*From][From:1]]
 (import addict [Dict :as D])
 (import ast [literal-eval])
 (import autoslot [SlotsPlusDictMeta])
@@ -34,7 +39,7 @@
 (import toolz [first])
 (import types [MethodType])
 (import typing [Any Dict Generator Tuple Union])
-;; Imports:2 ends here
+;; From:1 ends here
 
 ;; Requires
 
@@ -909,7 +914,7 @@
 (defn subcommand/process [self]
     (setv self.m/subcommand.current.processed (if self.m/subcommand.current.intact
                                                   self.m/subcommand.current.unprocessed
-                                                  (unmangle self.m/subcommand.current.unprocessed))))
+                                                  (unmangle (.replace self.m/subcommand.current.unprocessed "_" "-")))))
 ;; Process:1 ends here
 
 ;; Set Defaults
