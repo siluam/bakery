@@ -674,6 +674,17 @@ use the ~m/print-command~ keyword argument to print the final command.
 <<internal/(setting="print-command", value="False")>>
 #+end_src
 
+**** Print Command and Run
+
+Print the command and continue running.
+
+A good way to debug commands is to see what the command actually was
+use the ~m/print-command-and-run~ keyword argument to print the final command and continue running.
+
+#+begin_src hy
+<<m/(setting="print-command-and-run", value="False")>>
+#+end_src
+
 **** Type of Output
 
 ~m/type~ can be any available type, such as:
@@ -1311,6 +1322,7 @@ otherwise ~(isinstance value int)~ will catch both cases.
                                      [(coll? frosted-output) (list frosted-output)]
                                      [True [frosted-output]])
                                frosted-output))
+      (if self.m/print-command-and-run (print (.m/command self)))
       (cond [(or self.m/frozen (= self.m/wait False)) (return frosted-output)]
             [self.m/print-command (print frosted-output)]
             [self.m/dazzle (if dict-like-frosted-output

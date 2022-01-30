@@ -709,6 +709,19 @@
 (setv self.m/settings.defaults.m/print-command (deepcopy self.internal/print-command))
 ;; Print Command:1 ends here
 
+;; Print Command and Run
+
+;; Print the command and continue running.
+
+;; A good way to debug commands is to see what the command actually was
+;; use the ~m/print-command-and-run~ keyword argument to print the final command and continue running.
+
+
+;; [[file:bakery.org::*Print Command and Run][Print Command and Run:1]]
+(setv self.m/print-command-and-run False)
+(setv self.m/settings.defaults.m/print-command-and-run (deepcopy self.m/print-command-and-run))
+;; Print Command and Run:1 ends here
+
 ;; Type of Output
 
 ;; ~m/type~ can be any available type, such as:
@@ -1381,6 +1394,7 @@
                                      [(coll? frosted-output) (list frosted-output)]
                                      [True [frosted-output]])
                                frosted-output))
+      (if self.m/print-command-and-run (print (.m/command self)))
       (cond [(or self.m/frozen (= self.m/wait False)) (return frosted-output)]
             [self.m/print-command (print frosted-output)]
             [self.m/dazzle (if dict-like-frosted-output
