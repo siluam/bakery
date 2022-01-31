@@ -18,7 +18,7 @@
 (import functools [partial wraps])
 (import gensing [frosting tea])
 (import hy [mangle unmangle])
-(import hyrule [coll?])
+(import hyrule [coll? inc])
 (import inspect [isclass :as class?])
 (import itertools [chain tee])
 (import nanite [fullpath peek trim])
