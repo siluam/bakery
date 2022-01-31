@@ -462,7 +462,7 @@
 
 
 ;; [[file:bakery.org::*Program][Program:1]]
-(setv self.m/program (or program- "")
+(setv self.m/program (or (.replace (unmangle program) "_" "-") "")
       self.m/base-program (or base-program- program-))
 ;; Program:1 ends here
 
