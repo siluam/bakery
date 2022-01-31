@@ -1432,10 +1432,10 @@
              (for [std (, "out" "err")]
                   (setv stdstd (+ "std" std))
                   (if (hasattr frosted-output stdstd)
-                      (let [new-frosted-output (get frosted-output stdstd)]
-                           (if self.m/split
-                               (setv new-frosted-output (.cls/split-and-flatten self.__class__ new-frosted-output)))
-                           (assoc frosted-output stdstd (.convert/type self new-frosted-output))))
+                      (do (setv new-frosted-output (get frosted-output stdstd))
+                          (if self.m/split
+                              (setv new-frosted-output (.cls/split-and-flatten self.__class__ new-frosted-output)))
+                          (assoc frosted-output stdstd (.convert/type self new-frosted-output))))
                   (else (return new-frosted-output)))]
             [(is self.m/wait None) (return (.misc/return-none-if-tnis self))]
             [True (let [new-frosted-output (frosting frosted-output self.m/capture)]
