@@ -914,7 +914,7 @@
 (defn subcommand/process [self]
     (setv self.m/subcommand.current.processed (if self.m/subcommand.current.intact
                                                   self.m/subcommand.current.unprocessed
-                                                  (unmangle (.replace self.m/subcommand.current.unprocessed "_" "-")))))
+                                                  (.replace (unmangle self.m/subcommand.current.unprocessed) "_" "-"))))
 ;; Process:1 ends here
 
 ;; Set Defaults
@@ -1169,7 +1169,7 @@
                                          (setv command/process-kwargs/key (if (or (= k "fixed")
                                                                                   self.m/fixed)
                                                                               key
-                                                                              (.replace key "_" "-"))
+                                                                              (.replace (unmangle key) "_" "-"))
                                                command/process-kwargs/key (cond [(or (= k "dos")
                                                                                      self.m/dos)
                                                                                  (+ "/" command/process-kwargs/key)]
@@ -1210,7 +1210,7 @@
                                                command/process-kwargs/key-values None))
                                      (raise (AttributeError #[f[Sorry! A keyword argument value of type dict can only have the following keys: {(.join ", " options)}]f])))))
                         [True (setv command/process-kwargs/value (inner value)
-                                    command/process-kwargs/key (if self.m/fixed key (.replace key "_" "-"))
+                                    command/process-kwargs/key (if self.m/fixed key (.replace (unmangle key) "_" "-"))
                                     command/process-kwargs/key (cond [self.m/dos (+ "/" command/process-kwargs/key)]
                                                                      [(or self.m/one-dash
                                                                           (= (len command/process-kwargs/key) 1))
