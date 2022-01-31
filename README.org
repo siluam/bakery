@@ -207,6 +207,15 @@ repr(ls)
 import hy
 from bakery import ls
 
+# sudo ls /
+ls("/", _sudo = True)
+
+# sudo -i -u root ls /
+ls("/", _sudo = "i")
+
+# sudo -s -u root ls /
+ls("/", _sudo = "s")
+
 # sudo -i -u user ls /
 ls("/", _sudo = dict(i = "user"))
 
@@ -267,8 +276,8 @@ zfs.load_key(pool)
 (.load-key zfs pool)
 #+end_src
 
-~Note:~ This does not happen with the use of ~sudo~, or the ~m/sudo~ keyword argument, due to it setting ~m/capture~ to ~run~ in the process;
-the password prompt will still be shown, and input will still be passed to ~sudo~.
+~Note:~ This does not happen with the use of ~sudo~, or the ~m/sudo~ keyword argument;
+the password prompt will still be shown, input will still be passed to ~sudo~, and output will still be returned.
 
 ** Freeze ~bakery~ objects, allowing other ~bakery~ objects to act on them
 

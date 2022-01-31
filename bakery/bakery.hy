@@ -292,14 +292,20 @@
 ;; [[file:bakery.org::*Sudo][Sudo:1]]
 #@(property (defn m/sudo [self] (return self.internal/sudo)))
 #@(m/sudo.setter (defn m/sudo [self value]
-                       (if (not (isinstance value self.m/type-groups.dict-like))
-                           (raise (TypeError "Sorry! `m/sudo' needs to be a tea, frosting, or dict-like object!")))
-                       (if (> (len value) 1)
-                           (raise (ValueError "Sorry! The `m/sudo' object can only have a single key-value item!")))
-                       (if (and value
-                                (-> value (.keys) (iter) (next) (in (, "i" "s")) (not)))
-                           (raise (ValueError "Sorry! The `m/sudo' object can only take `i' or `s' as a key!")))
-                       (setv self.internal/sudo value)))
+                       (setv error-message
+                             #[[Sorry! `m/sudo' must be a string of "i" or "s", a tea, frosting, or dict-like object of length 1, key "i" or "s", and value `user', or a boolean!]]
+                             self.internal/sudo (if value
+                                                    (if (or (isinstance value bool) (= (len value) 1))
+                                                        (cond [(isinstance value str)
+                                                               (if (in value (, "i" "s"))
+                                                                   { value "root" }
+                                                                   (raise (ValueError error-message)))]
+                                                              [(isinstance value bool) value]
+                                                              [(isinstance value self.m/type-groups.dict-like) (if (-> value (.keys) (iter) (next) (in (, "i" "s")))
+                                                                                                                   value
+                                                                                                                   (raise (ValueError error-message)))])
+                                                        (raise (ValueError error-message)))
+                                                    False))))
 ;; Sudo:1 ends here
 
 ;; __init__
@@ -789,11 +795,14 @@
 
 ;; Sudo
 
-;; Dict must be in the form {"i" : user} or {"s" : user}, to use or not use the configuration files of the specified user:
+;; May be a string of length 1, and value ~i~ or ~s~, or a boolean.
+
+;; If [[https://gitlab.com/picotech/nanotech/gensing][tea or frosting objects]], or dict-like object, must be in the form {"i" : user} or {"s" : user},
+;; to use or not use the configuration files of the specified user.
 
 
 ;; [[file:bakery.org::*Sudo][Sudo:1]]
-(setv self.internal/sudo (D {}))
+(setv self.internal/sudo False)
 (setv self.m/settings.defaults.m/sudo (deepcopy self.internal/sudo))
 ;; Sudo:1 ends here
 
@@ -1266,8 +1275,9 @@
 ;; [[file:bakery.org::*Create Command][Create Command:1]]
 (defn command/create [self]
       (if self.m/sudo
-          (.append self.m/command
-                   f"sudo -{(-> self.m/sudo (.keys) (iter) (next))} -u {(-> self.m/sudo (.values) (iter) (next))}"))
+          (if (isinstance self.m/sudo bool)
+              (.append self.m/command "sudo")
+              (.append self.m/command f"sudo -{(-> self.m/sudo (.keys) (iter) (next))} -u {(-> self.m/sudo (.values) (iter) (next))}")))
 
       (if self.m/shell
           (do (.extend self.m/command self.m/shell "-c" "'")
