@@ -439,7 +439,7 @@ Note that only via ~baking~ can subcommand-specific arguments and keyword argume
 *** Program
 
 #+begin_src hy
-(setv self.m/program (or (.replace (unmangle program) "_" "-") "")
+(setv self.m/program (or (.replace (unmangle program-) "_" "-") "")
       self.m/base-program (or base-program- program-))
 #+end_src
 
