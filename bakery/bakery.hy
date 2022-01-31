@@ -6,13 +6,6 @@
 (import pout weakref)
 ;; Imports:1 ends here
 
-;; For Nuitka
-
-
-;; [[file:bakery.org::*For Nuitka][For Nuitka:1]]
-(import hyrule)
-;; For Nuitka:1 ends here
-
 ;; From
 
 

@@ -11,12 +11,6 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 (import pout weakref)
 #+end_src
 
-** For Nuitka
-
-#+begin_src hy
-(import hyrule)
-#+end_src
-
 ** From
 
 #+begin_src hy
