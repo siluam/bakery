@@ -26,7 +26,7 @@
 (import rich [pretty print inspect])
 (import rich.pretty [pretty-repr pprint])
 (import shlex [join split])
-(import subprocess [DEVNULL PIPE Popen])
+(import subprocess [DEVNULL PIPE Popen STDOUT])
 (import textwrap [TextWrapper])
 (import toml [load])
 (import toolz [first])
@@ -571,6 +571,14 @@
 (setv self.m/ignore-stderr False)
 (setv self.m/settings.defaults.m/ignore-stderr (deepcopy self.m/ignore-stderr))
 ;; Stderr:1 ends here
+
+;; Pipe STDERR to STDOUT
+
+
+;; [[file:bakery.org::*Pipe STDERR to STDOUT][Pipe STDERR to STDOUT:1]]
+(setv self.m/stdout-stderr False)
+(setv self.m/settings.defaults.m/stdout-stderr (deepcopy self.m/stdout-stderr))
+;; Pipe STDERR to STDOUT:1 ends here
 
 ;; Verbosity
 
@@ -1328,7 +1336,8 @@
                            (do (setv [peek-value output.stderr] (peek output.stderr :return-first 2)
                                      stds (, "out" "err"))
                                (if (and peek-value
-                                        (not self.m/ignore-stderr))
+                                        (not self.m/ignore-stderr)
+                                        (not self.m/stdout-stderr))
                                    (raise (SystemError (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr)))))
                                (for [[std opp] (zip stds (py "stds[::-1]"))]
                                     (setv stdstd (+ "std" std)
@@ -1447,10 +1456,10 @@
                                       (.get self.m/popen "stdout" DEVNULL)
                                       (.get self.m/popen "stdout" PIPE))])
             pp-stderr (or stderr (if (= self.m/capture "run")
-                          (.get self.m/popen "stderr" None)
-                          (if self.m/ignore-stderr
-                              (.get self.m/popen "stderr" DEVNULL)
-                              (.get self.m/popen "stderr" PIPE))))
+                                     (.get self.m/popen "stderr" None)
+                                     (cond [self.m/stdout-stderr (.get self.m/popen "stderr" STDOUT)]
+                                           [self.m/ignore-stderr (.get self.m/popen "stderr" DEVNULL)]
+                                           [True (.get self.m/popen "stderr" PIPE)])))
             bufsize (.get self.m/popen "bufsize" -1)
             universal-newlines (.get self.m/popen "universal-newlines" None)
             universal-text (if (= bufsize 1)

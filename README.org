@@ -487,3 +487,85 @@ with ls([], l = True, a = True) | tail as tails:
 (with [tails (| (ls [] :l True :a True) tail)]
       (tails))
 #+end_src
+
+** Ignore Stderr
+
+~Python:~
+
+#+begin_src python
+ls(j = True)
+
+# Without `_ignore_stderr = True':
+
+# SystemError: In trying to run `ls -j':
+
+# ls: invalid option -- 'j'
+# Try 'ls --help' for more information.
+
+ls(j = True, _ignore_stderr = True)
+
+# With `_ignore_stderr = True':
+
+# ...
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(ls :j True)
+
+;; Without `:m/ignore-stderr True':
+
+;; SystemError: In trying to run `ls -j':
+
+;; ls: invalid option -- 'j'
+;; Try 'ls --help' for more information.
+
+(ls :j True :m/ignore-stderr True)
+
+;; With `:m/ignore-stderr True':
+
+;; ...
+#+end_src
+
+** Pipe Stderr to Stdout
+
+~Python:~
+
+#+begin_src python
+ls(j = True)
+
+# Without `_stdout_stderr = True':
+
+# SystemError: In trying to run `ls -j':
+
+# ls: invalid option -- 'j'
+# Try 'ls --help' for more information.
+
+ls(j = True, _stdout_stderr = True)
+
+# With `_stdout_stderr = True':
+
+# ls: invalid option -- 'j'
+# Try 'ls --help' for more information.
+#+end_src
+
+~Hy:~
+
+#+begin_src hy
+(ls :j True)
+
+# Without `:m/stdout-stderr True':
+
+# SystemError: In trying to run `ls -j':
+
+# ls: invalid option -- 'j'
+# Try 'ls --help' for more information.
+
+(ls :j True :m/stdout-stderr True)
+
+# With `:m/stdout-stderr True':
+
+# ls: invalid option -- 'j'
+# Try 'ls --help' for more information.
+#+end_src
