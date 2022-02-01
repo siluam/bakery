@@ -1539,22 +1539,23 @@
                                universal-newlines)
             shell (.get self.m/popen "shell" (bool self.m/freezer))
             command (.m/command self)
-            executable (if (setx exe (.get self.m/popen "executable" None)) (fullpath exe) exe))
+            executable (if (setx exe (.get self.m/popen "executable" None)) (fullpath exe) exe)
+            kwargs { "bufsize" bufsize
+                     "stdin" (.get self.m/popen "stdin" self.m/input)
+                     "stdout" pp-stdout
+                     "stderr" pp-stderr
+                     "executable" executable
+                     "universal-newlines" universal-text
+                     "text" universal-text
+                     "shell" shell })
+      (.update kwargs self.m/popen)
       (return (partial Popen
                        (if self.m/freezer
                            command
                            (if shell
                                (join (split command))
                                (split command)))
-                       :bufsize bufsize
-                       :stdin (.get self.m/popen "stdin" self.m/input)
-                       :stdout pp-stdout
-                       :stderr pp-stderr
-                       :executable executable
-                       :universal-newlines universal-text
-                       :text universal-text
-                       :shell shell
-                       #** self.m/popen)))
+                       #** kwargs)))
 ;; Popen Partial:1 ends here
 
 ;; Run
