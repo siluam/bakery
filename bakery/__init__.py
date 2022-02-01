@@ -1,9 +1,16 @@
-# Import Hy
+# Imports
 
 
-# [[file:__init__.org::*Import Hy][Import Hy:1]]
+# [[file:__init__.org::*Imports][Imports:1]]
 import hy
-# Import Hy:1 ends here
+# Imports:1 ends here
+
+# From
+
+
+# [[file:__init__.org::*From][From:1]]
+from shutil import which as notToBeConfusedWithWhich
+# From:1 ends here
 
 # Relative Import
 
@@ -23,6 +30,8 @@ def __getattr__(program_):
         raise AttributeError
     elif program_ == "steakery":
         return notToBeConfusedWithMilcery
-    else:
+    elif notToBeConfusedWithWhich(program_):
         return notToBeConfusedWithMilcery(program_ = program_)
+    else:
+        raise AttributeError
 # Rest of __init__:1 ends here

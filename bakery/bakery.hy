@@ -26,6 +26,7 @@
 (import rich [pretty print inspect])
 (import rich.pretty [pretty-repr pprint])
 (import shlex [join split])
+(import shutil [which])
 (import subprocess [DEVNULL PIPE Popen STDOUT])
 (import textwrap [TextWrapper])
 (import toml [load])
@@ -1636,15 +1637,26 @@ freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [proce
                          #** kwargs)))
 ;; Apply Pipe or Redirect:5 ends here
 
-;; Miscellaneous
+;; Deepcopy With Arguments
 
 
-;; [[file:bakery.org::*Miscellaneous][Miscellaneous:1]]
+;; [[file:bakery.org::*Deepcopy With Arguments][Deepcopy With Arguments:1]]
 (defn deepcopy- [self #* args [subcommand- "supercalifragilisticexpialidocious"] #** kwargs]
       (setv cls (deepcopy self))
       (.bake- cls #* args :instantiated- True :m/subcommand subcommand- #** kwargs)
       (return cls))
-;; Miscellaneous:1 ends here
+;; Deepcopy With Arguments:1 ends here
+
+;; Check Program
+
+
+;; [[file:bakery.org::*Check Program][Check Program:1]]
+(defn check- [self] (-> self.m/program
+                        (which)
+                        (is None)
+                        (if None self)
+                        (return)))
+;; Check Program:1 ends here
 
 ;; Freeze
 

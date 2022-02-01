@@ -6,10 +6,16 @@
 
 Adapted from the entirety of [[https://stackoverflow.com/questions/56786604/import-modules-that-dont-exist-yet][this question]]:
 
-** Import Hy
+** Imports
 
 #+begin_src py
 import hy
+#+end_src
+
+*** From
+
+#+begin_src py
+from shutil import which as notToBeConfusedWithWhich
 #+end_src
 
 ** Relative Import
@@ -28,6 +34,8 @@ def __getattr__(program_):
         raise AttributeError
     elif program_ == "steakery":
         return notToBeConfusedWithMilcery
-    else:
+    elif notToBeConfusedWithWhich(program_):
         return notToBeConfusedWithMilcery(program_ = program_)
+    else:
+        raise AttributeError
 #+end_src
