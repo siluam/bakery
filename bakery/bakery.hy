@@ -528,7 +528,7 @@
 ;; [[file:bakery.org::*Programs][Programs:1]]
 (setv self.m/settings.programs (D {})
       self.m/current-settings (D {})
-      self.m/current-settings.programs (D {})
+      self.m/current-settings.program (D {})
       self.m/current-settings.subcommand (D {}))
 ;; Programs:1 ends here
 
@@ -855,16 +855,6 @@
 (setv self.m/settings.defaults.m/popen (deepcopy self.m/popen))
 ;; Popen:1 ends here
 
-;; Chunk Size
-
-;; Chunk size used when reading with ~m/capture = "run"~:
-
-
-;; [[file:bakery.org::*Chunk Size][Chunk Size:1]]
-(setv self.m/chunk-size 512)
-(setv self.m/settings.defaults.m/chunk-size (deepcopy self.m/chunk-size))
-;; Chunk Size:1 ends here
-
 ;; Sudo
 
 ;; May be a string of length 1, and value ~i~ or ~s~, or a boolean.
@@ -998,7 +988,10 @@
 (defn var/set-defaults [self]
       (for [[key value] (.items self.m/settings.defaults)]
            (setattr self key (deepcopy value)))
-      (setv self.m/current-settings.program (.cls/get-un-mangled self.__class__ self.m/settings.programs self.m/program))
+      (setv self.m/current-settings.program (.cls/get-un-mangled self.__class__
+                                                                 self.m/settings.programs
+                                                                 self.m/program
+                                                                 :default (D {})))
       (for [[key value] (.items self.m/current-settings.program.supercalifragilisticexpialidocious)]
            (setattr self key (deepcopy value))))
 ;; Set Defaults:1 ends here
@@ -1022,7 +1015,10 @@
       (if (not self.m/subcommand.current.unprocessed) (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
       (.subcommand/process self)
 
-      (setv self.m/current-settings.subcommand (.cls/get-un-mangled self.__class__ self.m/current-settings.program self.m/subcommand.current.processed))
+      (setv self.m/current-settings.subcommand (.cls/get-un-mangled self.__class__
+                                                                    self.m/current-settings.program
+                                                                    self.m/subcommand.current.processed
+                                                                    :default (D {})))
       (for [[key value] (.items self.m/current-settings.subcommand)]
            (setattr self key (deepcopy value)))
 
@@ -1545,7 +1541,7 @@
                      "stdout" pp-stdout
                      "stderr" pp-stderr
                      "executable" executable
-                     "universal-newlines" universal-text
+                     "universal_newlines" universal-text
                      "text" universal-text
                      "shell" shell })
       (.update kwargs self.m/popen)

@@ -530,7 +530,7 @@ Default settings for certain programs and their subcommands:
 #+begin_src hy
 (setv self.m/settings.programs (D {})
       self.m/current-settings (D {})
-      self.m/current-settings.programs (D {})
+      self.m/current-settings.program (D {})
       self.m/current-settings.subcommand (D {}))
 #+end_src
 
@@ -800,14 +800,6 @@ A dictionary used to pass options to the ~subprocess Popen~ class:
 <<m/(setting="popen", value="(D {})")>>
 #+end_src
 
-**** Chunk Size
-
-Chunk size used when reading with ~m/capture = "run"~:
-
-#+begin_src hy
-<<m/(setting="chunk-size", value=512)>>
-#+end_src
-
 **** Sudo
 
 May be a string of length 1, and value ~i~ or ~s~, or a boolean.
@@ -930,7 +922,10 @@ Print all the current values after attempting to return the result of the comman
 (defn var/set-defaults [self]
       (for [[key value] (.items self.m/settings.defaults)]
            (setattr self key (deepcopy value)))
-      (setv self.m/current-settings.program (.cls/get-un-mangled self.__class__ self.m/settings.programs self.m/program))
+      (setv self.m/current-settings.program (.cls/get-un-mangled self.__class__
+                                                                 self.m/settings.programs
+                                                                 self.m/program
+                                                                 :default (D {})))
       (for [[key value] (.items self.m/current-settings.program.<<20220111111603650875845>>)]
            (setattr self key (deepcopy value))))
 #+end_src
@@ -953,7 +948,10 @@ Print all the current values after attempting to return the result of the comman
       (if (not self.m/subcommand.current.unprocessed) (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
       (.subcommand/process self)
 
-      (setv self.m/current-settings.subcommand (.cls/get-un-mangled self.__class__ self.m/current-settings.program self.m/subcommand.current.processed))
+      (setv self.m/current-settings.subcommand (.cls/get-un-mangled self.__class__
+                                                                    self.m/current-settings.program
+                                                                    self.m/subcommand.current.processed
+                                                                    :default (D {})))
       (for [[key value] (.items self.m/current-settings.subcommand)]
            (setattr self key (deepcopy value)))
 
@@ -1464,7 +1462,7 @@ otherwise ~(isinstance value int)~ will catch both cases.
                      "stdout" pp-stdout
                      "stderr" pp-stderr
                      "executable" executable
-                     "universal-newlines" universal-text
+                     "universal_newlines" universal-text
                      "text" universal-text
                      "shell" shell })
       (.update kwargs self.m/popen)
