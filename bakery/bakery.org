@@ -179,6 +179,14 @@ as well as from the [[https://github.com/cjrh/autoslot][autoslot]] documentation
                                  (.get dct (mangle (+ "m/" cls/get-attr/attr)) default)))))
 #+end_src
 
+*** Get Mangled or Unmangled
+
+#+begin_src hy
+#@(classmethod (defn cls/get-un-mangled [cls dct key [default None]]
+                     (return (or (.get dct (mangle key) None)
+                                 (.get dct (.replace (unmangle key) "_" "-") default)))))
+#+end_src
+
 ** Properties
 *** Freezer
 
@@ -479,6 +487,20 @@ Set ~m/context~ to ~True~:
 (setv self.m/c True)
 #+end_src
 
+*** Gitea
+
+Set ~m/gitea.bool~ to ~True~, or add the program to ~m/gitea.list~ to allow this program to do something like ~git(C = path).status()~,
+and set ~m/gitea.off~ to override and disable both.
+
+Named after [[https://gitea.io/en-us/][gitea]] and my own [[https://gitlab.com/picotech/nanotech/gensing][gensing]] modules:
+
+#+begin_src hy
+(setv self.m/gitea (D {})
+      self.m/gitea.list [ "git" "yadm" ]
+      self.m/gitea.bool (or (in self.m/program self.m/gitea.list) False)
+      self.m/gitea.off False)
+#+end_src
+
 *** Settings
 
 #+begin_src hy
@@ -501,18 +523,52 @@ Set ~m/context~ to ~True~:
 `((?s . ,setting) (?v . ,value)))
 #+end_src
 
-**** Gitea
+**** Programs
 
-Set ~m/gitea.bool~ to ~True~, or add the program to ~m/gitea.list~ to allow this program to do something like ~git(C = path).status()~,
-and set ~m/gitea.off~ to override and disable both.
-
-Named after [[https://gitea.io/en-us/][gitea]] and my own [[https://gitlab.com/picotech/nanotech/gensing][gensing]] modules:
+Default settings for certain programs and their subcommands:
 
 #+begin_src hy
-(setv self.m/gitea (D {})
-      self.m/gitea.list [ "git" "yadm" ]
-      self.m/gitea.bool (or (in self.m/program self.m/gitea.list) False)
-      self.m/gitea.off False)
+(setv self.m/settings.programs (D {})
+      self.m/current-settings (D {})
+      self.m/current-settings.programs (D {})
+      self.m/current-settings.subcommand (D {}))
+#+end_src
+
+***** Zpool
+
+#+begin_src hy
+(setv self.m/settings.programs.zpool (D {}))
+#+end_src
+
+****** Import
+
+#+begin_src hy
+(setv self.m/settings.programs.zpool.import (D { "m/sudo" True }))
+#+end_src
+
+***** ZFS
+
+#+begin_src hy
+(setv self.m/settings.programs.zfs (D {}))
+#+end_src
+
+****** Load Key
+
+#+begin_src hy
+(setv self.m/settings.programs.zfs.load-key (D { "m/run" True
+                                                 "m/sudo" True }))
+#+end_src
+
+***** Rich
+
+#+begin_src hy
+(setv self.m/settings.programs.rich (D {}))
+#+end_src
+
+****** Default Subcommand
+
+#+begin_src hy
+(setv self.m/settings.programs.rich.<<20220111111603650875845>>.m/run True)
 #+end_src
 
 **** Frozen Program
@@ -873,6 +929,9 @@ Print all the current values after attempting to return the result of the comman
 #+begin_src hy
 (defn var/set-defaults [self]
       (for [[key value] (.items self.m/settings.defaults)]
+           (setattr self key (deepcopy value)))
+      (setv self.m/current-settings.program (.cls/get-un-mangled self.__class__ self.m/settings.programs self.m/program))
+      (for [[key value] (.items self.m/current-settings.program.<<20220111111603650875845>>)]
            (setattr self key (deepcopy value))))
 #+end_src
 
@@ -880,26 +939,30 @@ Print all the current values after attempting to return the result of the comman
 
 #+begin_src hy
 (defn var/setup [self #* args [subcommand- "<<20220111111603650875845>>"] #** kwargs]
-    (.var/set-defaults self)
+      (.var/set-defaults self)
 
-    (setv self.m/args.world (or (. (.origin- self) m/args world) []))
-    (setv self.m/kwargs.world (or (. (.origin- self) m/kwargs world) (D {})))
+      (setv self.m/args.world (or (. (.origin- self) m/args world) []))
+      (setv self.m/kwargs.world (or (. (.origin- self) m/kwargs world) (D {})))
 
-    (if (= subcommand- self.m/subcommand.default)
-        (do (.subcommand/get self #** self.m/kwargs.world)
-            (.subcommand/get self #** self.m/kwargs.instantiated)
-            (.subcommand/get self #** (. self m/kwargs baked [subcommand-]))
-            (.subcommand/get self #** kwargs))
-        (setv self.m/subcommand.current.unprocessed subcommand-))
-    (if (not self.m/subcommand.current.unprocessed) (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
-    (.subcommand/process self)
+      (if (= subcommand- self.m/subcommand.default)
+          (do (.subcommand/get self #** self.m/kwargs.world)
+              (.subcommand/get self #** self.m/kwargs.instantiated)
+              (.subcommand/get self #** (. self m/kwargs baked [subcommand-]))
+              (.subcommand/get self #** kwargs))
+          (setv self.m/subcommand.current.unprocessed subcommand-))
+      (if (not self.m/subcommand.current.unprocessed) (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
+      (.subcommand/process self)
 
-    (setv self.m/args.called args)
-    (setv self.m/kwargs.called kwargs)
+      (setv self.m/current-settings.subcommand (.cls/get-un-mangled self.__class__ self.m/current-settings.program self.m/subcommand.current.processed))
+      (for [[key value] (.items self.m/current-settings.subcommand)]
+           (setattr self key (deepcopy value)))
 
-    (.var/process-all self #* args #** kwargs)
+      (setv self.m/args.called args)
+      (setv self.m/kwargs.called kwargs)
 
-    (.var/apply self))
+      (.var/process-all self #* args #** kwargs)
+
+      (.var/apply self))
 #+end_src
 
 *** Reset
@@ -917,6 +980,7 @@ Note that ~subcommand~ is only really needed here to help reset the baked argume
             [all-subs False]
             [subcommand "<<20220111111603650875845>>"]
             [set-defaults True]]
+      (setv self.m/current-settings (D {}))
       (for [m (, "settings" "subcommand" "args" "kwargs")]
            (assoc (getattr self (mangle (+ "m/" m))) "current" (D {})))
       (setv self.m/args.called [])

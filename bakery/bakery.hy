@@ -191,6 +191,15 @@
                                  (.get dct (mangle (+ "m/" cls/get-attr/attr)) default)))))
 ;; Get Attribute:1 ends here
 
+;; Get Mangled or Unmangled
+
+
+;; [[file:bakery.org::*Get Mangled or Unmangled][Get Mangled or Unmangled:1]]
+#@(classmethod (defn cls/get-un-mangled [cls dct key [default None]]
+                     (return (or (.get dct (mangle key) None)
+                                 (.get dct (.replace (unmangle key) "_" "-") default)))))
+;; Get Mangled or Unmangled:1 ends here
+
 ;; Freezer
 
 ;; This tells the bakery that the program is a combination of multiple programs, such as ~ls | tail~.
@@ -487,15 +496,6 @@
 (setv self.m/command (tea))
 ;; Command:1 ends here
 
-;; Settings
-
-
-;; [[file:bakery.org::*Settings][Settings:1]]
-(setv self.m/settings (D {})
-      self.m/settings.defaults (D {})
-      self.m/settings.current (D {}))
-;; Settings:1 ends here
-
 ;; Gitea
 
 ;; Set ~m/gitea.bool~ to ~True~, or add the program to ~m/gitea.list~ to allow this program to do something like ~git(C = path).status()~,
@@ -510,6 +510,70 @@
       self.m/gitea.bool (or (in self.m/program self.m/gitea.list) False)
       self.m/gitea.off False)
 ;; Gitea:1 ends here
+
+;; Settings
+
+
+;; [[file:bakery.org::*Settings][Settings:1]]
+(setv self.m/settings (D {})
+      self.m/settings.defaults (D {})
+      self.m/settings.current (D {}))
+;; Settings:1 ends here
+
+;; Programs
+
+;; Default settings for certain programs and their subcommands:
+
+
+;; [[file:bakery.org::*Programs][Programs:1]]
+(setv self.m/settings.programs (D {})
+      self.m/current-settings (D {})
+      self.m/current-settings.programs (D {})
+      self.m/current-settings.subcommand (D {}))
+;; Programs:1 ends here
+
+;; Zpool
+
+
+;; [[file:bakery.org::*Zpool][Zpool:1]]
+(setv self.m/settings.programs.zpool (D {}))
+;; Zpool:1 ends here
+
+;; Import
+
+
+;; [[file:bakery.org::*Import][Import:1]]
+(setv self.m/settings.programs.zpool.import (D { "m/sudo" True }))
+;; Import:1 ends here
+
+;; ZFS
+
+
+;; [[file:bakery.org::*ZFS][ZFS:1]]
+(setv self.m/settings.programs.zfs (D {}))
+;; ZFS:1 ends here
+
+;; Load Key
+
+
+;; [[file:bakery.org::*Load Key][Load Key:1]]
+(setv self.m/settings.programs.zfs.load-key (D { "m/run" True
+                                                 "m/sudo" True }))
+;; Load Key:1 ends here
+
+;; Rich
+
+
+;; [[file:bakery.org::*Rich][Rich:1]]
+(setv self.m/settings.programs.rich (D {}))
+;; Rich:1 ends here
+
+;; Default Subcommand
+
+
+;; [[file:bakery.org::*Default Subcommand][Default Subcommand:1]]
+(setv self.m/settings.programs.rich.supercalifragilisticexpialidocious.m/run True)
+;; Default Subcommand:1 ends here
 
 ;; Frozen Program
 
@@ -933,6 +997,9 @@
 ;; [[file:bakery.org::*Set Defaults][Set Defaults:1]]
 (defn var/set-defaults [self]
       (for [[key value] (.items self.m/settings.defaults)]
+           (setattr self key (deepcopy value)))
+      (setv self.m/current-settings.program (.cls/get-un-mangled self.__class__ self.m/settings.programs self.m/program))
+      (for [[key value] (.items self.m/current-settings.program.supercalifragilisticexpialidocious)]
            (setattr self key (deepcopy value))))
 ;; Set Defaults:1 ends here
 
@@ -941,26 +1008,30 @@
 
 ;; [[file:bakery.org::*Setup][Setup:1]]
 (defn var/setup [self #* args [subcommand- "supercalifragilisticexpialidocious"] #** kwargs]
-    (.var/set-defaults self)
+      (.var/set-defaults self)
 
-    (setv self.m/args.world (or (. (.origin- self) m/args world) []))
-    (setv self.m/kwargs.world (or (. (.origin- self) m/kwargs world) (D {})))
+      (setv self.m/args.world (or (. (.origin- self) m/args world) []))
+      (setv self.m/kwargs.world (or (. (.origin- self) m/kwargs world) (D {})))
 
-    (if (= subcommand- self.m/subcommand.default)
-        (do (.subcommand/get self #** self.m/kwargs.world)
-            (.subcommand/get self #** self.m/kwargs.instantiated)
-            (.subcommand/get self #** (. self m/kwargs baked [subcommand-]))
-            (.subcommand/get self #** kwargs))
-        (setv self.m/subcommand.current.unprocessed subcommand-))
-    (if (not self.m/subcommand.current.unprocessed) (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
-    (.subcommand/process self)
+      (if (= subcommand- self.m/subcommand.default)
+          (do (.subcommand/get self #** self.m/kwargs.world)
+              (.subcommand/get self #** self.m/kwargs.instantiated)
+              (.subcommand/get self #** (. self m/kwargs baked [subcommand-]))
+              (.subcommand/get self #** kwargs))
+          (setv self.m/subcommand.current.unprocessed subcommand-))
+      (if (not self.m/subcommand.current.unprocessed) (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
+      (.subcommand/process self)
 
-    (setv self.m/args.called args)
-    (setv self.m/kwargs.called kwargs)
+      (setv self.m/current-settings.subcommand (.cls/get-un-mangled self.__class__ self.m/current-settings.program self.m/subcommand.current.processed))
+      (for [[key value] (.items self.m/current-settings.subcommand)]
+           (setattr self key (deepcopy value)))
 
-    (.var/process-all self #* args #** kwargs)
+      (setv self.m/args.called args)
+      (setv self.m/kwargs.called kwargs)
 
-    (.var/apply self))
+      (.var/process-all self #* args #** kwargs)
+
+      (.var/apply self))
 ;; Setup:1 ends here
 
 ;; Reset
@@ -979,6 +1050,7 @@
             [all-subs False]
             [subcommand "supercalifragilisticexpialidocious"]
             [set-defaults True]]
+      (setv self.m/current-settings (D {}))
       (for [m (, "settings" "subcommand" "args" "kwargs")]
            (assoc (getattr self (mangle (+ "m/" m))) "current" (D {})))
       (setv self.m/args.called [])
