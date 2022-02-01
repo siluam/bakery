@@ -10,10 +10,9 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 addict = "*"
 autoslot = "*"
-fabric = "*"
 hy = "^1.0a4"
 hyrule = "*"
 toolz = "*"
