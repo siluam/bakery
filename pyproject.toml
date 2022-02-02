@@ -12,15 +12,21 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.8"
 addict = "*"
+alive-progress = "^2.2"
 autoslot = "*"
+coconut = { version = "*", optional = true }
 hy = "^1.0a4"
 hyrule = "*"
+cytoolz = { version = "*", optional = true }
 toolz = "*"
 pout = "*"
-rich = {git = "https://github.com/shadowrylander/rich.git", branch = "master"}
+rich = { git = "https://github.com/shadowrylander/rich.git", branch = "master" }
 toml = "*"
-nanite = {git = "https://gitlab.com/picotech/nanotech/nanite.git", branch = "master"}
-gensing = {git = "https://gitlab.com/picotech/nanotech/gensing.git", branch = "master"}
+nanite = { git = "https://gitlab.com/picotech/nanotech/nanite.git", branch = "master" }
+gensing = { git = "https://gitlab.com/picotech/nanotech/gensing.git", branch = "master" }
+
+[tool.poetry.extras]
+gcc = [ "cytoolz" "coconut" ]
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"

@@ -1,8 +1,15 @@
 #+setupfile: ../settings/README.org
 #+include: ../settings/README.org
-#+property: header-args:hy :tangle yes :comments both
+#+property: header-args:hy :tangle yes
 
 Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffat][Andrew Moffat]].
+
+* Rich Traceback
+
+#+begin_src hy
+(import rich.traceback)
+(.install rich.traceback)
+#+end_src
 
 * Imports
 
@@ -15,6 +22,7 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 
 #+begin_src hy
 (import addict [Dict :as D])
+(import alive-progress [alive-it])
 (import ast [literal-eval])
 (import autoslot [SlotsPlusDictMeta])
 (import collections [OrderedDict])
@@ -27,22 +35,64 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 (import itertools [chain tee])
 (import nanite [fullpath peek trim])
 (import os [environ])
-(import rich [pretty print inspect])
+(import rich [print inspect])
 (import rich.pretty [pretty-repr pprint])
 (import shlex [join split])
 (import shutil [which])
 (import subprocess [DEVNULL PIPE Popen STDOUT])
 (import textwrap [TextWrapper])
 (import toml [load])
-(import toolz [first])
 (import types [MethodType])
 (import typing [Any Dict Generator Tuple Union])
+#+end_src
+
+*** Coconut
+
+[[https://coconut.readthedocs.io/en/latest/index.html][Coconut]]:
+
+#+begin_src hy
+(try (import coconut *)
+     (except [ImportError] None))
+#+end_src
+
+*** Toolz
+
+[[https://github.com/pytoolz/toolz][Toolz]] and [[https://github.com/pytoolz/cytoolz/][CyToolz]]:
+
+#+begin_src hy
+(try (import cytoolz [first])
+     (except [ImportError]
+             (import toolz [first])))
 #+end_src
 
 * Requires
 
 #+begin_src hy
 (require hyrule [-> ->> assoc])
+#+end_src
+
+* Static Methods
+
+# TODO: Add to nanite
+
+** Flatten Iterable
+
+#+begin_src hy
+(defn flatten [iterable [times None]]
+      (setv lst [])
+      (for [i iterable]
+           (if (and (coll? i)
+                    (or (is times None)
+                        times))
+               (.extend lst (flatten i :times (if times (dec times) times)))
+               (.append lst i)))
+      (return lst))
+#+end_src
+
+** Split and Flatten Iterable
+
+#+begin_src hy
+(defn split-and-flatten [iterable] (flatten (gfor j (flatten iterable) (.split j))))
 #+end_src
 
 * The Meta Class
@@ -75,28 +125,6 @@ as well as from the [[https://github.com/cjrh/autoslot][autoslot]] documentation
 #+end_src
 
 ** Class Methods
-*** Flatten Iterable
-
-# TODO: Add to nanite
-
-#+begin_src hy
-#@(classmethod (defn cls/flatten [cls iterable [times None]]
-                     (setv lst [])
-                     (for [i iterable]
-                          (if (and (coll? i)
-                                   (or (is times None)
-                                       times))
-                              (.extend lst (.cls/flatten cls i :times (if times (dec times) times)))
-                              (.append lst i)))
-                     (return lst)))
-#+end_src
-
-*** Split and Flatten
-
-#+begin_src hy
-#@(classmethod (defn cls/split-and-flatten [cls iterable] (.cls/flatten cls (gfor j (.cls/flatten cls iterable) (.split j)))))
-#+end_src
-
 *** Freezer
 
 #+begin_src hy
@@ -105,7 +133,7 @@ as well as from the [[https://github.com/cjrh/autoslot][autoslot]] documentation
                             [(coll? value)
                              (do (if (not (isinstance freezer list)) (setv freezer []))
                                  (.extend freezer value)
-                                 (setv freezer (.cls/flatten cls (gfor i freezer :if i i))))]
+                                 (setv freezer (flatten (gfor i freezer :if i i))))]
                             [True (raise (TypeError f"Sorry! The 'm/freezer' can only accept non-string iterables or non-truthy values!"))])
                       (return freezer)))
 #+end_src
@@ -572,6 +600,15 @@ Default settings for certain programs and their subcommands:
 (setv self.m/settings.programs.rich.<<20220111111603650875845>>.m/run True)
 #+end_src
 
+**** Environment Variables
+
+Environment variables to be set while running the command,
+passed in as dictionary of variable names and values:
+
+#+begin_src hy
+<<m/(setting="exports", value="(D {})")>>
+#+end_src
+
 **** Frozen Program
 
 Return the bakery just before running the command; any type not in ~m/type-groups.acceptable-args~ will freeze the bakery:
@@ -767,6 +804,14 @@ use the ~m/print-command-and-run~ keyword argument to print the final command an
 <<m/(setting="type", value="iter")>>
 #+end_src
 
+**** Progress Bar
+
+If the final output is an iterable, return it wrapped in an [[https://github.com/rsalmei/alive-progress][alive-progress]] progress bar:
+
+#+begin_src hy
+<<m/(setting="progress", value="False")>>
+#+end_src
+
 **** Split Output By Whitespace
 
 Split the output by newlines, tabs, spaces, etc.
@@ -893,9 +938,11 @@ Print all the current values after attempting to return the result of the comman
                    [(isinstance frosted-input int) (if (.misc/type-name-is-string self :type/type type/type/type)
                                                        (return (pretty-repr frosted-input))
                                                        (return frosted-input))])))
-    (cond [(.misc/type-name-is-string self :type/type type/type/type) (return (.join "\n" input))]
-          [(in type/type/type.__name__ self.m/type-groups.generators) (return (.convert/generator self input))]
-          [True (return (type/type/type input))]))
+    (setv output (cond [(.misc/type-name-is-string self :type/type type/type/type) (.join "\n" input)]
+                       [(in type/type/type.__name__ self.m/type-groups.generators) (.convert/generator self input)]
+                       [True (type/type/type input)]))
+    (return (if (and self.m/progress
+                     (coll? output)) (alive-it output) output)))
 #+end_src
 
 ** Subcommand
@@ -1031,7 +1078,7 @@ Note that ~subcommand~ is only really needed here to help reset the baked argume
                (if (isinstance (. self m/args current unprocessed [(if starter "starter" "regular")]) list)
                    (.append (. self m/args current unprocessed [(if starter "starter" "regular")]) arg)
                    (assoc self.m/args.current.unprocessed (if starter "starter" "regular") [arg]))
-               (do (setv self.m/settings.current.m/frozen True)))))
+               (setv self.m/settings.current.m/frozen True))))
 #+end_src
 
 **** Keyword Arguments
@@ -1326,7 +1373,9 @@ otherwise ~(isinstance value int)~ will catch both cases.
 (defn return/output [self]
       (cond [self.m/frozen (return (deepcopy self))]
             [self.m/return-command (return (.m/command self))]
-            [True (let [output (.return/process self)]
+            [True (try (setv olviron (.copy environ)
+                             output (.return/process self))
+                       (.update environ self.m/exports)
                        (if (isinstance output dict)
                            (do (setv [peek-value output.stderr] (peek output.stderr :return-first 2)
                                      stds (, "out" "err"))
@@ -1340,7 +1389,9 @@ otherwise ~(isinstance value int)~ will catch both cases.
                                     (if (< self.m/verbosity 1)
                                         (if (= self.m/capture stdstd)
                                             (del (get output stdopp)))))))
-                       (return output))]))
+                       (return output)
+                       (finally (.clear environ)
+                                (.update environ olviron)))]))
 #+end_src
 
 **** Process
@@ -1393,8 +1444,9 @@ otherwise ~(isinstance value int)~ will catch both cases.
 
 #+begin_src hy
 (defn return/frosting [self]
-      (setv output (.return/output self)
-            frosted-output (if (and (isinstance output self.m/type-groups.dict-like)
+      (setv output (.return/output self))
+      (if self.m/frozen (return output))
+      (setv frosted-output (if (and (isinstance output self.m/type-groups.dict-like)
                                     (= (len output) 1))
                                (-> output (.values) (iter) (next))
                                output)
@@ -1405,8 +1457,7 @@ otherwise ~(isinstance value int)~ will catch both cases.
                                      [True [frosted-output]])
                                frosted-output))
       (if self.m/print-command-and-run (print (.m/command self)))
-      (cond [(or self.m/frozen (= self.m/wait False)) (return frosted-output)]
-            [self.m/print-command (print frosted-output)]
+      (cond [self.m/print-command (print frosted-output)]
             [self.m/dazzle (if dict-like-frosted-output
                                (for [cat frosted-output]
                                     (setv outcat (get output cat))
@@ -1427,13 +1478,13 @@ otherwise ~(isinstance value int)~ will catch both cases.
                   (if (hasattr frosted-output stdstd)
                       (do (setv new-frosted-output (get frosted-output stdstd))
                           (if self.m/split
-                              (setv new-frosted-output (.cls/split-and-flatten self.__class__ new-frosted-output)))
+                              (setv new-frosted-output (split-and-flatten new-frosted-output)))
                           (assoc frosted-output stdstd (.convert/type self new-frosted-output))))
                   (else (return new-frosted-output)))]
             [(is self.m/wait None) (return (.misc/return-none-if-tnis self))]
             [True (let [new-frosted-output (frosting frosted-output self.m/capture)]
                        (if self.m/split
-                           (setv new-frosted-output (.cls/split-and-flatten self.__class__ new-frosted-output)))
+                           (setv new-frosted-output (split-and-flatten new-frosted-output)))
                        (return (.convert/type self new-frosted-output)))]))
 #+end_src
 
@@ -1822,7 +1873,9 @@ Deep copy all other attributes
 #+end_quote
 
 #+begin_src hy
-    (for [var slots] (if (not (in var (, "__weakref__"))) (setattr result var (deepcopy (getattr self var) memo))))
+    (for [var slots]
+         (if (not (in var (, "__weakref__")))
+             (setattr result var (deepcopy (getattr self var) memo))))
     (for [[k v] (.items self.__dict__)] (setattr result k (deepcopy v memo)))
 #+end_src
 
@@ -1843,28 +1896,12 @@ Return updated instance
 *** __iter__
 
 #+begin_src hy
-(defn __iter__ [self]
-    (setv self.m/n 0
-          self.m/output (.m/spin self))
-    (return self))
-#+end_src
-
-*** __next__
-
-#+begin_src hy
-(defn __next__ [self]
-      (try (setv output-len (len self.m/output))
-           (except [TypeError]
-                   (return (next self.m/output)))
-           (else (hyrulem/n output-len)
-                     (do (+= self.m/n 1)
-                         (return (get self.m/output (dec self.m/n))))
-                     (raise StopIteration))))
+(defn __iter__ [self] (yield-from (.m/spin self)))
 #+end_src
 
 *** __str__
 
-If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in infinite loop when getting the title of the report.
+If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in infinite loop when getting the title of the report, since it's not being passed in.
 
 #+begin_src hy
 (defn __str__ [self] (return (or (.m/command self) f"<{self.__class__.__module__}.{self.__class__.__name__} object at {(hex (id self))}>")))
@@ -1872,7 +1909,7 @@ If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in inf
 
 *** __repr__
 
-If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in infinite loop when getting the title of the report.
+If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in infinite loop when getting the title of the report, since it's not being passed in.
 
 #+begin_src hy
 (defn __repr__ [self] (.inspect- self) (return (str self)))

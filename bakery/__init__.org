@@ -1,6 +1,13 @@
 #+setupfile: ../settings/README.org
 #+include: ../settings/README.org
-#+property: header-args:py :tangle yes :comments both
+#+property: header-args:py :tangle yes
+
+* Rich Traceback
+
+#+begin_src py
+import rich.traceback
+rich.traceback.install()
+#+end_src
 
 * Bakery Frontend
 

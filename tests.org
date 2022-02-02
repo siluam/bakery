@@ -1,0 +1,122 @@
+#+setupfile: ./settings/README.org
+#+include: ./settings/README.org
+#+property: header-args:hy :tangle yes
+
+* Preparations
+** Rich Traceback
+
+#+begin_src hy
+(import rich.traceback)
+(.install rich.traceback)
+#+end_src
+
+** Imports
+*** From
+
+#+begin_src hy
+(import alive-progress [alive-it])
+(import os [path :as osPath])
+#+end_src
+
+** Zoom Decorator
+
+#+begin_src hy
+(setv funcs [])
+(defn zoom [func] (.append funcs func))
+#+end_src
+
+** Cookies!
+
+#+begin_src hy
+(setv cookies (.join osPath (.dirname osPath (.realpath osPath __file__)) "cookies"))
+#+end_src
+
+** Dots?
+
+#+begin_src hy
+(defn not-dots? [string] (not (or (= string ".") (= string ".."))))
+#+end_src
+
+* Tests
+** Main
+
+#+begin_src hy
+#@(zoom (defn main []
+              (import bakery [ls])
+              (import os [listdir])
+              (setv output (ls cookies))
+              (assert (all (gfor item (listdir cookies) :if (and (not (.startswith item "."))
+                                                                   (in item output)) item)))))
+#+end_src
+
+** Program Options
+
+#+begin_src hy
+#@(zoom (defn program-options []
+              (import bakery [ls])
+              (import os [listdir])
+              (setv output (ls :a True cookies))
+              (assert (all (gfor item (listdir cookies) :if (in item output) item)))))
+#+end_src
+
+** Context Manager
+
+Check if temporary baking with a context manager works:
+
+#+begin_src hy
+#@(zoom (defn context-manager []
+              (import bakery [ls])
+              (import os [listdir])
+              (with [lsa (ls :a True cookies :m/context True)]
+                    (setv output (lsa))
+                    (assert (all (gfor item (listdir cookies) :if (in item output) item))))
+              (setv output (ls cookies))
+              (assert (all (gfor item (listdir cookies) :if (and (not (.startswith item "."))
+                                                                   (in item output)) item)))))
+#+end_src
+
+** Loop
+
+#+begin_src hy
+#@(zoom (defn loop []
+              (import bakery [ls])
+              (import os [listdir chdir getcwd])
+              (setv output (listdir cookies)
+                    cwd (getcwd))
+              (try (chdir cookies)
+                   (for [item ls]
+                        (assert (in item output)))
+                   (finally (chdir cwd)))))
+#+end_src
+
+** Progress
+
+#+begin_src hy
+#@(zoom (defn progress []
+              (import bakery [ls])
+              (import os [listdir])
+              (setv output (listdir cookies))
+              (for [item (ls :a True cookies :m/progress True)]
+                   (if (not-dots? item)
+                       (assert (in item output))))))
+#+end_src
+
+** Baking
+
+#+begin_src hy
+#@(zoom (defn baking []
+              (import bakery [ls])
+              (import os [listdir])
+              (.bake- ls :a True :m/progress True cookies)
+              (setv output (listdir cookies))
+              (for [item ls]
+                   (if (not-dots? item)
+                       (assert (in item output))))))
+#+end_src
+
+* Run Everything
+
+#+begin_src hy
+(for [func (alive-it funcs)]
+     (func))
+#+end_src
