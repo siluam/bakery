@@ -22,7 +22,7 @@ import hy
 *** From
 
 #+begin_src py
-from shutil import which as notToBeConfusedWithWhich
+from shutil import which as which_
 #+end_src
 
 ** Relative Import
@@ -30,7 +30,7 @@ from shutil import which as notToBeConfusedWithWhich
 Adapted from [[https://stackoverflow.com/users/799163/remcogerlich][RemcoGerlich's]] answer [[https://stackoverflow.com/a/21139466][here]]:
 
 #+begin_src py
-from .bakery import milcery as notToBeConfusedWithMilcery
+from .bakery import milcery as milcery_
 #+end_src
 
 ** Rest of __init__
@@ -40,9 +40,9 @@ def __getattr__(program_):
     if program_ == "__path__":
         raise AttributeError
     elif program_ == "steakery":
-        return notToBeConfusedWithMilcery
-    elif notToBeConfusedWithWhich(program_):
-        return notToBeConfusedWithMilcery(program_ = program_)
+        return milcery_
+    elif which_(program_):
+        return milcery_(program_ = program_)
     else:
         raise AttributeError
 #+end_src

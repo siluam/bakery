@@ -177,6 +177,16 @@
                                                         (raise (ValueError error-message)))
                                                     False))))
 
+#@(property (defn m/exports [self] (return self.internal/exports)))
+#@(m/exports.setter (defn m/exports [self value]
+                          (setv self.internal/exports value)
+                          (if value (setv self.m/intact-command (bool value)))))
+
+#@(property (defn m/new-exports [self] (return self.internal/new-exports)))
+#@(m/new-exports.setter (defn m/new-exports [self value]
+                              (setv self.internal/new-exports value)
+                              (if value (setv self.m/intact-command (bool value)))))
+
 (defn __init__ [
         self
         #* args
@@ -271,6 +281,9 @@
       self.m/settings.defaults (D {})
       self.m/settings.current (D {}))
 
+(setv self.m/intact-command (bool self.m/freezer))
+(setv self.m/settings.defaults.m/intact-command (deepcopy self.m/intact-command))
+
 (setv self.m/settings.programs (D {})
       self.m/current-settings (D {})
       self.m/current-settings.program (D {})
@@ -289,8 +302,11 @@
 
 (setv self.m/settings.programs.rich.supercalifragilisticexpialidocious.m/run True)
 
-(setv self.m/exports (D {}))
-(setv self.m/settings.defaults.m/exports (deepcopy self.m/exports))
+(setv self.internal/exports (D {}))
+(setv self.m/settings.defaults.m/exports (deepcopy self.internal/exports))
+
+(setv self.internal/new-exports (D {}))
+(setv self.m/settings.defaults.m/new-exports (deepcopy self.internal/new-exports))
 
 (setv self.m/frozen False)
 (setv self.m/settings.defaults.m/frozen (deepcopy self.m/frozen))
@@ -744,9 +760,7 @@
 (defn return/output [self]
       (cond [self.m/frozen (return (deepcopy self))]
             [self.m/return-command (return (.m/command self))]
-            [True (try (setv olviron (.copy environ)
-                             output (.return/process self))
-                       (.update environ self.m/exports)
+            [True (let [output (.return/process self)]
                        (if (isinstance output dict)
                            (do (setv [peek-value output.stderr] (peek output.stderr :return-first 2)
                                      stds (, "out" "err"))
@@ -760,9 +774,7 @@
                                     (if (< self.m/verbosity 1)
                                         (if (= self.m/capture stdstd)
                                             (del (get output stdopp)))))))
-                       (return output)
-                       (finally (.clear environ)
-                                (.update environ olviron)))]))
+                       (return output))]))
 
 (defn return/process [self]
     (if (.m/command self)
@@ -867,25 +879,30 @@
             universal-text (if (= bufsize 1)
                                True
                                universal-newlines)
-            shell (.get self.m/popen "shell" (bool self.m/freezer))
+            shell (.get self.m/popen "shell" self.m/intact-command)
             command (.m/command self)
-            executable (if (setx exe (.get self.m/popen "executable" None)) (fullpath exe) exe)
-            kwargs { "bufsize" bufsize
-                     "stdin" (.get self.m/popen "stdin" self.m/input)
-                     "stdout" pp-stdout
-                     "stderr" pp-stderr
-                     "executable" executable
-                     "universal_newlines" universal-text
-                     "text" universal-text
-                     "shell" shell })
-      (.update kwargs self.m/popen)
-      (return (partial Popen
-                       (if self.m/freezer
-                           command
-                           (if shell
-                               (join (split command))
-                               (split command)))
-                       #** kwargs)))
+
+env (or (dict self.m/new-exports) (.copy environ))
+
+executable (if (setx exe (.get self.m/popen "executable" None)) (fullpath exe) exe)
+      kwargs { "bufsize" bufsize
+               "stdin" (.get self.m/popen "stdin" self.m/input)
+               "stdout" pp-stdout
+               "stderr" pp-stderr
+               "executable" executable
+               "universal_newlines" universal-text
+               "text" universal-text
+               "shell" shell })
+(.update env self.m/exports)
+(assoc kwargs "env" env)
+(.update kwargs self.m/popen)
+(return (partial Popen
+                 (if self.m/intact-command
+                     command
+                     (if shell
+                         (join (split command))
+                         (split command)))
+                 #** kwargs)))
 
 (defn m/spin [self #* args [subcommand- "supercalifragilisticexpialidocious"] #** kwargs]
       (try (.var/setup self #* args :subcommand- subcommand- #** kwargs)

@@ -31,10 +31,10 @@
 (setv cookies (.join osPath (.dirname osPath (.realpath osPath __file__)) "cookies"))
 #+end_src
 
-** Dots?
+** Not Dots?
 
 #+begin_src hy
-(defn not-dots? [string] (not (or (= string ".") (= string ".."))))
+(defn nots? [string] (not (or (= string ".") (= string ".."))))
 #+end_src
 
 * Tests
@@ -97,7 +97,7 @@ Check if temporary baking with a context manager works:
               (import os [listdir])
               (setv output (listdir cookies))
               (for [item (ls :a True cookies :m/progress True)]
-                   (if (not-dots? item)
+                   (if (nots? item)
                        (assert (in item output))))))
 #+end_src
 
@@ -110,8 +110,16 @@ Check if temporary baking with a context manager works:
               (.bake- ls :a True :m/progress True cookies)
               (setv output (listdir cookies))
               (for [item ls]
-                   (if (not-dots? item)
+                   (if (nots? item)
                        (assert (in item output))))))
+#+end_src
+
+** Freezing
+
+#+begin_src hy
+#@(zoom (defn freezing []
+              (import bakery [ls steakery])
+              (assert (.m/command (ls [])))))
 #+end_src
 
 * Run Everything

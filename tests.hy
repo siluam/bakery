@@ -9,7 +9,7 @@
 
 (setv cookies (.join osPath (.dirname osPath (.realpath osPath __file__)) "cookies"))
 
-(defn not-dots? [string] (not (or (= string ".") (= string ".."))))
+(defn nots? [string] (not (or (= string ".") (= string ".."))))
 
 #@(zoom (defn main []
               (import bakery [ls])
@@ -49,7 +49,7 @@
               (import os [listdir])
               (setv output (listdir cookies))
               (for [item (ls :a True cookies :m/progress True)]
-                   (if (not-dots? item)
+                   (if (nots? item)
                        (assert (in item output))))))
 
 #@(zoom (defn baking []
@@ -58,8 +58,12 @@
               (.bake- ls :a True :m/progress True cookies)
               (setv output (listdir cookies))
               (for [item ls]
-                   (if (not-dots? item)
+                   (if (nots? item)
                        (assert (in item output))))))
+
+#@(zoom (defn freezing []
+              (import bakery [ls steakery])
+              (assert (.m/command (ls [])))))
 
 (for [func (alive-it funcs)]
      (func))
