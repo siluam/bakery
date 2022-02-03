@@ -26,7 +26,7 @@ nanite = { git = "https://gitlab.com/picotech/nanotech/nanite.git", branch = "ma
 gensing = { git = "https://gitlab.com/picotech/nanotech/gensing.git", branch = "master" }
 
 [tool.poetry.extras]
-gcc = [ "cytoolz" "coconut" ]
+gcc = [ "cytoolz coconut" ]
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
