@@ -13,7 +13,7 @@ def __getattr__(program_):
         raise AttributeError
     elif program_ == "steakery":
         return milcery_
-    elif which_(unmangle(program_).replace("_" "-")):
+    elif which_(unmangle(program_).replace("_", "-")):
         return milcery_(program_ = program_)
     else:
         raise AttributeError
