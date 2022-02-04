@@ -2,7 +2,7 @@
 (.install rich.traceback)
 
 (import builtins)
-(import pout weakref)
+(import weakref)
 
 (import addict [Dict :as D])
 (import alive-progress [alive-it])

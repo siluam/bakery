@@ -15,7 +15,7 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 
 #+begin_src hy
 (import builtins)
-(import pout weakref)
+(import weakref)
 #+end_src
 
 ** From
