@@ -19,11 +19,10 @@ hy = "^1.0a4"
 hyrule = "*"
 cytoolz = { version = "*", optional = true }
 toolz = "*"
-pout = "*"
 rich = { git = "https://github.com/shadowrylander/rich.git", branch = "master" }
-toml = "*"
 nanite = { git = "https://gitlab.com/picotech/nanotech/nanite.git", branch = "master" }
 gensing = { git = "https://gitlab.com/picotech/nanotech/gensing.git", branch = "master" }
+poetry2setup = "*"
 
 [tool.poetry.extras]
 gcc = [ "cytoolz coconut" ]
