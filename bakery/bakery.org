@@ -1280,7 +1280,7 @@ otherwise ~(isinstance value int)~ will catch both cases.
                                                                                            (= (len command/process-kwargs/key) 1))
                                                                                        (+ "-" command/process-kwargs/key)]
                                                                                       [True (+ "--" command/process-kwargs/key)])
-                                                     command/process-kwargs/key-values (cond [(= k "repeat") (lfor i (range (inc v)) command/process-kwargs/key)]
+                                                     command/process-kwargs/key-values (cond [(= k "repeat") (lfor i (range v) command/process-kwargs/key)]
                                                                                              [(in k (, "repeat-with-values" "rwv"))
                                                                                               (do (setv key-values [])
                                                                                                   (for [j v]
