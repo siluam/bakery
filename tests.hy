@@ -63,7 +63,12 @@
 
 #@(zoom (defn freezing []
               (import bakery [ls steakery])
-              (assert (.m/command (ls [])))))
+              (assert (isinstance (ls []) steakery))))
+
+#@(zoom (defn git-status []
+              (import bakery [git])
+              (assert (= (.status (git :C cookies) :m/str True)
+                         "On branch main\nYour branch is up to date with 'origin/main'.\n\nnothing to commit, working tree clean"))))
 
 (for [func (alive-it funcs)]
      (func))

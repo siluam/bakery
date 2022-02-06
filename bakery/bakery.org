@@ -34,7 +34,7 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 (import inspect [isclass :as class?])
 (import itertools [chain tee])
 (import nanite [fullpath peek trim])
-(import os [environ])
+(import os [environ path :as osPath getcwd])
 (import rich [print inspect])
 (import rich.pretty [pretty-repr pprint])
 (import shlex [join split])
@@ -92,6 +92,16 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 
 #+begin_src hy
 (defn split-and-flatten [iterable] (flatten (gfor j (flatten iterable) (.split j))))
+#+end_src
+
+** Check Program
+
+#+begin_src hy
+(defn check [self program] (-> program
+                          (which)
+                          (is None)
+                          (if None self)
+                          (return)))
 #+end_src
 
 * The Meta Class
@@ -352,7 +362,6 @@ Capture types, consisting of ~stdout~, ~stderr~, and both:
         self
         #* args
         [program- None]
-        [base-program- None]
         [freezer- None]
         #** kwargs]
 #+end_src
@@ -493,8 +502,11 @@ Note that only via ~baking~ can subcommand-specific arguments and keyword argume
 *** Program
 
 #+begin_src hy
-(setv self.m/program (or (.replace (unmangle program-) "_" "-") "")
-      self.m/base-program (or base-program- program-))
+(setv self.m/program (or (.replace (unmangle program-) "_" "-") ""))
+(if (in "--" self.m/program)
+    (setv self.m/program (.join osPath (getcwd) (.replace self.m/program "--" "."))))
+(if (not (check self self.m/program))
+    (raise (ImportError f"cannot import name '{self.m/program}' from '{self.__class__.__module__}'")))
 #+end_src
 
 *** Return Categories
@@ -1615,7 +1627,6 @@ this allows for more compilcated redirects, such as ~&>~, ~2>&1~, etc.
 
 #+begin_src hy
     (setv kwargs {}
-          base-program- (or self.m/base-program self.m/program)
 #+end_src
 
 Note that ~freezer-~ will always use the ~m/freezer~ value from the bakery on the left-hand side of the operation calling it:
@@ -1643,7 +1654,6 @@ Note that ~freezer-~ will always use the ~m/freezer~ value from the bakery on th
     (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.called)))
 
     (return (.__class__ self :freezer- freezer-
-                             :base-program- base-program-
                              #** kwargs)))
 #+end_src
 
@@ -1661,11 +1671,7 @@ Note that ~freezer-~ will always use the ~m/freezer~ value from the bakery on th
 **** Check Program
 
 #+begin_src hy
-(defn check- [self] (-> self.m/program
-                        (which)
-                        (is None)
-                        (if None self)
-                        (return)))
+(defn check- [self] (return (check self self.m/program)))
 #+end_src
 
 *** Freeze

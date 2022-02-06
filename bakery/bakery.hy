@@ -17,7 +17,7 @@
 (import inspect [isclass :as class?])
 (import itertools [chain tee])
 (import nanite [fullpath peek trim])
-(import os [environ])
+(import os [environ path :as osPath getcwd])
 (import rich [print inspect])
 (import rich.pretty [pretty-repr pprint])
 (import shlex [join split])
@@ -47,6 +47,12 @@
       (return lst))
 
 (defn split-and-flatten [iterable] (flatten (gfor j (flatten iterable) (.split j))))
+
+(defn check [self program] (-> program
+                          (which)
+                          (is None)
+                          (if None self)
+                          (return)))
 
 (defclass melcery [SlotsPlusDictMeta]
 
@@ -259,6 +265,10 @@
 
 (setv self.m/program (or (.replace (unmangle program-) "_" "-") "")
       self.m/base-program (or base-program- program-))
+(if (in "--" self.m/program)
+    (setv self.m/program (.join osPath (getcwd) (.replace self.m/program "--" "."))))
+(if (not (check self self.m/program))
+    (raise (ImportError f"cannot import name '{self.m/program}' from '{self.__class__.__module__}'")))
 
 (setv self.m/return-categories (,
     "stdout"
@@ -961,11 +971,7 @@ freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [proce
       (.bake- cls #* args :instantiated- True :m/subcommand subcommand- #** kwargs)
       (return cls))
 
-(defn check- [self] (-> self.m/program
-                        (which)
-                        (is None)
-                        (if None self)
-                        (return)))
+(defn check- [self] (return (check self self.m/program)))
 
 (defn freeze- [self] (setv self.m/frozen True))
 

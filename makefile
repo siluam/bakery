@@ -9,8 +9,9 @@ tangle:
 |make -f $(mkfileDir)/settings/makefile tangle-setup
 |$(mkfileDir)/settings/org-tangle.sh $(mkfileDir)/bakery/*.org
 |$(mkfileDir)/settings/org-tangle.sh $(mkfileDir)/tests.org
+|$(mkfileDir)/settings/org-tangle.sh $(mkfileDir)/shell.org
 
-install:
+install: tangle
 |pip install .
 
 repl:

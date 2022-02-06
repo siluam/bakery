@@ -5,8 +5,8 @@
 * Rich Traceback
 
 #+begin_src py
-import rich.traceback
-rich.traceback.install()
+import rich.traceback as _rt
+_rt.install()
 #+end_src
 
 * Bakery Frontend
@@ -19,19 +19,12 @@ Adapted from the entirety of [[https://stackoverflow.com/questions/56786604/impo
 import hy
 #+end_src
 
-*** From
-
-#+begin_src py
-from hy import unmangle
-from shutil import which as which_
-#+end_src
-
 ** Relative Import
 
 Adapted from [[https://stackoverflow.com/users/799163/remcogerlich][RemcoGerlich's]] answer [[https://stackoverflow.com/a/21139466][here]]:
 
 #+begin_src py
-from .bakery import milcery as milcery_
+from .bakery import milcery as _milcery
 #+end_src
 
 ** Rest of __init__
@@ -41,9 +34,7 @@ def __getattr__(program_):
     if program_ == "__path__":
         raise AttributeError
     elif program_ == "steakery":
-        return milcery_
-    elif which_(unmangle(program_).replace("_", "-")):
-        return milcery_(program_ = program_)
+        return _milcery
     else:
-        raise AttributeError
+        return _milcery(program_ = program_)
 #+end_src

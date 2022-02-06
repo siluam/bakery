@@ -1,19 +1,14 @@
-import rich.traceback
-rich.traceback.install()
+import rich.traceback as _rt
+_rt.install()
 
 import hy
 
-from hy import unmangle
-from shutil import which as which_
-
-from .bakery import milcery as milcery_
+from .bakery import milcery as _milcery
 
 def __getattr__(program_):
     if program_ == "__path__":
         raise AttributeError
     elif program_ == "steakery":
-        return milcery_
-    elif which_(unmangle(program_).replace("_", "-")):
-        return milcery_(program_ = program_)
+        return _milcery
     else:
-        raise AttributeError
+        return _milcery(program_ = program_)
