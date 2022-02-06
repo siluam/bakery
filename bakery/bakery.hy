@@ -196,7 +196,6 @@
         self
         #* args
         [program- None]
-        [base-program- None]
         [freezer- None]
         #** kwargs]
 
@@ -263,8 +262,7 @@
 
 (setv self.internal/freezer (.cls/freezer self.__class__ freezer- []))
 
-(setv self.m/program (or (.replace (unmangle program-) "_" "-") "")
-      self.m/base-program (or base-program- program-))
+(setv self.m/program (or (.replace (unmangle program-) "_" "-") ""))
 (if (in "--" self.m/program)
     (setv self.m/program (.join osPath (getcwd) (.replace self.m/program "--" "."))))
 (if (not (check self self.m/program))
@@ -636,7 +634,7 @@
                                                                                      (= (len command/process-kwargs/key) 1))
                                                                                  (+ "-" command/process-kwargs/key)]
                                                                                 [True (+ "--" command/process-kwargs/key)])
-                                               command/process-kwargs/key-values (cond [(= k "repeat") (lfor i (range (inc v)) command/process-kwargs/key)]
+                                               command/process-kwargs/key-values (cond [(= k "repeat") (lfor i (range v) command/process-kwargs/key)]
                                                                                        [(in k (, "repeat-with-values" "rwv"))
                                                                                         (do (setv key-values [])
                                                                                             (for [j v]
@@ -941,7 +939,6 @@ executable (if (setx exe (.get self.m/popen "executable" None)) (fullpath exe) e
           processed-pr pr))
 
 (setv kwargs {}
-      base-program- (or self.m/base-program self.m/program)
 
 freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [processed-pr processed-value]))
 
@@ -963,7 +960,6 @@ freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [proce
 (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.called)))
 
 (return (.__class__ self :freezer- freezer-
-                         :base-program- base-program-
                          #** kwargs)))
 
 (defn deepcopy- [self #* args [subcommand- "supercalifragilisticexpialidocious"] #** kwargs]
