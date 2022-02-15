@@ -908,10 +908,11 @@ to use or not use the configuration files of the specified user.
 
 **** Debug
 
-Print all the current values after attempting to return the result of the command:
+Print all the current values after each step; accepts a boolean or a dictionary of options passed to [[https://rich.readthedocs.io/en/latest/reference/init.html#rich.inspect][rich inspect]]:
 
 #+begin_src hy
 <<m/(setting="debug", value="False")>>
+<<m/(setting="default-inspect-kwargs", value="(D { \"all\" True })")>>
 #+end_src
 
 *** End of Init
@@ -1589,11 +1590,29 @@ For some reason, ~Popen's env~ keyword doesn't like [[https://github.com/mewwts/
 
 #+begin_src hy
 (defn m/spin [self #* args [subcommand- "<<20220111111603650875845>>"] #** kwargs]
-      (try (.var/setup self #* args :subcommand- subcommand- #** kwargs)
+      (defn inner [title]
+            (setv opts (or self.m/debug (.cls/get-attr self.__class__ kwargs "m/debug" :default self.m/debug))
+                  bool-opts {})
+            (if (isinstance opts self.m/type-groups.dict-like)
+                (do (.update opts { "title" title })
+                    (.inspect- self #** opts))
+                (if opts
+                    (do (.update bool-opts self.m/default-inspect-kwargs)
+                        (.update bool-opts { "title" title })
+                        (.inspect- self #** bool-opts)))))
+      (try (inner "Setup")
+           (.var/setup self #* args :subcommand- subcommand- #** kwargs)
+
+           (inner "Process")
            (.command/process-all self)
+
+           (inner "Create")
            (.command/create self)
+
+           (inner "Return")
            (return (.return/frosting self))
-           (finally (if self.m/debug (.inspect- self))
+
+           (finally (inner "Reset")
                     (.m/reset-all self))))
 #+end_src
 
@@ -1750,7 +1769,7 @@ Debug the current function:
 #+begin_src hy
 (defn inspect- [self #** kwargs] 
       (if (not kwargs)
-          (setv kwargs { "all" True }))
+          (setv kwargs self.m/default-inspect-kwargs))
       (inspect self #** kwargs))
 #+end_src
 

@@ -402,6 +402,8 @@
 
 (setv self.m/debug False)
 (setv self.m/settings.defaults.m/debug (deepcopy self.m/debug))
+(setv self.m/default-inspect-kwargs (D { "all" True }))
+(setv self.m/settings.defaults.m/default-inspect-kwargs (deepcopy self.m/default-inspect-kwargs))
 
 )
 
@@ -912,11 +914,29 @@ executable (if (setx exe (.get self.m/popen "executable" None)) (fullpath exe) e
                  #** kwargs)))
 
 (defn m/spin [self #* args [subcommand- "supercalifragilisticexpialidocious"] #** kwargs]
-      (try (.var/setup self #* args :subcommand- subcommand- #** kwargs)
+      (defn inner [title]
+            (setv opts (or self.m/debug (.cls/get-attr self.__class__ kwargs "m/debug" :default self.m/debug))
+                  bool-opts {})
+            (if (isinstance opts self.m/type-groups.dict-like)
+                (do (.update opts { "title" title })
+                    (.inspect- self #** opts))
+                (if opts
+                    (do (.update bool-opts self.m/default-inspect-kwargs)
+                        (.update bool-opts { "title" title })
+                        (.inspect- self #** bool-opts)))))
+      (try (inner "Setup")
+           (.var/setup self #* args :subcommand- subcommand- #** kwargs)
+
+           (inner "Process")
            (.command/process-all self)
+
+           (inner "Create")
            (.command/create self)
+
+           (inner "Return")
            (return (.return/frosting self))
-           (finally (if self.m/debug (.inspect- self))
+
+           (finally (inner "Reset")
                     (.m/reset-all self))))
 
 (defn m/apply-pipe-redirect [self pr value]
@@ -1001,7 +1021,7 @@ freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [proce
 
 (defn inspect- [self #** kwargs] 
       (if (not kwargs)
-          (setv kwargs { "all" True }))
+          (setv kwargs self.m/default-inspect-kwargs))
       (inspect self #** kwargs))
 
 (defn origin- [self] (return (. (first self.__class__.m/stores) __callback__)))

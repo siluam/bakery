@@ -1,6 +1,6 @@
-[submodule "settings"]
-	path = settings
-	url = https://github.com/shadowrylander/settings.git
 [submodule "cookies"]
 	path = cookies
 	url = https://github.com/syvlorg/cookies.git
+[submodule "settings"]
+	path = settings
+	url = https://github.com/sylvorg/settings.git
