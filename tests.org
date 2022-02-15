@@ -131,6 +131,43 @@ Check if temporary baking with a context manager works:
                          "On branch main\nYour branch is up to date with 'origin/main'.\n\nnothing to commit, working tree clean"))))
 #+end_src
 
+** String Output
+
+#+begin_src hy
+#@(zoom (defn string-output []
+              (import bakery [echo])
+              (assert (= (echo :m/str True "Hello!") "Hello!"))))
+#+end_src
+
+** Piping
+*** First
+
+#+begin_src hy
+#@(zoom (defn piping/first []
+              (import bakery [ls tail])
+              (import os [listdir])
+              (setv tails (| (ls [] :a True cookies) tail)
+                    output (tails))
+              (assert (all (gfor item (cut (listdir cookies) 10 -1) :if (in item output) item)))))
+#+end_src
+
+*** Both
+
+#+begin_src hy
+#@(zoom (defn piping/both []
+              (import bakery [env grep])
+              (setv egrep (| (env [] :m/exports { "FOO" "bar" } :m/str True) (grep [] "FOO")))
+              (assert (= (egrep) "FOO=bar"))))
+#+end_src
+
+** Exports
+
+#+begin_src hy
+#@(zoom (defn exports []
+              (import bakery [echo])
+              (assert (= (echo :m/exports { "FOO" "bar" } "$FOO" :m/str True) "bar"))))
+#+end_src
+
 * Run Everything
 
 #+begin_src hy

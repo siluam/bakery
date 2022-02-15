@@ -196,6 +196,7 @@
         self
         #* args
         [program- None]
+        [base-program- None]
         [freezer- None]
         #** kwargs]
 
@@ -262,11 +263,15 @@
 
 (setv self.internal/freezer (.cls/freezer self.__class__ freezer- []))
 
-(setv self.m/program (or (.replace (unmangle program-) "_" "-") ""))
-(if (in "--" self.m/program)
-    (setv self.m/program (.join osPath (getcwd) (.replace self.m/program "--" "."))))
-(if (not (check self self.m/program))
-    (raise (ImportError f"cannot import name '{self.m/program}' from '{self.__class__.__module__}'")))
+(if program-
+    (do (setv self.m/program (or (.replace (unmangle program-) "_" "-") ""))
+        (if (in "--" self.m/program)
+            (setv self.m/program (.join osPath (getcwd) (.replace self.m/program "--" "."))))
+        (if (not (check self self.m/program))
+            (raise (ImportError f"cannot import name '{self.m/program}' from '{self.__class__.__module__}'")))
+        (setv self.m/base-program (or base-program- self.m/program)))
+    (setv self.m/program ""
+          self.m/base-program (or base-program- self.m/program)))
 
 (setv self.m/return-categories (,
     "stdout"
@@ -281,7 +286,7 @@
 
 (setv self.m/gitea (D {})
       self.m/gitea.list [ "git" "yadm" ]
-      self.m/gitea.bool (or (in self.m/program self.m/gitea.list) False)
+      self.m/gitea.bool (or (in self.m/base-program self.m/gitea.list) False)
       self.m/gitea.off False)
 
 (setv self.m/settings (D {})
@@ -465,7 +470,7 @@
            (setattr self key (deepcopy value)))
       (setv self.m/current-settings.program (.cls/get-un-mangled self.__class__
                                                                  self.m/settings.programs
-                                                                 self.m/program
+                                                                 self.m/base-program
                                                                  :default (D {})))
       (for [[key value] (.items self.m/current-settings.program.supercalifragilisticexpialidocious)]
            (setattr self key (deepcopy value))))
@@ -946,7 +951,7 @@ executable (if (setx exe (.get self.m/popen "executable" None)) (fullpath exe) e
                                                    self.m/type-groups.this-class-subclass
                                                    [str]) t.__name__))]
                (return (cond [(isinstance v self.m/type-groups.genstrings) [(v)]]
-                             [is-milcery (or v.m/freezer (.values v.m/command) [v.m/program])]
+                             [is-milcery (or v.m/freezer (.values v.m/command) [v.m/base-program])]
                              [(isinstance v str) [v]]
                              [True (raise (NotImplemented f"Sorry! Value '{v}' can only be of the following types: {type-string}"))]))))
 
@@ -960,7 +965,7 @@ executable (if (setx exe (.get self.m/popen "executable" None)) (fullpath exe) e
 
 (setv kwargs {}
 
-freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [processed-pr processed-value]))
+freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/base-program]) [processed-pr processed-value]))
 
 (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.world))
 (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.world)))
@@ -980,6 +985,7 @@ freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [proce
 (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.called)))
 
 (return (.__class__ self :freezer- freezer-
+                         :base-program- self.m/base-program
                          #** kwargs)))
 
 (defn deepcopy- [self #* args [subcommand- "supercalifragilisticexpialidocious"] #** kwargs]
@@ -1035,7 +1041,7 @@ freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [proce
         #** kwargs ]
     (if (and (not self.m/gitea.off)
              (or self.m/gitea.bool
-                 (in self.m/program self.m/gitea.list)))
+                 (in self.m/base-program self.m/gitea.list)))
         (return (.deepcopy- self :m/starter-args args :m/starter-kwargs kwargs))
         (cond [(or (.cls/get-attr self.__class__ kwargs "m/context" False)
                    (.cls/get-attr self.__class__ kwargs "m/c" False))

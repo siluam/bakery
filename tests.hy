@@ -12,24 +12,19 @@
 (defn nots? [string] (not (or (= string ".") (= string ".."))))
 
 #@(zoom (defn main []
-              (print "Testing Main...")
               (import bakery [ls])
               (import os [listdir])
               (setv output (ls cookies))
               (assert (all (gfor item (listdir cookies) :if (and (not (.startswith item "."))
-                                                                   (in item output)) item)))
-              (print "Testing Main Complete!")))
+                                                                   (in item output)) item)))))
 
 #@(zoom (defn program-options []
-              (print "Testing Program Options...")
               (import bakery [ls])
               (import os [listdir])
               (setv output (ls :a True cookies))
-              (assert (all (gfor item (listdir cookies) :if (in item output) item)))
-              (print "Testing Program Options Complete!")))
+              (assert (all (gfor item (listdir cookies) :if (in item output) item)))))
 
 #@(zoom (defn context-manager []
-              (print "Testing Context Manager...")
               (import bakery [ls])
               (import os [listdir])
               (with [lsa (ls :a True cookies :m/context True)]
@@ -37,11 +32,9 @@
                     (assert (all (gfor item (listdir cookies) :if (in item output) item))))
               (setv output (ls cookies))
               (assert (all (gfor item (listdir cookies) :if (and (not (.startswith item "."))
-                                                                   (in item output)) item)))
-              (print "Testing Context Manager Complete!")))
+                                                                   (in item output)) item)))))
 
 #@(zoom (defn loop []
-              (print "Testing Loop...")
               (import bakery [ls])
               (import os [listdir chdir getcwd])
               (setv output (listdir cookies)
@@ -49,42 +42,53 @@
               (try (chdir cookies)
                    (for [item ls]
                         (assert (in item output)))
-                   (finally (chdir cwd)))
-              (print "Testing Loop Complete!")))
+                   (finally (chdir cwd)))))
 
 #@(zoom (defn progress []
-              (print "Testing Progress...")
               (import bakery [ls])
               (import os [listdir])
               (setv output (listdir cookies))
               (for [item (ls :a True cookies :m/progress True)]
                    (if (nots? item)
-                       (assert (in item output))))
-              (print "Testing Progress Complete!")))
+                       (assert (in item output))))))
 
 #@(zoom (defn baking []
-              (print "Testing Baking...")
               (import bakery [ls])
               (import os [listdir])
               (.bake- ls :a True :m/progress True cookies)
               (setv output (listdir cookies))
               (for [item ls]
                    (if (nots? item)
-                       (assert (in item output))))
-              (print "Testing Baking Complete!")))
+                       (assert (in item output))))))
 
 #@(zoom (defn freezing []
-              (print "Testing Freezing...")
               (import bakery [ls steakery])
-              (assert (isinstance (ls []) steakery))
-              (print "Testing Freezing Complete!")))
+              (assert (isinstance (ls []) steakery))))
 
 #@(zoom (defn git-status []
-              (print "Testing Git Status...")
               (import bakery [git])
               (assert (= (.status (git :C cookies) :m/str True)
-                         "On branch main\nYour branch is up to date with 'origin/main'.\n\nnothing to commit, working tree clean"))
-              (print "Testing Git Status Complete!")))
+                         "On branch main\nYour branch is up to date with 'origin/main'.\n\nnothing to commit, working tree clean"))))
+
+#@(zoom (defn string-output []
+              (import bakery [echo])
+              (assert (= (echo :m/str True "Hello!") "Hello!"))))
+
+#@(zoom (defn piping/first []
+              (import bakery [ls tail])
+              (import os [listdir])
+              (setv tails (| (ls [] :a True cookies) tail)
+                    output (tails))
+              (assert (all (gfor item (cut (listdir cookies) 10 -1) :if (in item output) item)))))
+
+#@(zoom (defn piping/both []
+              (import bakery [env grep])
+              (setv egrep (| (env [] :m/exports { "FOO" "bar" } :m/str True) (grep [] "FOO")))
+              (assert (= (egrep) "FOO=bar"))))
+
+#@(zoom (defn exports []
+              (import bakery [echo])
+              (assert (= (echo :m/exports { "FOO" "bar" } "$FOO" :m/str True) "bar"))))
 
 (for [func (alive-it funcs)]
      (func))

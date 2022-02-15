@@ -362,6 +362,7 @@ Capture types, consisting of ~stdout~, ~stderr~, and both:
         self
         #* args
         [program- None]
+        [base-program- None]
         [freezer- None]
         #** kwargs]
 #+end_src
@@ -502,11 +503,15 @@ Note that only via ~baking~ can subcommand-specific arguments and keyword argume
 *** Program
 
 #+begin_src hy
-(setv self.m/program (or (.replace (unmangle program-) "_" "-") ""))
-(if (in "--" self.m/program)
-    (setv self.m/program (.join osPath (getcwd) (.replace self.m/program "--" "."))))
-(if (not (check self self.m/program))
-    (raise (ImportError f"cannot import name '{self.m/program}' from '{self.__class__.__module__}'")))
+(if program-
+    (do (setv self.m/program (or (.replace (unmangle program-) "_" "-") ""))
+        (if (in "--" self.m/program)
+            (setv self.m/program (.join osPath (getcwd) (.replace self.m/program "--" "."))))
+        (if (not (check self self.m/program))
+            (raise (ImportError f"cannot import name '{self.m/program}' from '{self.__class__.__module__}'")))
+        (setv self.m/base-program (or base-program- self.m/program)))
+    (setv self.m/program ""
+          self.m/base-program (or base-program- self.m/program)))
 #+end_src
 
 *** Return Categories
@@ -555,7 +560,7 @@ Named after [[https://gitea.io/en-us/][gitea]] and my own [[https://gitlab.com/p
 #+begin_src hy
 (setv self.m/gitea (D {})
       self.m/gitea.list [ "git" "yadm" ]
-      self.m/gitea.bool (or (in self.m/program self.m/gitea.list) False)
+      self.m/gitea.bool (or (in self.m/base-program self.m/gitea.list) False)
       self.m/gitea.off False)
 #+end_src
 
@@ -1024,7 +1029,7 @@ Print all the current values after each step; accepts a boolean or a dictionary 
            (setattr self key (deepcopy value)))
       (setv self.m/current-settings.program (.cls/get-un-mangled self.__class__
                                                                  self.m/settings.programs
-                                                                 self.m/program
+                                                                 self.m/base-program
                                                                  :default (D {})))
       (for [[key value] (.items self.m/current-settings.program.<<20220111111603650875845>>)]
            (setattr self key (deepcopy value))))
@@ -1626,7 +1631,7 @@ For some reason, ~Popen's env~ keyword doesn't like [[https://github.com/mewwts/
                                                    self.m/type-groups.this-class-subclass
                                                    [str]) t.__name__))]
                (return (cond [(isinstance v self.m/type-groups.genstrings) [(v)]]
-                             [is-milcery (or v.m/freezer (.values v.m/command) [v.m/program])]
+                             [is-milcery (or v.m/freezer (.values v.m/command) [v.m/base-program])]
                              [(isinstance v str) [v]]
                              [True (raise (NotImplemented f"Sorry! Value '{v}' can only be of the following types: {type-string}"))]))))
 #+end_src
@@ -1651,7 +1656,7 @@ this allows for more compilcated redirects, such as ~&>~, ~2>&1~, etc.
 Note that ~freezer-~ will always use the ~m/freezer~ value from the bakery on the left-hand side of the operation calling it:
 
 #+begin_src hy
-          freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/program]) [processed-pr processed-value]))
+          freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/base-program]) [processed-pr processed-value]))
 #+end_src
 
 #+begin_src hy
@@ -1673,6 +1678,7 @@ Note that ~freezer-~ will always use the ~m/freezer~ value from the bakery on th
     (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.called)))
 
     (return (.__class__ self :freezer- freezer-
+                             :base-program- self.m/base-program
                              #** kwargs)))
 #+end_src
 
@@ -1819,7 +1825,7 @@ Adapted from [[https://realpython.com/primer-on-python-decorators/][Primer on Py
         #** kwargs ]
     (if (and (not self.m/gitea.off)
              (or self.m/gitea.bool
-                 (in self.m/program self.m/gitea.list)))
+                 (in self.m/base-program self.m/gitea.list)))
         (return (.deepcopy- self :m/starter-args args :m/starter-kwargs kwargs))
         <<20220101204858374153059()>>))
 #+end_src
