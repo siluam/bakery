@@ -1,5 +1,5 @@
 let
-    name = "20220208045251813793805";
+    name = "4d28e002-8dfd-41d5-a4af-1aa20f7f99ea";
     pkgs = import <nixpkgs> {};
     venv = "~/.local/nix-shells/${name}/venv";
 in (pkgs.mkShell rec {

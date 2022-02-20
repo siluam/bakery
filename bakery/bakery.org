@@ -1,5 +1,4 @@
 #+setupfile: ../settings/README.org
-#+include: ../settings/README.org
 #+property: header-args:hy :tangle yes
 
 Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffat][Andrew Moffat]].
@@ -8,7 +7,7 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 
 #+begin_src hy
 (import rich.traceback)
-(.install rich.traceback)
+(.install rich.traceback :show-locals True)
 #+end_src
 
 * Imports
@@ -22,21 +21,21 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 
 #+begin_src hy
 (import addict [Dict :as D])
-(import alive-progress [alive-it])
 (import ast [literal-eval])
-(import autoslot [SlotsPlusDictMeta])
+(import autoslot [Slots SlotsMeta])
 (import collections [OrderedDict])
 (import copy [copy deepcopy])
 (import functools [partial wraps])
-(import gensing [frosting tea])
 (import hy [mangle unmangle])
 (import hyrule [coll? inc])
 (import inspect [isclass :as class?])
 (import itertools [chain tee])
-(import nanite [fullpath peek trim])
+(import more-itertools [peekable ilen always-iterable])
+(import oreo [eclair flatten get-un-mangled recursive-unmangle tea trim])
 (import os [environ path :as osPath getcwd])
 (import rich [print inspect])
 (import rich.pretty [pretty-repr pprint])
+(import rich.progress [Progress])
 (import shlex [join split])
 (import shutil [which])
 (import subprocess [DEVNULL PIPE Popen STDOUT])
@@ -71,23 +70,6 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 #+end_src
 
 * Static Methods
-
-# TODO: Add to nanite
-
-** Flatten Iterable
-
-#+begin_src hy
-(defn flatten [iterable [times None]]
-      (setv lst [])
-      (for [i iterable]
-           (if (and (coll? i)
-                    (or (is times None)
-                        times))
-               (.extend lst (flatten i :times (if times (dec times) times)))
-               (.append lst i)))
-      (return lst))
-#+end_src
-
 ** Split and Flatten Iterable
 
 #+begin_src hy
@@ -104,14 +86,68 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
                           (return)))
 #+end_src
 
+* The Frosting Class
+
+#+begin_src hy
+(defclass frosting [tea Slots]
+#+end_src
+
+** __init__
+
+#+begin_src hy
+(defn __init__ [self output [capture "stdout"]]
+      (setv self.capture (if (= capture "stderr") "stderr" "stdout")
+            self.dict-like (isinstance output dict)
+            self.iterable (coll? output)
+            self.output output)
+#+end_src
+
+*** Initialize Super
+
+#+begin_src hy
+(cond [self.dict-like (.__init__ (super) #** self.output)]
+      [self.iterable (.__init__ (super) #* self.output)]
+      [True (.__init__ (super) self.output)])
+#+end_src
+
+*** End of __init__
+
+#+begin_src hy
+)
+#+end_src
+
+** __iter__
+
+#+begin_src hy
+(defn __iter__ [self]
+      (yield-from (if self.dict-like
+                      (get self self.capture)
+                      (.values self))))
+#+end_src
+
+** __call__
+
+#+begin_src hy
+(defn __call__ [self]
+      (return (cond [(not self.iterable) self.output]
+                    [self.dict-like (D (.items self))]
+                    [True (.values self)])))
+#+end_src
+
+** End of Frosting
+
+#+begin_src hy
+)
+#+end_src
+
 * The Meta Class
 
-Adapted from [[https://stackoverflow.com/a/1800999/10827766][this answer]] by [[https://stackoverflow.com/users/36433/a-coady][A. Coady]], as well as [[https://stackoverflow.com/a/31537249/10827766][this answer]] by [[https://stackoverflow.com/users/302343/timur][Timur]].
+Adapted from [[https://stackoverflow.com/users/36433/a-coady][A. Coady's]] answer [[https://stackoverflow.com/a/1800999/10827766][here]], as well as [[https://stackoverflow.com/users/302343/timur][Timur's]] answer [[https://stackoverflow.com/a/31537249/10827766][here]].
 
 Remember that ~metaclasses~ use ~cls~ instead of ~self~!
 
 #+begin_src hy
-(defclass melcery [SlotsPlusDictMeta]
+(defclass melcery [SlotsMeta]
 #+end_src
 
 ** __init__
@@ -217,14 +253,6 @@ as well as from the [[https://github.com/cjrh/autoslot][autoslot]] documentation
                                  (.get dct (mangle (+ "m/" cls/get-attr/attr)) default)))))
 #+end_src
 
-*** Get Mangled or Unmangled
-
-#+begin_src hy
-#@(classmethod (defn cls/get-un-mangled [cls dct key [default None]]
-                     (return (or (.get dct (mangle key) None)
-                                 (.get dct (.replace (unmangle key) "_" "-") default)))))
-#+end_src
-
 ** Properties
 *** Freezer
 
@@ -322,7 +350,7 @@ Capture types, consisting of ~stdout~, ~stderr~, and both:
 #@(property (defn m/sudo [self] (return self.internal/sudo)))
 #@(m/sudo.setter (defn m/sudo [self value]
                        (setv error-message
-                             #[[Sorry! `m/sudo' must be a string of "i" or "s", a tea, frosting, or dict-like object of length 1, key "i" or "s", and value `user', or a boolean!]]
+                             #[[Sorry! `m/sudo' must be a string of "i" or "s", or a dict-like object of length 1, key "i" or "s", and value `user', or a boolean!]]
                              self.internal/sudo (if value
                                                     (if (or (isinstance value bool) (= (len value) 1))
                                                         (cond [(isinstance value str)
@@ -330,7 +358,7 @@ Capture types, consisting of ~stdout~, ~stderr~, and both:
                                                                    { value "root" }
                                                                    (raise (ValueError error-message)))]
                                                               [(isinstance value bool) value]
-                                                              [(isinstance value self.m/type-groups.dict-like) (if (-> value (.keys) (iter) (next) (in (, "i" "s")))
+                                                              [(isinstance value dict) (if (-> value (.keys) (iter) (next) (in (, "i" "s")))
                                                                                                                    value
                                                                                                                    (raise (ValueError error-message)))])
                                                         (raise (ValueError error-message)))
@@ -369,7 +397,7 @@ Capture types, consisting of ~stdout~, ~stderr~, and both:
 
 *** Append bakery to list of bakeries
 
-Adapted from [[https://stackoverflow.com/a/26626707/10827766][this answer]] by [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters]], as well as [[https://stackoverflow.com/a/328882/10827766][this answer]] by [[https://stackoverflow.com/users/9567/torsten-marek][Torsten Marek]]:
+Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters']] answer [[https://stackoverflow.com/a/26626707/10827766][here]], as well as [[https://stackoverflow.com/users/9567/torsten-marek][Torsten Marek's]] answer [[https://stackoverflow.com/a/328882/10827766][here]]:
 
 #+begin_src hy
 (.append self.__class__.m/stores (.ref weakref self self))
@@ -400,18 +428,11 @@ Adapted from [[https://stackoverflow.com/a/26626707/10827766][this answer]] by [
 (.extend self.m/type-groups.acceptable-args self.m/type-groups.this-class-subclass)
 #+end_src
 
-**** Dict-Like
-
-#+begin_src hy
-(setv self.m/type-groups.dict-like [dict])
-#+end_src
-
 **** Genstrings
 
 #+begin_src hy
-(setv self.m/type-groups.genstrings [tea frosting])
+(setv self.m/type-groups.genstrings [tea])
 (.extend self.m/type-groups.acceptable-args self.m/type-groups.genstrings)
-(.extend self.m/type-groups.acceptable-args self.m/type-groups.dict-like)
 (setv self.m/type-groups.genstrings (tuple self.m/type-groups.genstrings))
 #+end_src
 
@@ -425,12 +446,6 @@ Adapted from [[https://stackoverflow.com/a/26626707/10827766][this answer]] by [
 
 #+begin_src hy
 (setv self.m/type-groups.excluded-classes (, "type"))
-#+end_src
-
-**** Post
-
-#+begin_src hy
-(setv self.m/type-groups.dict-like (tuple self.m/type-groups.dict-like))
 #+end_src
 
 *** Subcommand
@@ -860,10 +875,11 @@ use the ~m/print-command-and-run~ keyword argument to print the final command an
 
 **** Progress Bar
 
-If the final output is an iterable, return it wrapped in an [[https://github.com/rsalmei/alive-progress][alive-progress]] progress bar:
+If the final output is an iterable, return it wrapped in an [[https://rich.readthedocs.io/en/stable/reference/progress.html][rich]] progress bar;
+accepts a color string value:
 
 #+begin_src hy
-<<m/(setting="progress", value="False")>>
+<<m/(setting="progress", value="None")>>
 #+end_src
 
 **** Split Output By Whitespace
@@ -904,7 +920,7 @@ A dictionary used to pass options to the ~subprocess Popen~ class:
 
 May be a string of length 1, and value ~i~ or ~s~, or a boolean.
 
-If [[https://gitlab.com/picotech/nanotech/gensing][tea or frosting objects]], or dict-like object, must be in the form {"i" : user} or {"s" : user},
+If a dict-like object, must be in the form {"i" : user} or {"s" : user},
 to use or not use the configuration files of the specified user.
 
 #+begin_src hy
@@ -927,29 +943,6 @@ Print all the current values after each step; accepts a boolean or a dictionary 
 #+end_src
 
 ** Miscellaneous
-*** Magic String Output
-
-#+begin_src hy
-(defn misc/magic-string-output [self output]
-      (return (if (not (.misc/type-name-is-string self :type/type (type output)))
-                  "Sorry! The bakery is currently frozen, debugging, or has returned a Popen!"
-                  output)))
-#+end_src
-
-# TODO: Add to nanite
-
-*** Recursive Unmangle
-
-#+begin_src hy
-(defn misc/recursive-unmangle [self dct]
-      (return (D (dfor [key value]
-                       (.items dct)
-                       [(unmangle key)
-                        (if (isinstance value dict)
-                            (.misc/recursive-unmangle self value)
-                            value)]))))
-#+end_src
-
 *** Type Name is String
 
 #+begin_src hy
@@ -985,7 +978,7 @@ Print all the current values after each step; accepts a boolean or a dictionary 
 (defn convert/type [self input [type/type None]]
     (setv type/type/type (or type/type self.m/type))
     (if (is input None) (return (.misc/return-none-if-tnis self :type/type type/type/type)))
-    (if (and input (isinstance input frosting))
+    (if (and input (isinstance input self.m/type-groups.genstrings))
         (let [frosted-input (input)]
              (cond [(isinstance frosted-input str)
                     (setv input [(.fill (TextWrapper :break-long-words False :break-on-hyphens False) frosted-input)])]
@@ -993,11 +986,10 @@ Print all the current values after each step; accepts a boolean or a dictionary 
                    [(isinstance frosted-input int) (if (.misc/type-name-is-string self :type/type type/type/type)
                                                        (return (pretty-repr frosted-input))
                                                        (return frosted-input))])))
-    (setv output (cond [(.misc/type-name-is-string self :type/type type/type/type) (.join "\n" input)]
-                       [(in type/type/type.__name__ self.m/type-groups.generators) (.convert/generator self input)]
-                       [True (type/type/type input)]))
-    (return (if (and self.m/progress
-                     (coll? output)) (alive-it output) output)))
+    (return (cond [(and self.m/progress (coll? input)) (eclair input (.m/command self) self.m/progress)]
+                  [(.misc/type-name-is-string self :type/type type/type/type) (.join "\n" input)]
+                  [(in type/type/type.__name__ self.m/type-groups.generators) (.convert/generator self input)]
+                  [True (type/type/type input)])))
 #+end_src
 
 ** Subcommand
@@ -1027,10 +1019,9 @@ Print all the current values after each step; accepts a boolean or a dictionary 
 (defn var/set-defaults [self]
       (for [[key value] (.items self.m/settings.defaults)]
            (setattr self key (deepcopy value)))
-      (setv self.m/current-settings.program (.cls/get-un-mangled self.__class__
-                                                                 self.m/settings.programs
-                                                                 self.m/base-program
-                                                                 :default (D {})))
+      (setv self.m/current-settings.program (get-un-mangled self.m/settings.programs
+                                                            self.m/base-program
+                                                            :default (D {})))
       (for [[key value] (.items self.m/current-settings.program.<<20220111111603650875845>>)]
            (setattr self key (deepcopy value))))
 #+end_src
@@ -1053,10 +1044,9 @@ Print all the current values after each step; accepts a boolean or a dictionary 
       (if (not self.m/subcommand.current.unprocessed) (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
       (.subcommand/process self)
 
-      (setv self.m/current-settings.subcommand (.cls/get-un-mangled self.__class__
-                                                                    self.m/current-settings.program
-                                                                    self.m/subcommand.current.processed
-                                                                    :default (D {})))
+      (setv self.m/current-settings.subcommand (get-un-mangled self.m/current-settings.program
+                                                               self.m/subcommand.current.processed
+                                                               :default (D {})))
       (for [[key value] (.items self.m/current-settings.subcommand)]
            (setattr self key (deepcopy value)))
 
@@ -1430,8 +1420,11 @@ otherwise ~(isinstance value int)~ will catch both cases.
             [self.m/return-command (return (.m/command self))]
             [True (let [output (.return/process self)]
                        (if (isinstance output dict)
-                           (do (setv [peek-value output.stderr] (peek output.stderr :return-first 2)
+                           (do (setv output.stderr (peekable output.stderr)
                                      stds (, "out" "err"))
+                               (try (setv peek-value (.peek output.stderr))
+                                    (except [StopIteration]
+                                            (setv peek-value None)))
                                (if (and peek-value
                                         (not self.m/ignore-stderr)
                                         (not self.m/stdout-stderr))
@@ -1476,12 +1469,7 @@ otherwise ~(isinstance value int)~ will catch both cases.
                                      (if (not (and (is self.m/n-lines.number None)
                                                    (.misc/type-name-is-string self)))
                                          (let [trim-part (partial trim :ordinal self.m/n-lines.ordinal
-                                                                       :number self.m/n-lines.number
-
-                                                                       ;; TODO: After converting `nanite' / `nanotech' to `hy', change this to `type-'
-                                                                       :_type self.m/type
-
-                                                                       :ignore-check True)]
+                                                                       :number self.m/n-lines.number)]
                                               (if (in self.m/n-lines.std (, "stdout" "both"))
                                                   (setv return/process/return.stdout (trim-part :iterable return/process/return.stdout)))
                                               (if (in self.m/n-lines.std (, "stderr" "both"))
@@ -1497,14 +1485,14 @@ otherwise ~(isinstance value int)~ will catch both cases.
 (defn return/frosting [self]
       (setv output (.return/output self))
       (if self.m/frozen (return output))
-      (setv frosted-output (if (and (isinstance output self.m/type-groups.dict-like)
+      (setv frosted-output (if (and (isinstance output dict)
                                     (= (len output) 1))
                                (-> output (.values) (iter) (next))
                                output)
-            dict-like-frosted-output (isinstance frosted-output self.m/type-groups.dict-like)
+            dict-like-frosted-output (isinstance frosted-output dict)
             frosted-output (if self.m/dazzle
                                (cond [dict-like-frosted-output frosted-output]
-                                     [(coll? frosted-output) (list frosted-output)]
+                                     [(coll? frosted-output) (always-iterable frosted-output)]
                                      [True [frosted-output]])
                                frosted-output))
       (if self.m/print-command-and-run (print (.m/command self)))
@@ -1570,7 +1558,7 @@ For some reason, ~Popen's env~ keyword doesn't like [[https://github.com/mewwts/
 #+end_src
 
 #+begin_src hy
-            executable (if (setx exe (.get self.m/popen "executable" None)) (fullpath exe) exe)
+            executable (.get self.m/popen "executable" None)
             kwargs { "bufsize" bufsize
                      "stdin" (.get self.m/popen "stdin" self.m/input)
                      "stdout" pp-stdout
@@ -1598,7 +1586,7 @@ For some reason, ~Popen's env~ keyword doesn't like [[https://github.com/mewwts/
       (defn inner [title]
             (setv opts (or self.m/debug (.cls/get-attr self.__class__ kwargs "m/debug" :default self.m/debug))
                   bool-opts {})
-            (if (isinstance opts self.m/type-groups.dict-like)
+            (if (isinstance opts dict)
                 (do (.update opts { "title" title })
                     (.inspect- self #** opts))
                 (if opts
@@ -1656,7 +1644,7 @@ this allows for more compilcated redirects, such as ~&>~, ~2>&1~, etc.
 Note that ~freezer-~ will always use the ~m/freezer~ value from the bakery on the left-hand side of the operation calling it:
 
 #+begin_src hy
-          freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/base-program]) [processed-pr processed-value]))
+          freezer- (+ (or self.m/freezer (list (.values self.m/command)) [self.m/base-program]) [processed-pr processed-value]))
 #+end_src
 
 #+begin_src hy
@@ -1761,11 +1749,13 @@ can be used for debugging purposes or otherwise.
 
 #+begin_src hy
 (defn current-values- [self]
-      (return (D { "__slots__" (.misc/recursive-unmangle self (dfor var
-                                                                    self.__slots__
-                                                                    :if (!= var "__dict__")
-                                                                    [var (getattr self var)]))
-                   "__dict__" self.__dict__ })))
+      (setv sd (D { "__slots__" (recursive-unmangle (dfor var
+                                                         self.__slots__
+                                                         :if (!= var "__dict__")
+                                                         [var (getattr self var)])) }))
+      (if (hasattr self "__dict__")
+          (setv sd.__dict__ self.__dict__))
+      (return sd))
 #+end_src
 
 **** Print
@@ -1883,7 +1873,8 @@ Copy all attributes
 
 #+begin_src hy
     (for [var slots] (if (not (in var (, "__weakref__"))) (setattr result var (copy (getattr self var)))))
-    (.update result.__dict__ self.__dict__)
+    (if (hasattr self "__dict__")
+        (.update result.__dict__ self.__dict__))
 #+end_src
 
 Reset ~m/frozen~:
@@ -1951,7 +1942,8 @@ Deep copy all other attributes
     (for [var slots]
          (if (not (in var (, "__weakref__")))
              (setattr result var (deepcopy (getattr self var) memo))))
-    (for [[k v] (.items self.__dict__)] (setattr result k (deepcopy v memo)))
+    (if (hasattr self "__dict__")
+        (for [[k v] (.items self.__dict__)] (setattr result k (deepcopy v memo))))
 #+end_src
 
 Reset ~m/frozen~:
@@ -1972,22 +1964,6 @@ Return updated instance
 
 #+begin_src hy
 (defn __iter__ [self] (yield-from (.m/spin self)))
-#+end_src
-
-*** __str__
-
-If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in infinite loop when getting the title of the report, since it's not being passed in.
-
-#+begin_src hy
-(defn __str__ [self] (return (or (.m/command self) f"<{self.__class__.__module__}.{self.__class__.__name__} object at {(hex (id self))}>")))
-#+end_src
-
-*** __repr__
-
-If ~__str__~ doesn't exist, ~__repr__~ called by ~(inspect self)~ trigger in infinite loop when getting the title of the report, since it's not being passed in.
-
-#+begin_src hy
-(defn __repr__ [self] (.inspect- self) (return (str self)))
 #+end_src
 
 *** __or__

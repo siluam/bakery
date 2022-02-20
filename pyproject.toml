@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "bakery"
-version = "1.0.0.0"
+version = "2.0.0.0"
 description = "An \"sh\" alternative"
-authors = ["shadowrylander <titaniumfiles@outlook.com>"]
+authors = ["sylvorg <jeet.ray@syvl.org>"]
 license = "OREO"
 include = [
 	"bakery/**/*.py",
@@ -10,26 +10,12 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-addict = "*"
-alive-progress = "^2.2"
-autoslot = "*"
-coconut = { version = "*", optional = true }
-hy = "^1.0a4"
-hyrule = "*"
-cytoolz = { version = "*", optional = true }
-toolz = "*"
-rich = { git = "https://github.com/shadowrylander/rich.git", branch = "master" }
-nanite = { git = "https://gitlab.com/picotech/nanotech/nanite.git", branch = "master" }
-gensing = { git = "https://gitlab.com/picotech/nanotech/gensing.git", branch = "master" }
-poetry2setup = "*"
-
-[tool.poetry.extras]
-gcc = [ "cytoolz coconut" ]
+python = ">=3.9,<3.11"
+oreo = { git = "https://github.com/sylvorg/oreo.git", branch = "main" }
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

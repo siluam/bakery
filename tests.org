@@ -1,5 +1,4 @@
 #+setupfile: ./settings/README.org
-#+include: ./settings/README.org
 #+property: header-args:hy :tangle yes
 
 * Preparations
@@ -14,7 +13,7 @@
 *** From
 
 #+begin_src hy
-(import alive-progress [alive-it])
+(import oreo [eclair either?])
 (import os [path :as osPath])
 #+end_src
 
@@ -96,7 +95,7 @@ Check if temporary baking with a context manager works:
               (import bakery [ls])
               (import os [listdir])
               (setv output (listdir cookies))
-              (for [item (ls :a True cookies :m/progress True)]
+              (for [item (ls :a True cookies :m/progress "red")]
                    (if (nots? item)
                        (assert (in item output))))))
 #+end_src
@@ -107,19 +106,31 @@ Check if temporary baking with a context manager works:
 #@(zoom (defn baking []
               (import bakery [ls])
               (import os [listdir])
-              (.bake- ls :a True :m/progress True cookies)
+              (.bake- ls :a True :m/progress "green" cookies)
               (setv output (listdir cookies))
               (for [item ls]
                    (if (nots? item)
                        (assert (in item output))))))
 #+end_src
 
+** Module Call
+
+#+begin_src hy
+#@(zoom (defn module-call []
+              (import bakery)
+              (import os [listdir])
+              (setv ls (bakery :program- "ls")
+                    output (ls :a True cookies))
+              (assert (all (gfor item (listdir cookies) :if (in item output) item)))))
+#+end_src
+
 ** Freezing
 
 #+begin_src hy
 #@(zoom (defn freezing []
-              (import bakery [ls steakery])
-              (assert (isinstance (ls []) steakery))))
+              (import bakery)
+              (import bakery [ls])
+              (assert (either? (ls []) bakery))))
 #+end_src
 
 ** Git Status
@@ -171,6 +182,5 @@ Check if temporary baking with a context manager works:
 * Run Everything
 
 #+begin_src hy
-(for [func (alive-it funcs)]
-     (func))
+(for [func (eclair funcs "tests" "blue")] (func))
 #+end_src

@@ -1,14 +1,25 @@
-import rich.traceback as _rt
-_rt.install()
+import rich.traceback as RichTraceback
+RichTraceback.install(show_locals = True)
 
 import hy
+import sys
 
-from .bakery import milcery as _milcery
+from oreo import ModuleCaller
 
-def __getattr__(program_):
-    if program_ == "__path__":
-        raise AttributeError
-    elif program_ == "steakery":
-        return _milcery
-    else:
-        return _milcery(program_ = program_)
+from .bakery import milcery
+
+class bakery(ModuleCaller):
+    def __call__(self, *args, **kwargs):
+        if args or kwargs:
+            return milcery(*args, **kwargs)
+        else:
+            return milcery
+    def __getattr__(self, program_):
+        if program_.startswith("_"):
+            raise AttributeError
+        else:
+            return milcery(program_ = program_)
+    bakery = __call__
+    __all__ = [ var for var in vars() if var not in ('__qualname__',) ]
+
+sys.modules[__name__] = bakery()

@@ -1,7 +1,7 @@
 (import rich.traceback)
 (.install rich.traceback)
 
-(import alive-progress [alive-it])
+(import oreo [eclair either?])
 (import os [path :as osPath])
 
 (setv funcs [])
@@ -48,22 +48,30 @@
               (import bakery [ls])
               (import os [listdir])
               (setv output (listdir cookies))
-              (for [item (ls :a True cookies :m/progress True)]
+              (for [item (ls :a True cookies :m/progress "red")]
                    (if (nots? item)
                        (assert (in item output))))))
 
 #@(zoom (defn baking []
               (import bakery [ls])
               (import os [listdir])
-              (.bake- ls :a True :m/progress True cookies)
+              (.bake- ls :a True :m/progress "green" cookies)
               (setv output (listdir cookies))
               (for [item ls]
                    (if (nots? item)
                        (assert (in item output))))))
 
+#@(zoom (defn module-call []
+              (import bakery)
+              (import os [listdir])
+              (setv ls (bakery :program- "ls")
+                    output (ls :a True cookies))
+              (assert (all (gfor item (listdir cookies) :if (in item output) item)))))
+
 #@(zoom (defn freezing []
-              (import bakery [ls steakery])
-              (assert (isinstance (ls []) steakery))))
+              (import bakery)
+              (import bakery [ls])
+              (assert (either? (ls []) bakery))))
 
 #@(zoom (defn git-status []
               (import bakery [git])
@@ -90,5 +98,4 @@
               (import bakery [echo])
               (assert (= (echo :m/exports { "FOO" "bar" } "$FOO" :m/str True) "bar"))))
 
-(for [func (alive-it funcs)]
-     (func))
+(for [func (eclair funcs "tests" "blue")] (func))

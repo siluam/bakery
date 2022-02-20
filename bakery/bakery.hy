@@ -1,25 +1,25 @@
 (import rich.traceback)
-(.install rich.traceback)
+(.install rich.traceback :show-locals True)
 
 (import builtins)
 (import weakref)
 
 (import addict [Dict :as D])
-(import alive-progress [alive-it])
 (import ast [literal-eval])
-(import autoslot [SlotsPlusDictMeta])
+(import autoslot [Slots SlotsMeta])
 (import collections [OrderedDict])
 (import copy [copy deepcopy])
 (import functools [partial wraps])
-(import gensing [frosting tea])
 (import hy [mangle unmangle])
 (import hyrule [coll? inc])
 (import inspect [isclass :as class?])
 (import itertools [chain tee])
-(import nanite [fullpath peek trim])
+(import more-itertools [peekable ilen always-iterable])
+(import oreo [eclair flatten get-un-mangled recursive-unmangle tea trim])
 (import os [environ path :as osPath getcwd])
 (import rich [print inspect])
 (import rich.pretty [pretty-repr pprint])
+(import rich.progress [Progress])
 (import shlex [join split])
 (import shutil [which])
 (import subprocess [DEVNULL PIPE Popen STDOUT])
@@ -36,16 +36,6 @@
 
 (require hyrule [-> ->> assoc])
 
-(defn flatten [iterable [times None]]
-      (setv lst [])
-      (for [i iterable]
-           (if (and (coll? i)
-                    (or (is times None)
-                        times))
-               (.extend lst (flatten i :times (if times (dec times) times)))
-               (.append lst i)))
-      (return lst))
-
 (defn split-and-flatten [iterable] (flatten (gfor j (flatten iterable) (.split j))))
 
 (defn check [self program] (-> program
@@ -54,7 +44,33 @@
                           (if None self)
                           (return)))
 
-(defclass melcery [SlotsPlusDictMeta]
+(defclass frosting [tea Slots]
+
+(defn __init__ [self output [capture "stdout"]]
+      (setv self.capture (if (= capture "stderr") "stderr" "stdout")
+            self.dict-like (isinstance output dict)
+            self.iterable (coll? output)
+            self.output output)
+
+(cond [self.dict-like (.__init__ (super) #** self.output)]
+      [self.iterable (.__init__ (super) #* self.output)]
+      [True (.__init__ (super) self.output)])
+
+)
+
+(defn __iter__ [self]
+      (yield-from (if self.dict-like
+                      (get self self.capture)
+                      (.values self))))
+
+(defn __call__ [self]
+      (return (cond [(not self.iterable) self.output]
+                    [self.dict-like (D (.items self))]
+                    [True (.values self)])))
+
+)
+
+(defclass melcery [SlotsMeta]
 
 (defn __init__ [cls #* args #** kwargs] (setv cls.m/stores [])))
 
@@ -113,10 +129,6 @@
                                  (.get dct (mangle (+ "internal/" cls/get-attr/attr)) False)
                                  (.get dct (mangle (+ "m/" cls/get-attr/attr)) default)))))
 
-#@(classmethod (defn cls/get-un-mangled [cls dct key [default None]]
-                     (return (or (.get dct (mangle key) None)
-                                 (.get dct (.replace (unmangle key) "_" "-") default)))))
-
 #@(property (defn m/freezer [self] (return self.internal/freezer)))
 #@(m/freezer.setter (defn m/freezer [self value] (setv self.internal/freezer (.cls/freezer self.__class__ value self.internal/freezer))))
 
@@ -168,7 +180,7 @@
 #@(property (defn m/sudo [self] (return self.internal/sudo)))
 #@(m/sudo.setter (defn m/sudo [self value]
                        (setv error-message
-                             #[[Sorry! `m/sudo' must be a string of "i" or "s", a tea, frosting, or dict-like object of length 1, key "i" or "s", and value `user', or a boolean!]]
+                             #[[Sorry! `m/sudo' must be a string of "i" or "s", or a dict-like object of length 1, key "i" or "s", and value `user', or a boolean!]]
                              self.internal/sudo (if value
                                                     (if (or (isinstance value bool) (= (len value) 1))
                                                         (cond [(isinstance value str)
@@ -176,7 +188,7 @@
                                                                    { value "root" }
                                                                    (raise (ValueError error-message)))]
                                                               [(isinstance value bool) value]
-                                                              [(isinstance value self.m/type-groups.dict-like) (if (-> value (.keys) (iter) (next) (in (, "i" "s")))
+                                                              [(isinstance value dict) (if (-> value (.keys) (iter) (next) (in (, "i" "s")))
                                                                                                                    value
                                                                                                                    (raise (ValueError error-message)))])
                                                         (raise (ValueError error-message)))
@@ -211,18 +223,13 @@
 (setv self.m/type-groups.this-class-subclass [self.__class__])
 (.extend self.m/type-groups.acceptable-args self.m/type-groups.this-class-subclass)
 
-(setv self.m/type-groups.dict-like [dict])
-
-(setv self.m/type-groups.genstrings [tea frosting])
+(setv self.m/type-groups.genstrings [tea])
 (.extend self.m/type-groups.acceptable-args self.m/type-groups.genstrings)
-(.extend self.m/type-groups.acceptable-args self.m/type-groups.dict-like)
 (setv self.m/type-groups.genstrings (tuple self.m/type-groups.genstrings))
 
 (setv self.m/type-groups.generators (, "generator" "iter" "chain" "tee"))
 
 (setv self.m/type-groups.excluded-classes (, "type"))
-
-(setv self.m/type-groups.dict-like (tuple self.m/type-groups.dict-like))
 
 (setv self.m/subcommand (D {})
       self.m/subcommand.default "supercalifragilisticexpialidocious"
@@ -387,7 +394,7 @@
 (setv self.m/type iter)
 (setv self.m/settings.defaults.m/type (deepcopy self.m/type))
 
-(setv self.m/progress False)
+(setv self.m/progress None)
 (setv self.m/settings.defaults.m/progress (deepcopy self.m/progress))
 
 (setv self.m/split False)
@@ -412,19 +419,6 @@
 
 )
 
-(defn misc/magic-string-output [self output]
-      (return (if (not (.misc/type-name-is-string self :type/type (type output)))
-                  "Sorry! The bakery is currently frozen, debugging, or has returned a Popen!"
-                  output)))
-
-(defn misc/recursive-unmangle [self dct]
-      (return (D (dfor [key value]
-                       (.items dct)
-                       [(unmangle key)
-                        (if (isinstance value dict)
-                            (.misc/recursive-unmangle self value)
-                            value)]))))
-
 (defn misc/type-name-is-string [self [type/type None]]
       (return (in (. (or type/type self.m/type) __name__) self.m/type-groups.reprs)))
 
@@ -440,7 +434,7 @@
 (defn convert/type [self input [type/type None]]
     (setv type/type/type (or type/type self.m/type))
     (if (is input None) (return (.misc/return-none-if-tnis self :type/type type/type/type)))
-    (if (and input (isinstance input frosting))
+    (if (and input (isinstance input self.m/type-groups.genstrings))
         (let [frosted-input (input)]
              (cond [(isinstance frosted-input str)
                     (setv input [(.fill (TextWrapper :break-long-words False :break-on-hyphens False) frosted-input)])]
@@ -448,11 +442,10 @@
                    [(isinstance frosted-input int) (if (.misc/type-name-is-string self :type/type type/type/type)
                                                        (return (pretty-repr frosted-input))
                                                        (return frosted-input))])))
-    (setv output (cond [(.misc/type-name-is-string self :type/type type/type/type) (.join "\n" input)]
-                       [(in type/type/type.__name__ self.m/type-groups.generators) (.convert/generator self input)]
-                       [True (type/type/type input)]))
-    (return (if (and self.m/progress
-                     (coll? output)) (alive-it output) output)))
+    (return (cond [(and self.m/progress (coll? input)) (eclair input (.m/command self) self.m/progress)]
+                  [(.misc/type-name-is-string self :type/type type/type/type) (.join "\n" input)]
+                  [(in type/type/type.__name__ self.m/type-groups.generators) (.convert/generator self input)]
+                  [True (type/type/type input)])))
 
 (defn subcommand/get [self #** kwargs]
       (setv self.m/subcommand.current.intact (.cls/get-attr self.__class__ kwargs "m/intact-subcommand"))
@@ -468,10 +461,9 @@
 (defn var/set-defaults [self]
       (for [[key value] (.items self.m/settings.defaults)]
            (setattr self key (deepcopy value)))
-      (setv self.m/current-settings.program (.cls/get-un-mangled self.__class__
-                                                                 self.m/settings.programs
-                                                                 self.m/base-program
-                                                                 :default (D {})))
+      (setv self.m/current-settings.program (get-un-mangled self.m/settings.programs
+                                                            self.m/base-program
+                                                            :default (D {})))
       (for [[key value] (.items self.m/current-settings.program.supercalifragilisticexpialidocious)]
            (setattr self key (deepcopy value))))
 
@@ -490,10 +482,9 @@
       (if (not self.m/subcommand.current.unprocessed) (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
       (.subcommand/process self)
 
-      (setv self.m/current-settings.subcommand (.cls/get-un-mangled self.__class__
-                                                                    self.m/current-settings.program
-                                                                    self.m/subcommand.current.processed
-                                                                    :default (D {})))
+      (setv self.m/current-settings.subcommand (get-un-mangled self.m/current-settings.program
+                                                               self.m/subcommand.current.processed
+                                                               :default (D {})))
       (for [[key value] (.items self.m/current-settings.subcommand)]
            (setattr self key (deepcopy value)))
 
@@ -776,8 +767,11 @@
             [self.m/return-command (return (.m/command self))]
             [True (let [output (.return/process self)]
                        (if (isinstance output dict)
-                           (do (setv [peek-value output.stderr] (peek output.stderr :return-first 2)
+                           (do (setv output.stderr (peekable output.stderr)
                                      stds (, "out" "err"))
+                               (try (setv peek-value (.peek output.stderr))
+                                    (except [StopIteration]
+                                            (setv peek-value None)))
                                (if (and peek-value
                                         (not self.m/ignore-stderr)
                                         (not self.m/stdout-stderr))
@@ -818,12 +812,7 @@
                                      (if (not (and (is self.m/n-lines.number None)
                                                    (.misc/type-name-is-string self)))
                                          (let [trim-part (partial trim :ordinal self.m/n-lines.ordinal
-                                                                       :number self.m/n-lines.number
-
-                                                                       ;; TODO: After converting `nanite' / `nanotech' to `hy', change this to `type-'
-                                                                       :_type self.m/type
-
-                                                                       :ignore-check True)]
+                                                                       :number self.m/n-lines.number)]
                                               (if (in self.m/n-lines.std (, "stdout" "both"))
                                                   (setv return/process/return.stdout (trim-part :iterable return/process/return.stdout)))
                                               (if (in self.m/n-lines.std (, "stderr" "both"))
@@ -835,14 +824,14 @@
 (defn return/frosting [self]
       (setv output (.return/output self))
       (if self.m/frozen (return output))
-      (setv frosted-output (if (and (isinstance output self.m/type-groups.dict-like)
+      (setv frosted-output (if (and (isinstance output dict)
                                     (= (len output) 1))
                                (-> output (.values) (iter) (next))
                                output)
-            dict-like-frosted-output (isinstance frosted-output self.m/type-groups.dict-like)
+            dict-like-frosted-output (isinstance frosted-output dict)
             frosted-output (if self.m/dazzle
                                (cond [dict-like-frosted-output frosted-output]
-                                     [(coll? frosted-output) (list frosted-output)]
+                                     [(coll? frosted-output) (always-iterable frosted-output)]
                                      [True [frosted-output]])
                                frosted-output))
       (if self.m/print-command-and-run (print (.m/command self)))
@@ -898,7 +887,7 @@
 
 env (or (dict self.m/new-exports) (.copy environ))
 
-executable (if (setx exe (.get self.m/popen "executable" None)) (fullpath exe) exe)
+executable (.get self.m/popen "executable" None)
       kwargs { "bufsize" bufsize
                "stdin" (.get self.m/popen "stdin" self.m/input)
                "stdout" pp-stdout
@@ -922,7 +911,7 @@ executable (if (setx exe (.get self.m/popen "executable" None)) (fullpath exe) e
       (defn inner [title]
             (setv opts (or self.m/debug (.cls/get-attr self.__class__ kwargs "m/debug" :default self.m/debug))
                   bool-opts {})
-            (if (isinstance opts self.m/type-groups.dict-like)
+            (if (isinstance opts dict)
                 (do (.update opts { "title" title })
                     (.inspect- self #** opts))
                 (if opts
@@ -965,7 +954,7 @@ executable (if (setx exe (.get self.m/popen "executable" None)) (fullpath exe) e
 
 (setv kwargs {}
 
-freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/base-program]) [processed-pr processed-value]))
+freezer- (+ (or self.m/freezer (list (.values self.m/command)) [self.m/base-program]) [processed-pr processed-value]))
 
 (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.world))
 (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.world)))
@@ -1019,11 +1008,13 @@ freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/base-program]) [
            (.reset- self :set-defaults set-defaults #** kwargs)))
 
 (defn current-values- [self]
-      (return (D { "__slots__" (.misc/recursive-unmangle self (dfor var
-                                                                    self.__slots__
-                                                                    :if (!= var "__dict__")
-                                                                    [var (getattr self var)]))
-                   "__dict__" self.__dict__ })))
+      (setv sd (D { "__slots__" (recursive-unmangle (dfor var
+                                                         self.__slots__
+                                                         :if (!= var "__dict__")
+                                                         [var (getattr self var)])) }))
+      (if (hasattr self "__dict__")
+          (setv sd.__dict__ self.__dict__))
+      (return sd))
 
 (defn inspect- [self #** kwargs] 
       (if (not kwargs)
@@ -1071,7 +1062,8 @@ freezer- (+ (or self.m/freezer (.values self.m/command) [self.m/base-program]) [
 slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__" []))))
 
 (for [var slots] (if (not (in var (, "__weakref__"))) (setattr result var (copy (getattr self var)))))
-(.update result.__dict__ self.__dict__)
+(if (hasattr self "__dict__")
+    (.update result.__dict__ self.__dict__))
 
 (setv result.m/frozen result.m/settings.defaults.m/frozen)
 
@@ -1091,17 +1083,14 @@ slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__
 (for [var slots]
      (if (not (in var (, "__weakref__")))
          (setattr result var (deepcopy (getattr self var) memo))))
-(for [[k v] (.items self.__dict__)] (setattr result k (deepcopy v memo)))
+(if (hasattr self "__dict__")
+    (for [[k v] (.items self.__dict__)] (setattr result k (deepcopy v memo))))
 
 (setv result.m/frozen result.m/settings.defaults.m/frozen)
 
 (return result))
 
 (defn __iter__ [self] (yield-from (.m/spin self)))
-
-(defn __str__ [self] (return (or (.m/command self) f"<{self.__class__.__module__}.{self.__class__.__name__} object at {(hex (id self))}>")))
-
-(defn __repr__ [self] (.inspect- self) (return (str self)))
 
 (defn __or__ [self value] (return (.m/apply-pipe-redirect self "|" value)))
 
