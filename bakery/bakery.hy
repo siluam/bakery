@@ -25,7 +25,6 @@
 (import subprocess [DEVNULL PIPE Popen STDOUT])
 (import textwrap [TextWrapper])
 (import types [MethodType])
-(import typing [Any Dict Generator Tuple Union])
 
 (try (import coconut *)
      (except [ImportError] None))
@@ -93,11 +92,7 @@
                      (setv attr (unmangle attr))
                      (if (.startswith attr prefix)
                          (.replace attr "_" "-")
-                         (-> attr
-                             (.lstrip "_")
-                             (.cls/string-prefix cls prefix)
-                             (.replace "_" "-")
-                             (mangle)))))
+                         (mangle (.replace (.cls/string-prefix cls (.lstrip attr "_") prefix) "_" "-")))))
 
 #@(classmethod (defn cls/is-attr [cls attr]
                      (setv attr (unmangle attr))
@@ -226,8 +221,6 @@
 (setv self.m/type-groups.genstrings [tea])
 (.extend self.m/type-groups.acceptable-args self.m/type-groups.genstrings)
 (setv self.m/type-groups.genstrings (tuple self.m/type-groups.genstrings))
-
-(setv self.m/type-groups.generators (, "generator" "iter" "chain" "tee"))
 
 (setv self.m/type-groups.excluded-classes (, "type"))
 
@@ -422,30 +415,24 @@
 (defn misc/type-name-is-string [self [type/type None]]
       (return (in (. (or type/type self.m/type) __name__) self.m/type-groups.reprs)))
 
-(defn misc/return-none-if-tnis [self [type/type None]]
-      (return (if (.misc/type-name-is-string self :type/type type/type) "None" None)))
-
 (defn m/reset-all [self]
       (.reset- self)
       (.command/reset self))
 
-(defn convert/generator [self input] (yield-from input))
-
-(defn convert/type [self input [type/type None]]
-    (setv type/type/type (or type/type self.m/type))
-    (if (is input None) (return (.misc/return-none-if-tnis self :type/type type/type/type)))
-    (if (and input (isinstance input self.m/type-groups.genstrings))
-        (let [frosted-input (input)]
-             (cond [(isinstance frosted-input str)
-                    (setv input [(.fill (TextWrapper :break-long-words False :break-on-hyphens False) frosted-input)])]
-                   [(is frosted-input None) (return (.misc/return-none-if-tnis self :type/type type/type/type))]
-                   [(isinstance frosted-input int) (if (.misc/type-name-is-string self :type/type type/type/type)
-                                                       (return (pretty-repr frosted-input))
-                                                       (return frosted-input))])))
-    (return (cond [(and self.m/progress (coll? input)) (eclair input (.m/command self) self.m/progress)]
-                  [(.misc/type-name-is-string self :type/type type/type/type) (.join "\n" input)]
-                  [(in type/type/type.__name__ self.m/type-groups.generators) (.convert/generator self input)]
-                  [True (type/type/type input)])))
+(defn m/convert-type [self input [type/type None]]
+      (if input
+          (do (setv type/type/type (or type/type self.m/type))
+              (if (isinstance input self.m/type-groups.genstrings)
+                  (let [frosted-input (input)]
+                       (cond [(isinstance frosted-input str)
+                              (setv input [(.fill (TextWrapper :break-long-words False :break-on-hyphens False) frosted-input)])]
+                             [(isinstance frosted-input int) (if (.misc/type-name-is-string self :type/type type/type/type)
+                                                                 (return (pretty-repr frosted-input))
+                                                                 (return frosted-input))])))
+              (return (cond [(and self.m/progress (coll? input)) (eclair input (.m/command self) self.m/progress)]
+                            [(.misc/type-name-is-string self :type/type type/type/type) (.join "\n" input)]
+                            [True (type/type/type input)])))
+          (return input)))
 
 (defn subcommand/get [self #** kwargs]
       (setv self.m/subcommand.current.intact (.cls/get-attr self.__class__ kwargs "m/intact-subcommand"))
@@ -787,8 +774,7 @@
 (defn return/process [self]
     (if (.m/command self)
         (do (setv process (.m/popen-partial self))
-            (cond [(is self.m/wait None) (with [p (process :pp-stdout DEVNULL :pp-stderr DEVNULL)]
-                                               (return (.misc/return-none-if-tnis self)))]
+            (cond [(is self.m/wait None) (with [p (process :pp-stdout DEVNULL :pp-stderr DEVNULL)] (return None))]
                   [self.m/wait (with [p (process)]
                                      (setv return/process/return (D {}))
                                      (for [std (, "out" "err")]
@@ -819,51 +805,51 @@
                                                   (setv return/process/return.stderr (trim-part :iterable return/process/return.stderr)))))
                                      (return return/process/return))]
                   [True (return (process))]))
-        (return (.misc/return-none-if-tnis self))))
+        (return None)))
 
 (defn return/frosting [self]
-      (setv output (.return/output self))
-      (if self.m/frozen (return output))
-      (setv frosted-output (if (and (isinstance output dict)
-                                    (= (len output) 1))
-                               (-> output (.values) (iter) (next))
-                               output)
-            dict-like-frosted-output (isinstance frosted-output dict)
-            frosted-output (if self.m/dazzle
-                               (cond [dict-like-frosted-output frosted-output]
-                                     [(coll? frosted-output) (always-iterable frosted-output)]
-                                     [True [frosted-output]])
-                               frosted-output))
-      (if self.m/print-command-and-run (print (.m/command self)))
-      (cond [self.m/print-command (print frosted-output)]
-            [self.m/dazzle (if dict-like-frosted-output
-                               (for [cat frosted-output]
-                                    (setv outcat (get output cat))
-                                    (if (or (isinstance outcat int)
-                                            (isinstance outcat str))
-                                        (print f"{cat}: {outcat}")
-                                        (do (if (not (in cat self.m/captures))
-                                                (print (+ cat ": ")))
-                                            (if (= cat "return-codes")
-                                                (print outcat)
-                                                (for [line outcat]
-                                                     (print line))))))
-                               (for [line frosted-output]
-                                    (print line)))])
-      (cond [dict-like-frosted-output
-             (for [std (, "out" "err")]
-                  (setv stdstd (+ "std" std))
-                  (if (hasattr frosted-output stdstd)
-                      (do (setv new-frosted-output (get frosted-output stdstd))
-                          (if self.m/split
-                              (setv new-frosted-output (split-and-flatten new-frosted-output)))
-                          (assoc frosted-output stdstd (.convert/type self new-frosted-output))))
-                  (else (return new-frosted-output)))]
-            [(is self.m/wait None) (return (.misc/return-none-if-tnis self))]
-            [True (let [new-frosted-output (frosting frosted-output self.m/capture)]
-                       (if self.m/split
-                           (setv new-frosted-output (split-and-flatten new-frosted-output)))
-                       (return (.convert/type self new-frosted-output)))]))
+      (if (setx output (.return/output self))
+          (do (if self.m/frozen (return output))
+              (setv frosted-output (if (and (isinstance output dict)
+                                            (= (len output) 1))
+                                       (-> output (.values) (iter) (next))
+                                       output)
+                    dict-like-frosted-output (isinstance frosted-output dict)
+                    frosted-output (if self.m/dazzle
+                                       (cond [dict-like-frosted-output frosted-output]
+                                             [(coll? frosted-output) (always-iterable frosted-output)]
+                                             [True [frosted-output]])
+                                       frosted-output))
+              (if self.m/print-command-and-run (print (.m/command self)))
+              (cond [self.m/print-command (print frosted-output)]
+                    [self.m/dazzle (if dict-like-frosted-output
+                                       (for [cat frosted-output]
+                                            (setv outcat (get output cat))
+                                            (if (or (isinstance outcat int)
+                                                    (isinstance outcat str))
+                                                (print f"{cat}: {outcat}")
+                                                (do (if (not (in cat self.m/captures))
+                                                        (print (+ cat ": ")))
+                                                    (if (= cat "return-codes")
+                                                        (print outcat)
+                                                        (for [line outcat]
+                                                             (print line))))))
+                                       (for [line frosted-output]
+                                            (print line)))])
+              (cond [dict-like-frosted-output
+                     (for [std (, "out" "err")]
+                          (setv stdstd (+ "std" std))
+                          (if (hasattr frosted-output stdstd)
+                              (do (setv new-frosted-output (get frosted-output stdstd))
+                                  (if self.m/split
+                                      (setv new-frosted-output (split-and-flatten new-frosted-output)))
+                                  (assoc frosted-output stdstd (.m/convert-type self new-frosted-output))))
+                          (else (return new-frosted-output)))]
+                    [True (let [new-frosted-output (frosting frosted-output self.m/capture)]
+                               (if self.m/split
+                                   (setv new-frosted-output (split-and-flatten new-frosted-output)))
+                               (return (.m/convert-type self new-frosted-output)))]))
+          (return None)))
 
 (defn m/popen-partial [self [stdout None] [stderr None]]
       (setv pp-stdout (cond [stdout]
