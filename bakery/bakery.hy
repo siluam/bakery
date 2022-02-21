@@ -13,9 +13,9 @@
 (import hy [mangle unmangle])
 (import hyrule [coll? inc])
 (import inspect [isclass :as class?])
-(import itertools [chain tee])
-(import more-itertools [peekable ilen always-iterable])
-(import oreo [eclair flatten get-un-mangled recursive-unmangle tea trim])
+(import itertools [chain tee islice])
+(import more-itertools [peekable])
+(import oreo [eclair flatten get-un-mangled int? recursive-unmangle tea trim])
 (import os [environ path :as osPath getcwd])
 (import rich [print inspect])
 (import rich.pretty [pretty-repr pprint])
@@ -140,28 +140,33 @@
 #@(property (defn m/run [self] (return (= self.m/capture "run"))))
 #@(m/run.setter (defn m/run [self value] (if value (setv self.m/capture "run"))))
 
-#@(property (defn m/n-lines [self] (return self.internal/n-lines)))
-#@(m/n-lines.setter (defn m/n-lines [self value]
+#@(property (defn m/trim [self] (return self.internal/trim)))
+#@(m/trim.setter (defn m/trim [self value]
+    (setv dict-like (isinstance value dict)
+          iterator (coll? value)
+          last-default False
+          number-default 0
+          std-default "stdout"
+          std (cond [dict-like (.get value "std" std-default)]
+                    [iterator (get (or (lfor item value :if (isinstance item str) item) (, std-default)) 0)]
+                    [(isinstance value str) value]
+                    [True std-default])
+          self.internal/trim (D {
 
-    (setv ordinal (.get value "ordinal" "first"))
-    (if ordinal
-        (if (not (in ordinal (setx ordinals (, "first" "last"))))
-            (raise (TypeError #[f[Sorry! You must choose an `ordinal' value from: {(.join ", " ordinals)}]f])))
-        (assoc value "ordinal" "first"))
+"last" (cond [dict-like (.get value "last" last-default)]
+             [iterator (get (or (lfor item value :if (isinstance item bool) item) (, last-default)) 0)]
+             [(isinstance value bool) value]
+             [True last-default])
+"number" (cond [dict-like (.get value "number" number-default)]
+               [iterator (get (or (lfor item value :if (int? item) item) (, number-default)) 0)]
+               [(int? value) value]
+               [True number-default])
 
-    (setv number (.get value "number" 0))
-    (if number
-        (cond [(is number None) None]
-              [(< (int number) 1) (raise (ValueError "Sorry! `n' must be greater than 0!"))])
-        (assoc value "number" None))
-
-    (setv std (.get value "std" "stdout"))
-    (if std
-        (if (not (in std (setx stds (, "stdout" "stderr" "both"))))
-            (raise (TypeError #[f[Sorry! You must choose an `std' value from: {(.join ", " stds)}]f]))
-        (assoc value "std" "stdout")))
-    
-    (setv self.internal/n-lines (D value))))
+"std" (if std
+                (if (not (in std (setx stds (, "stdout" "stderr" "both"))))
+                    (raise (TypeError #[f[Sorry! You must choose an `std' value from: {(.join ", " stds)}]f]))
+                    std))
+}))))
 
 #@(property (defn m/c [self] (return self.m/context)))
 #@(m/c.setter (defn m/c [self value] (setv self.m/context (bool value))))
@@ -348,8 +353,8 @@
 (setv self.m/run-as "")
 (setv self.m/settings.defaults.m/run-as (deepcopy self.m/run-as))
 
-(setv self.internal/n-lines (D { "ordinal" "first" "number" 0 "std" "stdout" }))
-(setv self.m/settings.defaults.m/n-lines (deepcopy self.internal/n-lines))
+(setv self.internal/trim (D { "last" "False" "number" 0 "std" "stdout" }))
+(setv self.m/settings.defaults.m/trim (deepcopy self.internal/trim))
 
 (setv self.m/one-dash False)
 (setv self.m/settings.defaults.m/one-dash (deepcopy self.m/one-dash))
@@ -795,14 +800,12 @@
                                      (if (> self.m/verbosity 1)
                                          (setv return/process/return.tea self.m/command
                                                return/process/return.subcommand self.m/subcommand))
-                                     (if (not (and (is self.m/n-lines.number None)
-                                                   (.misc/type-name-is-string self)))
-                                         (let [trim-part (partial trim :ordinal self.m/n-lines.ordinal
-                                                                       :number self.m/n-lines.number)]
-                                              (if (in self.m/n-lines.std (, "stdout" "both"))
-                                                  (setv return/process/return.stdout (trim-part :iterable return/process/return.stdout)))
-                                              (if (in self.m/n-lines.std (, "stderr" "both"))
-                                                  (setv return/process/return.stderr (trim-part :iterable return/process/return.stderr)))))
+                                     (let [trim-part (partial trim :last self.m/trim.last
+                                                                   :number self.m/trim.number)]
+                                          (if (in self.m/trim.std (, "stdout" "both"))
+                                              (setv return/process/return.stdout (trim-part :iterable return/process/return.stdout)))
+                                          (if (in self.m/trim.std (, "stderr" "both"))
+                                              (setv return/process/return.stderr (trim-part :iterable return/process/return.stderr))))
                                      (return return/process/return))]
                   [True (return (process))]))
         (return None)))
@@ -817,7 +820,7 @@
                     dict-like-frosted-output (isinstance frosted-output dict)
                     frosted-output (if self.m/dazzle
                                        (cond [dict-like-frosted-output frosted-output]
-                                             [(coll? frosted-output) (always-iterable frosted-output)]
+                                             [(coll? frosted-output) (tuple frosted-output)]
                                              [True [frosted-output]])
                                        frosted-output))
               (if self.m/print-command-and-run (print (.m/command self)))

@@ -75,8 +75,7 @@
 
 #@(zoom (defn git-status []
               (import bakery [git])
-              (assert (= (.status (git :C cookies) :m/str True)
-                         "On branch main\nYour branch is up to date with 'origin/main'.\n\nnothing to commit, working tree clean"))))
+              (assert (= (.remote (git :C cookies) :m/str True) "origin"))))
 
 #@(zoom (defn string-output []
               (import bakery [echo])
