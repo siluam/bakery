@@ -1,5 +1,5 @@
-(import richy.traceback)
-(.install richy.traceback :show-locals True)
+(import richyrich.traceback)
+(.install richyrich.traceback :show-locals True)
 
 (import builtins)
 (import weakref)
@@ -17,9 +17,9 @@
 (import more-itertools [peekable])
 (import oreo [eclair either? flatten get-un-mangled int? recursive-unmangle tea first-last-n])
 (import os [environ path :as osPath getcwd])
-(import richy [print inspect])
-(import richy.pretty [pretty-repr pprint])
-(import richy.progress [Progress])
+(import richyrich [print inspect])
+(import richyrich.pretty [pretty-repr pprint])
+(import richyrich.progress [Progress])
 (import shlex [join split])
 (import shutil [which])
 (import subprocess [DEVNULL PIPE Popen STDOUT])
@@ -776,20 +776,22 @@
               (.append self.m/command "sudo")
               (.append self.m/command f"sudo -{(-> self.m/sudo (.keys) (iter) (next))} -u {(-> self.m/sudo (.values) (iter) (next))}")))
 
-      (if self.m/shell
+      (if (and self.m/shell (not self.m/freezer))
           (do (.extend self.m/command self.m/shell "-c" "'")
               (if self.m/run-as
                   (do (.glue self.m/command self.m/run-as)
-                      (if self.m/freezer
-                          (.extend self.m/command #* self.m/freezer)
-                          (.append self.m/command self.m/program)))
-                  (if self.m/freezer
-                      (do (.glue self.m/command (first self.m/freezer))
-                          (.extend self.m/command (cut self.m/freezer 1 -1)))
-                      (.glue self.m/command self.m/program))))
-          (if self.m/freezer
-              (.extend self.m/command self.m/run-as #* self.m/freezer)
-              (.extend self.m/command self.m/run-as self.m/program)))
+                      (.append self.m/command self.m/program))
+                  (.glue self.m/command self.m/program)))
+          (if self.m/run-as
+              (.extend self.m/command self.m/run-as self.m/program)
+              (.append self.m/command self.m/program)))
+
+      (if self.m/freezer
+          (do (if self.m/shell
+                  (for [[index value] (enumerate self.m/freezer)]
+                       (if (= (get value -1) "'")
+                           (assoc self.m/freezer index (cut value 0 -1)))))
+              (.extend self.m/command #* self.m/freezer)))
 
       (.extend self.m/command #* self.m/kwargs.current.processed.starter)
       (if (!= self.m/subcommand.default self.m/subcommand.current.unprocessed)
@@ -798,7 +800,8 @@
                #* self.m/args.current.processed.starter
                #* self.m/kwargs.current.processed.regular
                #* self.m/args.current.processed.regular)
-      (if self.m/shell (.glue self.m/command "'"))
+      (if self.m/shell
+          (.glue self.m/command "'"))
       (if self.m/tiered
           (let [tier "{{ b.t }}"
                 replacements (+ self.m/kwargs.current.processed.starter-values
