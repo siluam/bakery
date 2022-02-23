@@ -33,7 +33,7 @@
      (except [ImportError]
              (import toolz [first])))
 
-(require hyrule [-> ->> assoc])
+(require hyrule [-> assoc unless])
 
 (defn split-and-flatten [iterable] (flatten (gfor j (flatten iterable) (.split j))))
 
@@ -80,7 +80,8 @@
 #@(classmethod (defn cls/freezer [cls value freezer]
                       (cond [(not value) (setv freezer [])]
                             [(coll? value)
-                             (do (if (not (isinstance freezer list)) (setv freezer []))
+                             (do (unless (isinstance freezer list)
+                                         (setv freezer []))
                                  (.extend freezer value)
                                  (setv freezer (flatten (gfor i freezer :if i i))))]
                             [True (raise (TypeError f"Sorry! The 'm/freezer' can only accept non-string iterables or non-truthy values!"))])
@@ -213,8 +214,8 @@
 
 #@(property (defn m/capture [self] (return self.internal/capture)))
 #@(m/capture.setter (defn m/capture [self value]
-                          (if (not (in value self.m/captures))
-                              (raise (TypeError #[f[Sorry! Capture type "{value}" is not permitted! Choose from one of: {(.join ", " self.m/captures)}]f])))
+                          (unless (in value self.m/captures)
+                                  (raise (TypeError #[f[Sorry! Capture type "{value}" is not permitted! Choose from one of: {(.join ", " self.m/captures)}]f])))
                           (setv self.internal/capture value)))
 
 #@(property (defn m/sudo [self] (return self.internal/sudo)))
@@ -312,8 +313,8 @@
     (do (setv self.m/program (or (.replace (unmangle program-) "_" "-") ""))
         (if (in "--" self.m/program)
             (setv self.m/program (.join osPath (getcwd) (.replace self.m/program "--" "."))))
-        (if (not (check self self.m/program))
-            (raise (ImportError f"cannot import name '{self.m/program}' from '{self.__class__.__module__}'")))
+        (unless (check self self.m/program)
+                (raise (ImportError f"cannot import name '{self.m/program}' from '{self.__class__.__module__}'")))
         (setv self.m/base-program (or base-program- self.m/program)))
     (setv self.m/program ""
           self.m/base-program (or base-program- self.m/program)))
@@ -529,7 +530,8 @@
               (.subcommand/get self #** (. self m/kwargs baked [subcommand-]))
               (.subcommand/get self #** kwargs))
           (setv self.m/subcommand.current.unprocessed subcommand-))
-      (if (not self.m/subcommand.current.unprocessed) (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
+      (unless self.m/subcommand.current.unprocessed
+              (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
       (.subcommand/process self)
 
       (setv self.m/current-settings.subcommand (get-un-mangled self.m/current-settings.program
@@ -618,8 +620,8 @@
            value))
  (setv self.m/settings.current.m/type literal-attr)]
 
-[True (if (not (in var/process/key (, "m/subcommand")))
-                                    (assoc self.m/settings.current key value))]))
+[True (unless (in var/process/key (, "m/subcommand"))
+                                        (assoc self.m/settings.current key value))]))
                (assoc (. self m/kwargs current unprocessed [(if starter "starter" "regular")]) key value))))
 (inner kwargs))
 
@@ -627,9 +629,7 @@
     (for [[key value] (.items self.m/settings.current)]
          (setattr self key value)))
 
-(defn command/reset [self]
-      (if (not self.m/frozen)
-          (setv self.m/command (tea))))
+(defn command/reset [self] (unless self.m/frozen (setv self.m/command (tea))))
 
 (defn command/process-all [self]
       (for [i (range 2)]
@@ -825,10 +825,10 @@
                                (try (setv peek-value (.peek output.stderr))
                                     (except [StopIteration]
                                             (setv peek-value None)))
-                               (if (and peek-value
-                                        (not self.m/ignore-stderr)
-                                        (not self.m/stdout-stderr))
-                                   (raise (SystemError (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr)))))
+                               (unless (or (not peek-value)
+                                           self.m/ignore-stderr
+                                           self.m/stdout-stderr)
+                                       (raise (SystemError (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr)))))
                                (for [[std opp] (zip stds (py "stds[::-1]"))]
                                     (setv stdstd (+ "std" std)
                                           stdopp (+ "std" opp))
@@ -904,8 +904,8 @@
                                             (if (or (isinstance outcat int)
                                                     (isinstance outcat str))
                                                 (print f"{cat}: {outcat}")
-                                                (do (if (not (in cat self.m/captures))
-                                                        (print (+ cat ": ")))
+                                                (do (unless (in cat self.m/captures)
+                                                            (print (+ cat ": ")))
                                                     (if (= cat "return-codes")
                                                         (print outcat)
                                                         (for [line outcat]
@@ -1067,8 +1067,8 @@ freezer- (+ (or self.m/freezer (list (.values self.m/command)) [self.m/base-prog
       (return sd))
 
 (defn inspect- [self #** kwargs] 
-      (if (not kwargs)
-          (setv kwargs self.m/default-inspect-kwargs))
+      (unless kwargs
+              (setv kwargs self.m/default-inspect-kwargs))
       (inspect self :Hy True #** kwargs))
 
 (defn origin- [self] (return (. (first self.__class__.m/stores) __callback__)))
@@ -1111,7 +1111,8 @@ freezer- (+ (or self.m/freezer (list (.values self.m/command)) [self.m/base-prog
 
 slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__" []))))
 
-(for [var slots] (if (not (in var (, "__weakref__"))) (setattr result var (copy (getattr self var)))))
+(for [var slots] (unless (in var (, "__weakref__"))
+                         (setattr result var (copy (getattr self var)))))
 (if (hasattr self "__dict__")
     (.update result.__dict__ self.__dict__))
 
@@ -1131,8 +1132,8 @@ slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__
 (setv slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__" []))))
 
 (for [var slots]
-     (if (not (in var (, "__weakref__")))
-         (setattr result var (deepcopy (getattr self var) memo))))
+     (unless (in var (, "__weakref__"))
+             (setattr result var (deepcopy (getattr self var) memo))))
 (if (hasattr self "__dict__")
     (for [[k v] (.items self.__dict__)] (setattr result k (deepcopy v memo))))
 
