@@ -286,7 +286,7 @@ the password prompt will still be shown, input will still be passed to ~sudo~, a
 :CUSTOM_ID: 6e879d2f-2dd0-447d-8cd0-5e4b680868d7
 :END:
 
-Freeze using anything but [[oreo.syvl.org/889cec3c-06eb-4993-9afa-6add2e090779][tea objects]], strings, integers, or the ~milcery~ class in this module;
+Freeze using anything but [[https://oreo.syvl.org/#889cec3c-06eb-4993-9afa-6add2e090779][tea objects]], strings, integers, or the ~milcery~ class in this module;
 frozen objects are simply ~deepcopies~ of the instance they were called from, after all settings and program arguments and options are set, but not reset.
 
 ~Python:~
