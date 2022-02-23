@@ -1,38 +1,65 @@
-(import rich.traceback)
-(.install rich.traceback)
+(import richy.traceback)
+(.install richy.traceback)
 
-(import oreo [eclair either?])
+(import oreo [eclair either? nots?])
 (import os [path :as osPath])
+
+(require hyrule [->])
 
 (setv funcs [])
 (defn zoom [func] (.append funcs func))
 
 (setv cookies (.join osPath (.dirname osPath (.realpath osPath __file__)) "cookies"))
 
-(defn nots? [string] (not (or (= string ".") (= string ".."))))
+#@(zoom (defn list-output []
+              (import bakery [ls])
+              (-> cookies
+                  (ls :m/list True)
+                  (isinstance list)
+                  (assert))
+              (-> cookies
+                  (ls :m/type list)
+                  (isinstance list)
+                  (assert))))
+
+#@(zoom (defn list-output []
+              (import bakery [ls])
+              (-> (ls)
+                  (sorted)
+                  (= (ls :m/list True :m/sort None))
+                  (assert))))
 
 #@(zoom (defn main []
               (import bakery [ls])
               (import os [listdir])
-              (setv output (ls cookies))
-              (assert (all (gfor item (listdir cookies) :if (and (not (.startswith item "."))
-                                                                   (in item output)) item)))))
+              (-> cookies
+                  (ls :m/list True)
+                  (.sort)
+                  (= (.sort (lfor item (listdir cookies) :if (not (.startswith item ".")) item)))
+                  (assert))))
 
 #@(zoom (defn program-options []
               (import bakery [ls])
               (import os [listdir])
-              (setv output (ls :a True cookies))
-              (assert (all (gfor item (listdir cookies) :if (in item output) item)))))
+              (-> cookies
+                  (ls :m/list True :a True)
+                  (.sort)
+                  (= (.sort (listdir cookies)))
+                  (assert))))
 
 #@(zoom (defn context-manager []
               (import bakery [ls])
               (import os [listdir])
-              (with [lsa (ls :a True cookies :m/context True)]
-                    (setv output (lsa))
-                    (assert (all (gfor item (listdir cookies) :if (in item output) item))))
-              (setv output (ls cookies))
-              (assert (all (gfor item (listdir cookies) :if (and (not (.startswith item "."))
-                                                                   (in item output)) item)))))
+              (with [lsa (ls :a True cookies :m/context True :m/list True)]
+                    (-> (lsa)
+                        (.sort)
+                        (= (.sort (listdir cookies)))
+                        (assert)))
+              (-> cookies
+                  (ls :m/list True)
+                  (.sort)
+                  (= (.sort (lfor item (listdir cookies) :if (not (.startswith item ".")) item)))
+                  (assert))))
 
 #@(zoom (defn loop []
               (import bakery [ls])
@@ -40,8 +67,7 @@
               (setv output (listdir cookies)
                     cwd (getcwd))
               (try (chdir cookies)
-                   (for [item ls]
-                        (assert (in item output)))
+                   (for [item ls] (assert (in item output)))
                    (finally (chdir cwd)))))
 
 #@(zoom (defn progress []
@@ -64,29 +90,47 @@
 #@(zoom (defn module-call []
               (import bakery)
               (import os [listdir])
-              (setv ls (bakery :program- "ls")
-                    output (ls :a True cookies))
-              (assert (all (gfor item (listdir cookies) :if (in item output) item)))))
+              (setv ls (bakery :program- "ls"))
+              (-> cookies
+                  (ls :a True :m/list True)
+                  (.sort)
+                  (= (.sort (listdir cookies)))
+                  (assert))))
 
 #@(zoom (defn freezing []
               (import bakery)
               (import bakery [ls])
-              (assert (either? (ls []) bakery))))
+              (-> []
+                  (ls)
+                  (either? bakery)
+                  (assert))))
 
 #@(zoom (defn git-status []
               (import bakery [git])
-              (assert (= (.remote (git :C cookies) :m/str True) "origin"))))
+              (-> (git :C cookies)
+                  (.remote :m/str True)
+                  (= "origin")
+                  (assert))))
 
 #@(zoom (defn string-output []
               (import bakery [echo])
-              (assert (= (echo :m/str True "Hello!") "Hello!"))))
+              (-> "Hello!"
+                  (echo :m/str True)
+                  (= "Hello!")
+                  (assert))))
 
 #@(zoom (defn piping/first []
               (import bakery [ls tail])
               (import os [listdir])
-              (setv tails (| (ls [] :a True cookies) tail)
-                    output (tails))
-              (assert (all (gfor item (cut (listdir cookies) 10 -1) :if (in item output) item)))))
+              (setv tails (| (ls [] :a True cookies :m/list True) tail)
+                    output (.sort (tails)))
+              #_(-> cookies
+                  (listdir)
+
+                  ;; TODO: Why does this end at -1? Cut doesn't work like slices
+                  (cut 10 -1))
+
+              (assert (= output (.sort (cut (listdir cookies) 10 -1))))))
 
 #@(zoom (defn piping/both []
               (import bakery [env grep])
@@ -95,6 +139,49 @@
 
 #@(zoom (defn exports []
               (import bakery [echo])
-              (assert (= (echo :m/exports { "FOO" "bar" } "$FOO" :m/str True) "bar"))))
+              (-> "$FOO"
+                  (echo :m/exports { "FOO" "bar" } :m/str True)
+                  (= "bar")
+                  (assert))))
+
+#@(zoom (defn trim []
+              (import bakery [cat])
+              (setv bulbasaur (.sort [ "001: Bulbasaur" "002: Ivysaur" "003: Venusaur" ])
+                    last-three (.sort [ "058: Growlithe" "059: Arcanine" "060: Poliwag" ]))
+
+              (-> cookies
+                  (+ "/01")
+                  (cat :m/n-lines 3 :m/list True)
+                  (.sort)
+                  (= bulbasaur)
+                  (assert))
+
+              (-> cookies
+                  (+ "/01")
+                  (cat :m/n-lines (, 3) :m/list True)
+                  (.sort)
+                  (= bulbasaur)
+                  (assert))
+
+              (-> cookies
+                  (+ "/01")
+                  (cat :m/n-lines { "number" 3 } :m/list True)
+                  (.sort)
+                  (= bulbasaur)
+                  (assert))
+
+              (-> cookies
+                  (+ "/01")
+                  (cat :m/n-lines (, True 3) :m/list True)
+                  (.sort)
+                  (= last-three)
+                  (assert))
+
+              (-> cookies
+                  (+ "/01")
+                  (cat :m/n-lines { "last" True "number" 3 } :m/list True)
+                  (.sort)
+                  (= last-three)
+                  (assert))))
 
 (for [func (eclair funcs "tests" "blue")] (func))

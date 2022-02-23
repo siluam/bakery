@@ -1,5 +1,5 @@
-(import rich.traceback)
-(.install rich.traceback :show-locals True)
+(import richy.traceback)
+(.install richy.traceback :show-locals True)
 
 (import builtins)
 (import weakref)
@@ -13,13 +13,13 @@
 (import hy [mangle unmangle])
 (import hyrule [coll? inc])
 (import inspect [isclass :as class?])
-(import itertools [chain tee islice])
+(import itertools [chain filterfalse tee])
 (import more-itertools [peekable])
-(import oreo [eclair flatten get-un-mangled int? recursive-unmangle tea trim])
+(import oreo [eclair either? flatten get-un-mangled int? recursive-unmangle tea first-last-n])
 (import os [environ path :as osPath getcwd])
-(import rich [print inspect])
-(import rich.pretty [pretty-repr pprint])
-(import rich.progress [Progress])
+(import richy [print inspect])
+(import richy.pretty [pretty-repr pprint])
+(import richy.progress [Progress])
 (import shlex [join split])
 (import shutil [which])
 (import subprocess [DEVNULL PIPE Popen STDOUT])
@@ -140,33 +140,73 @@
 #@(property (defn m/run [self] (return (= self.m/capture "run"))))
 #@(m/run.setter (defn m/run [self value] (if value (setv self.m/capture "run"))))
 
-#@(property (defn m/trim [self] (return self.internal/trim)))
-#@(m/trim.setter (defn m/trim [self value]
-    (setv dict-like (isinstance value dict)
-          iterator (coll? value)
-          last-default False
-          number-default 0
-          std-default "stdout"
-          std (cond [dict-like (.get value "std" std-default)]
-                    [iterator (get (or (lfor item value :if (isinstance item str) item) (, std-default)) 0)]
-                    [(isinstance value str) value]
-                    [True std-default])
-          self.internal/trim (D {
+#@(property (defn m/sort [self] (return self.internal/sort)))
+#@(m/sort.setter (defn m/sort [self value]
+                       (if (or (is value None)
+                               value)
+                           (setv dict-like (isinstance value dict)
+                                 iterable (coll? value)
+                                 reverse-default False
+                                 key-default None
+                                 self.internal/sort (D { "reverse" (cond [dict-like (.get value "reverse" reverse-default)]
+                                                                         [iterable (get (or (lfor item value :if (isinstance item bool) item)
+                                                                                            (, reverse-default)) 0)]
+                                                                         [(isinstance value bool) value]
+                                                                         [True reverse-default])
+                                                         "key" (cond [dict-like (.get value "key" key-default)]
+                                                                     [iterable (get (or (lfor item value :if (callable item) item)
+                                                                                        (, key-default)) 0)]
+                                                                     [(callable value) value]
+                                                                     [True key-default]) })))))
+
+#@(property (defn m/filter [self] (return self.internal/filter)))
+#@(m/filter.setter (defn m/filter [self value]
+                         (if (or (is value None)
+                                 value)
+                             (setv dict-like (isinstance value dict)
+                                   iterable (coll? value)
+                                   reverse-default False
+                                   key-default None
+                                   self.internal/filter (D { "reverse" (cond [dict-like (.get value "reverse" reverse-default)]
+                                                                             [iterable (get (or (lfor item value :if (isinstance item bool) item)
+                                                                                                (, reverse-default)) 0)]
+                                                                             [(isinstance value bool) value]
+                                                                             [True reverse-default])
+                                                             "key" (cond [dict-like (.get value "key" key-default)]
+                                                                         [iterable (get (or (lfor item value :if (callable item) item)
+                                                                                            (, key-default)) 0)]
+                                                                         [(callable value) value]
+                                                                         [True key-default]) })))))
+
+#@(property (defn m/n-lines [self] (return self.internal/n-lines)))
+#@(m/n-lines.setter (defn m/n-lines [self value]
+                       (setv dict-like (isinstance value dict)
+                             iterable (coll? value)
+                             last-default False
+                             number-default 0
+                             std-default "stdout"
+                             std (cond [dict-like (.get value "std" std-default)]
+                                       [iterable (get (or (lfor item value :if (isinstance item str) item)
+                                                          (, std-default)) 0)]
+                                       [(isinstance value str) value]
+                                       [True std-default])
+                             self.internal/n-lines (D {
 
 "last" (cond [dict-like (.get value "last" last-default)]
-             [iterator (get (or (lfor item value :if (isinstance item bool) item) (, last-default)) 0)]
+             [iterable (get (or (lfor item value :if (isinstance item bool) item)
+                                (, last-default)) 0)]
              [(isinstance value bool) value]
              [True last-default])
 "number" (cond [dict-like (.get value "number" number-default)]
-               [iterator (get (or (lfor item value :if (int? item) item) (, number-default)) 0)]
+               [iterable (get (or (lfor item value :if (int? item) item)
+                                  (, number-default)) 0)]
                [(int? value) value]
                [True number-default])
 
 "std" (if std
-                (if (not (in std (setx stds (, "stdout" "stderr" "both"))))
-                    (raise (TypeError #[f[Sorry! You must choose an `std' value from: {(.join ", " stds)}]f]))
-                    std))
-}))))
+          (if (not (in std (setx stds (, "stdout" "stderr" "both"))))
+              (raise (TypeError #[f[Sorry! You must choose an `std' value from: {(.join ", " stds)}]f]))
+              std))}))))
 
 #@(property (defn m/c [self] (return self.m/context)))
 #@(m/c.setter (defn m/c [self value] (setv self.m/context (bool value))))
@@ -227,7 +267,7 @@
 (.extend self.m/type-groups.acceptable-args self.m/type-groups.genstrings)
 (setv self.m/type-groups.genstrings (tuple self.m/type-groups.genstrings))
 
-(setv self.m/type-groups.excluded-classes (, "type"))
+(setv self.m/type-groups.excluded-classes (, "type" "filter"))
 
 (setv self.m/subcommand (D {})
       self.m/subcommand.default "supercalifragilisticexpialidocious"
@@ -353,8 +393,14 @@
 (setv self.m/run-as "")
 (setv self.m/settings.defaults.m/run-as (deepcopy self.m/run-as))
 
-(setv self.internal/trim (D { "last" "False" "number" 0 "std" "stdout" }))
-(setv self.m/settings.defaults.m/trim (deepcopy self.internal/trim))
+(setv self.internal/n-lines (D { "last" "False" "number" 0 "std" "stdout" }))
+(setv self.m/settings.defaults.m/n-lines (deepcopy self.internal/n-lines))
+
+(setv self.internal/sort False)
+(setv self.m/settings.defaults.m/sort (deepcopy self.internal/sort))
+
+(setv self.internal/filter False)
+(setv self.m/settings.defaults.m/filter (deepcopy self.internal/filter))
 
 (setv self.m/one-dash False)
 (setv self.m/settings.defaults.m/one-dash (deepcopy self.m/one-dash))
@@ -434,9 +480,21 @@
                              [(isinstance frosted-input int) (if (.misc/type-name-is-string self :type/type type/type/type)
                                                                  (return (pretty-repr frosted-input))
                                                                  (return frosted-input))])))
+              (if self.m/filter
+                  (do (setv string-like (isinstance input str)
+                            input (if self.m/filter.reverse
+                                      (tuple (filterfalse self.m/filter.key input))
+                                      (tuple (filter self.m/filter.key input))))
+                      (if string-like (setv input (.join "" input)))))
+              (if self.m/sort
+                  (do (setv string-like (isinstance input str)
+                            input (sorted input #** self.m/sort))
+                      (if string-like (setv input (.join "" input)))))
               (return (cond [(and self.m/progress (coll? input)) (eclair input (.m/command self) self.m/progress)]
                             [(.misc/type-name-is-string self :type/type type/type/type) (.join "\n" input)]
-                            [True (type/type/type input)])))
+                            [True (if (and self.m/sort (either? type/type/type list))
+                                      input
+                                      (type/type/type input))])))
           (return input)))
 
 (defn subcommand/get [self #** kwargs]
@@ -800,12 +858,12 @@
                                      (if (> self.m/verbosity 1)
                                          (setv return/process/return.tea self.m/command
                                                return/process/return.subcommand self.m/subcommand))
-                                     (let [trim-part (partial trim :last self.m/trim.last
-                                                                   :number self.m/trim.number)]
-                                          (if (in self.m/trim.std (, "stdout" "both"))
-                                              (setv return/process/return.stdout (trim-part :iterable return/process/return.stdout)))
-                                          (if (in self.m/trim.std (, "stderr" "both"))
-                                              (setv return/process/return.stderr (trim-part :iterable return/process/return.stderr))))
+                                     (let [first-last-n-part (partial first-last-n :last self.m/n-lines.last
+                                                                                   :number self.m/n-lines.number)]
+                                          (if (in self.m/n-lines.std (, "stdout" "both"))
+                                              (setv return/process/return.stdout (first-last-n-part :iterable return/process/return.stdout)))
+                                          (if (in self.m/n-lines.std (, "stderr" "both"))
+                                              (setv return/process/return.stderr (first-last-n-part :iterable return/process/return.stderr))))
                                      (return return/process/return))]
                   [True (return (process))]))
         (return None)))
@@ -821,12 +879,24 @@
                     frosted-output (if self.m/dazzle
                                        (cond [dict-like-frosted-output frosted-output]
                                              [(coll? frosted-output) (tuple frosted-output)]
-                                             [True [frosted-output]])
+                                             [True (, frosted-output)])
                                        frosted-output))
               (if self.m/print-command-and-run (print (.m/command self)))
-              (cond [self.m/print-command (print frosted-output)]
+              (cond [dict-like-frosted-output
+                     (for [std (, "out" "err")]
+                          (setv stdstd (+ "std" std))
+                          (if (hasattr frosted-output stdstd)
+                              (do (setv new-frosted-output (get frosted-output stdstd))
+                                  (if self.m/split
+                                      (setv new-frosted-output (split-and-flatten new-frosted-output)))
+                                  (assoc frosted-output stdstd (.m/convert-type self new-frosted-output)))))]
+                    [True (do (setv new-frosted-output (frosting frosted-output self.m/capture))
+                              (if self.m/split
+                                  (setv new-frosted-output (split-and-flatten new-frosted-output)))
+                              (setv new-frosted-output (.m/convert-type self new-frosted-output)))])
+              (cond [self.m/print-command (print new-frosted-output)]
                     [self.m/dazzle (if dict-like-frosted-output
-                                       (for [cat frosted-output]
+                                       (for [cat new-frosted-output]
                                             (setv outcat (get output cat))
                                             (if (or (isinstance outcat int)
                                                     (isinstance outcat str))
@@ -837,21 +907,9 @@
                                                         (print outcat)
                                                         (for [line outcat]
                                                              (print line))))))
-                                       (for [line frosted-output]
+                                       (for [line new-frosted-output]
                                             (print line)))])
-              (cond [dict-like-frosted-output
-                     (for [std (, "out" "err")]
-                          (setv stdstd (+ "std" std))
-                          (if (hasattr frosted-output stdstd)
-                              (do (setv new-frosted-output (get frosted-output stdstd))
-                                  (if self.m/split
-                                      (setv new-frosted-output (split-and-flatten new-frosted-output)))
-                                  (assoc frosted-output stdstd (.m/convert-type self new-frosted-output))))
-                          (else (return new-frosted-output)))]
-                    [True (let [new-frosted-output (frosting frosted-output self.m/capture)]
-                               (if self.m/split
-                                   (setv new-frosted-output (split-and-flatten new-frosted-output)))
-                               (return (.m/convert-type self new-frosted-output)))]))
+              (return new-frosted-output))
           (return None)))
 
 (defn m/popen-partial [self [stdout None] [stderr None]]
@@ -1008,7 +1066,7 @@ freezer- (+ (or self.m/freezer (list (.values self.m/command)) [self.m/base-prog
 (defn inspect- [self #** kwargs] 
       (if (not kwargs)
           (setv kwargs self.m/default-inspect-kwargs))
-      (inspect self #** kwargs))
+      (inspect self :Hy True #** kwargs))
 
 (defn origin- [self] (return (. (first self.__class__.m/stores) __callback__)))
 
