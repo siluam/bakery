@@ -1,3 +1,5 @@
+#+setupfile: ./settings/README.org
+
 * Welcome to the ~bakery~! May I wrap your program?
 
 ~bakery~ is a [[https://docs.hylang.org/en/alpha/][hylang]] module heavily inspired by [[https://amoffat.github.io/sh/][sh]],
@@ -7,7 +9,7 @@ I loved the concept of ~baking~ a command so much that I created an entire modul
 While amoffat's ~sh~ runs only Unix-based systems at the moment, ~bakery~ is able to run on DOS-based systems as well, such as ~Microsoft Windows~.
 Here are a few more differences (note that in python, ~m/option~ becomes ~_option~):
 
-** Program options can be directly set without baking them in first (heresy, I know!):
+** Program options can be directly set without baking them in first (heresy, I know!)
 
 ~Python:~
 
@@ -32,7 +34,7 @@ git(C = "...").status()
 setting ~program.m/gitea.bool~ to ~True~, or adding to the list, will trigger this as well,
 while setting ~program.m/gitea.off~ to ~False~ will override both of the former.
 
-** The general command string will end up like this:
+** The general command string will end up like this
 
 #+begin_src hy
 f"{m/shell} -c {m/program}
@@ -76,7 +78,7 @@ find(
 
 ~Note:~ To use single dashes for options, set ~m/one-dash~ to ~True~.
 
-** While I'm not sure how different the following behavious is, you can iterate over the ~bakery~ object itself to get its output:
+** While I'm not sure how different the following behavious is, you can iterate over the ~bakery~ object itself to get its output
 
 ~Python:~
 
@@ -102,7 +104,7 @@ for item in ls:
 (for [item ls] (print item))
 #+end_src
 
-** You can use specific shells to run commands as well:
+** You can use specific shells to run commands as well
 
 ~Python:~
 
@@ -199,7 +201,7 @@ repr(ls)
 (repr ls)
 #+end_src
 
-** Here's how to use ~sudo~:
+** Here's how to use ~sudo~
 
 ~Python:~
 
@@ -280,8 +282,11 @@ zfs.load_key(pool)
 the password prompt will still be shown, input will still be passed to ~sudo~, and output will still be returned.
 
 ** Freeze ~bakery~ objects, allowing other ~bakery~ objects to act on them
+:PROPERTIES:
+:CUSTOM_ID: 6e879d2f-2dd0-447d-8cd0-5e4b680868d7
+:END:
 
-Freeze using anything but [[https://gitlab.com/picotech/nanotech/gensing][tea or frosting objects]], strings, integers, or the ~milcery~ class in this module;
+Freeze using anything but [[oreo.syvl.org/889cec3c-06eb-4993-9afa-6add2e090779][tea objects]], strings, integers, or the ~milcery~ class in this module;
 frozen objects are simply ~deepcopies~ of the instance they were called from, after all settings and program arguments and options are set, but not reset.
 
 ~Python:~
@@ -457,7 +462,7 @@ nulls()
 (nulls)
 #+end_src
 
-** Use a ~bakery~ object with a context manager:
+** Use a ~bakery~ object with a context manager
 
 ~Python:~
 

@@ -1,0 +1,806 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-02-23 Wed 01:00 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Jeet Ray" />
+<link rel="stylesheet" type="text/css" href="https://rawcdn.githack.com/shadowrylander/settings/28f93432ef378d9abf0e0475c9a1699e02b8f5e0/src/styles/primary/syvl.css?min=1" />
+<link rel="icon" href="https://gitcdn.link/cdn/sylvorg/settings/main/src/icons/favicons/shiny-alolan-sandshrew.ico" sizes="any" />
+<link rel="icon" href="https://gitcdn.link/cdn/sylvorg/settings/main/src/icons/favicons/shiny-alolan-sandshrew.svg" />
+<link rel="manifest" href="https://raw.githack.com/sylvorg/settings/main/manifest.json" />
+<link rel="stylesheet" type="text/css" href="https://raw.githack.com/sylvorg/settings/main/src/styles/highlight/paraiso-dark.min.css" />
+<script src="https://raw.githack.com/sylvorg/settings/main/src/scripts/highlight/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+<div class="header">
+<h1>We Are Syvlorg.</h1>
+<a href="">About Me</a>
+<a href="">About This Website</a>
+<a href="">About Syvlorg</a>
+<a href="https://resume.syvl.org">Résumé</a>
+<a href="https://index.syvl.org">Index</a>
+</div>
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="content">
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org425f8fc">Welcome to the <code>bakery</code>! May I wrap your program?</a>
+<ul>
+<li><a href="#org27db7d1">Program options can be directly set without baking them in first (heresy, I know!):</a></li>
+<li><a href="#org17029ea">The general command string will end up like this:</a></li>
+<li><a href="#orge3190ed">While I'm not sure how different the following behavious is, you can iterate over the <code>bakery</code> object itself to get its output:</a></li>
+<li><a href="#orgf6262ea">You can use specific shells to run commands as well:</a></li>
+<li><a href="#orgf2eb63a">Want to get the command you're about to run?</a></li>
+<li><a href="#orged5d730">Want to <i>see</i> the command you're about to run?</a></li>
+<li><a href="#org87bbe0c">Want some more details?</a></li>
+<li><a href="#org52db9b1">Here's how to use <code>sudo</code>:</a></li>
+<li><a href="#org7405f97">If you want visible prompts, set <code>:m/capture</code> to <code>run</code>, or <code>:m/run</code> to <code>True</code></a></li>
+<li><a href="#orgdfc3136">Freeze <code>bakery</code> objects, allowing other <code>bakery</code> objects to act on them</a></li>
+<li><a href="#org8e35571">Piping and Redirection is implemented through the use of frozen <code>bakery</code> objects and strings&#x2026;</a></li>
+<li><a href="#org91fff0f">Use a <code>bakery</code> object with a context manager:</a></li>
+<li><a href="#org8157dd3">Ignore Stderr</a></li>
+<li><a href="#orgcf79c2b">Pipe Stderr to Stdout</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org425f8fc" class="outline-2">
+<h2 id="org425f8fc">Welcome to the <code>bakery</code>! May I wrap your program?</h2>
+<div class="outline-text-2" id="text-org425f8fc">
+<p>
+<code>bakery</code> is a <a href="https://docs.hylang.org/en/alpha/">hylang</a> module heavily inspired by <a href="https://amoffat.github.io/sh/">sh</a>,
+written by <a href="https://github.com/amoffat">Andrew Moffat / amoffat</a>;
+I loved the concept of <code>baking</code> a command so much that I created an entire module based on it.
+</p>
+
+<p>
+While amoffat's <code>sh</code> runs only Unix-based systems at the moment, <code>bakery</code> is able to run on DOS-based systems as well, such as <code>Microsoft Windows</code>.
+Here are a few more differences (note that in python, <code>m/option</code> becomes <code>_option</code>):
+</p>
+</div>
+
+<div id="outline-container-org27db7d1" class="outline-3">
+<h3 id="org27db7d1">Program options can be directly set without baking them in first (heresy, I know!):</h3>
+<div class="outline-text-3" id="text-org27db7d1">
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">import hy
+from bakery import git
+
+# git -C "..." status
+git(C = "...").status()
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(import bakery [git])
+
+;; git -C "..." status
+(.status (git :C "..."))
+</code></pre>
+</div>
+
+<p>
+<code>Note:</code> Because <code>git</code> and <code>yadm</code> are in a list called <code>m/gitea.list</code>, they can be imported with the ability to set program options;
+setting <code>program.m/gitea.bool</code> to <code>True</code>, or adding to the list, will trigger this as well,
+while setting <code>program.m/gitea.off</code> to <code>False</code> will override both of the former.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org17029ea" class="outline-3">
+<h3 id="org17029ea">The general command string will end up like this:</h3>
+<div class="outline-text-3" id="text-org17029ea">
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">f"{m/shell} -c {m/program}
+	       {m/starter-kwargs}
+	       {m/subcommand}
+	       {m/starter-args}
+	       {m/regular-kwargs}
+	       {m/regular-args}"
+</code></pre>
+</div>
+
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">import hy
+from bakery import ls, find
+
+# ls -l -a ~
+ls("~", l = True, a = True)
+
+# find . -empty -type d -delete
+find(
+    empty = True,
+    delete = True,
+    type = "d",
+    _one_dash = True,
+    _starter_args = "."
+)
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(import bakery [ls find])
+
+;; ls -l -a ~
+(ls "~" :l True :a True)
+
+;; find . -empty -type d -delete
+(find :empty True :delete True :type "d" :m/one-dash True :m/starter-args ".")
+</code></pre>
+</div>
+
+<p>
+<code>Note:</code> To use single dashes for options, set <code>m/one-dash</code> to <code>True</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge3190ed" class="outline-3">
+<h3 id="orge3190ed">While I'm not sure how different the following behavious is, you can iterate over the <code>bakery</code> object itself to get its output:</h3>
+<div class="outline-text-3" id="text-orge3190ed">
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">import hy
+from bakery import ls
+
+# And no, I didn't miss the brackets.
+
+# ls
+for item in ls:
+    print(item)
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(import bakery [ls])
+
+;; And no, I didn't miss the brackets.
+
+;; ls
+(for [item ls] (print item))
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf6262ea" class="outline-3">
+<h3 id="orgf6262ea">You can use specific shells to run commands as well:</h3>
+<div class="outline-text-3" id="text-orgf6262ea">
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">import hy
+from bakery import ls
+
+# bash -c 'ls'
+ls(_shell = "bash")
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(import bakery [ls])
+
+# bash -c 'ls'
+ls(:m/shell "bash")
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf2eb63a" class="outline-3">
+<h3 id="orgf2eb63a">Want to get the command you're about to run?</h3>
+<div class="outline-text-3" id="text-orgf2eb63a">
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">import hy
+from bakery import ls
+
+# bash -c 'ls'
+ls(_shell = "bash", _return_command = True)
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(import bakery [ls])
+
+;; bash -c 'ls'
+ls(:m/shell "bash" :m/return-command True)
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orged5d730" class="outline-3">
+<h3 id="orged5d730">Want to <i>see</i> the command you're about to run?</h3>
+<div class="outline-text-3" id="text-orged5d730">
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">import hy
+from bakery import ls
+
+# bash -c 'ls'
+ls(_shell = "bash", _print_command = True)
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(import bakery [ls])
+
+;; bash -c 'ls'
+ls(:m/shell "bash" :m/print-command True)
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org87bbe0c" class="outline-3">
+<h3 id="org87bbe0c">Want some more details?</h3>
+<div class="outline-text-3" id="text-org87bbe0c">
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">import hy
+from bakery import ls
+
+ls(_debug = True)
+
+# OR
+ls.inspect_()
+
+# OR
+ls
+
+# OR
+repr(ls)
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(import bakery [ls])
+
+(ls :m/debug True)
+
+;; OR
+(.inspect- ls)
+
+# OR
+(repr ls)
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org52db9b1" class="outline-3">
+<h3 id="org52db9b1">Here's how to use <code>sudo</code>:</h3>
+<div class="outline-text-3" id="text-org52db9b1">
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">import hy
+from bakery import ls
+
+# sudo ls /
+ls("/", _sudo = True)
+
+# sudo -i -u root ls /
+ls("/", _sudo = "i")
+
+# sudo -s -u root ls /
+ls("/", _sudo = "s")
+
+# sudo -i -u user ls /
+ls("/", _sudo = dict(i = "user"))
+
+# sudo -s -u user ls /
+ls("/", _sudo = dict(s = "user"))
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(import bakery [ls])
+
+;; sudo -i -u user ls /
+(ls "/" :m/sudo { "i" "user" })
+
+;; sudo -s -u user ls /
+(ls "/" :m/sudo { "s" "user" })
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7405f97" class="outline-3">
+<h3 id="org7405f97">If you want visible prompts, set <code>:m/capture</code> to <code>run</code>, or <code>:m/run</code> to <code>True</code></h3>
+<div class="outline-text-3" id="text-org7405f97">
+<p>
+Otherwise, prompts will be captured in the output, while the process still halts for input.
+</p>
+
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">import hy
+from bakery import zfs
+
+# Will show input prompt
+
+# zfs load-key pool
+zfs.load_key(pool, _capture = "run")
+
+
+
+# Will NOT show input prompt
+
+# zfs load-key pool
+zfs.load_key(pool)
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(import bakery [zfs])
+
+;; Will show input prompt
+
+;; zfs load-key pool
+(.load-key zfs pool :m/capture "run")
+
+
+
+;; Will NOT show input prompt
+
+;; zfs load-key pool
+(.load-key zfs pool)
+</code></pre>
+</div>
+
+<p>
+<code>Note:</code> This does not happen with the use of <code>sudo</code>, or the <code>m/sudo</code> keyword argument;
+the password prompt will still be shown, input will still be passed to <code>sudo</code>, and output will still be returned.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgdfc3136" class="outline-3">
+<h3 id="orgdfc3136">Freeze <code>bakery</code> objects, allowing other <code>bakery</code> objects to act on them</h3>
+<div class="outline-text-3" id="text-orgdfc3136">
+<p>
+Freeze using anything but <a href="https://gitlab.com/picotech/nanotech/gensing">tea or frosting objects</a>, strings, integers, or the <code>milcery</code> class in this module;
+frozen objects are simply <code>deepcopies</code> of the instance they were called from, after all settings and program arguments and options are set, but not reset.
+</p>
+
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">import hy
+from bakery import ls
+
+# ls
+ls([])
+
+# Some Alternatives
+ls(None)
+ls(False)
+ls(bool(0))
+ls(bool(""))
+
+# Freeze using the keyword (but it's longer; why would you want to do that? :P)
+ls(_frozen = True)
+
+# Freeze using... Nothing! :D
+ls
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(import bakery [ls])
+
+;; ls
+(ls [])
+
+;; Some Alternatives
+(ls None)
+(ls False)
+(ls bool(0))
+(ls bool(""))
+
+;; Freeze using the keyword (but it's longer; why would you want to do that? :P)
+(ls :m/frozen True)
+
+;; Freeze using... Nothing! :D
+ls
+</code></pre>
+</div>
+
+<p>
+<code>Note:</code> In the last example, assume all bakery objects are frozen by default, with default settings.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8e35571" class="outline-3">
+<h3 id="org8e35571">Piping and Redirection is implemented through the use of frozen <code>bakery</code> objects and strings&#x2026;</h3>
+<div class="outline-text-3" id="text-org8e35571">
+<p>
+&#x2026; or <a href="https://gitlab.com/picotech/nanotech/gensing">tea or frosting objects</a>.
+</p>
+
+<p>
+Mind that, while freezing the <code>bakery</code> objects, the settings on the right-hand side will override those on the right-hand side,
+if the same setting is set while freezing both objects.
+</p>
+
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">import hy
+from os import devnull
+from bakery import ls, tail
+
+# Piping using frozen objects
+
+# ls | tail
+
+tails = ls | tail
+tails = "ls" | tail
+tails = ls | "tail"
+
+tails = ls([]) | tail([])
+tails = "ls" | tail([])
+tails = ls([]) | "tail"
+
+tails()
+
+
+# Piping to tee
+
+# ls | tee /dev/null
+teels = ls &amp; devnull
+teels()
+
+# ls | tee -a /dev/null
+teels = ls + devnull
+teels()
+
+# Redirection using frozen objects
+
+# ls &gt; /dev/null
+nulls = ls &gt; devnull
+nulls()
+
+# ls &gt;&gt; /dev/null
+nulls = ls &gt;&gt; devnull
+nulls()
+
+# ls &lt; /dev/null
+nulls = ls &lt; devnull
+nulls()
+
+# ls &lt;&lt; /dev/null
+nulls = ls &lt;&lt; devnull
+nulls()
+
+# Any of the above pipes or redirections with a tuple
+
+# ls 2&gt;&amp;1 /dev/null
+nulls = ls | (devnull, "2&gt;&amp;1")
+nulls()
+
+# ls &amp;&gt; /dev/null
+nulls = ls &gt; (devnull, "&amp;&gt;")
+nulls()
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(import os [devnull])
+(import bakery [ls tail])
+
+;; Piping using frozen objects
+
+;; ls | tail
+
+(setv tails (| ls tail))
+(setv tails (| "ls" tail))
+(setv tails (| ls "tail"))
+
+(setv tails (| (ls []) (tail [])))
+(setv tails (| (ls []) "tail"))
+(setv tails (| "ls" (tail [])))
+
+(tails)
+
+
+;; Piping to tee
+
+;; ls | tee /dev/null
+(setv teels (&amp; ls devnull))
+(teels)
+
+;; ls | tee -a /dev/null
+(setv teels (+ ls devnull))
+(teels)
+
+;; Redirection using frozen objects
+
+;; ls &gt; /dev/null
+(setv nulls (&gt; ls devnull))
+(nulls)
+
+;; ls &gt;&gt; /dev/null
+(setv nulls (&gt;&gt; ls devnull))
+(nulls)
+
+;; ls &lt; /dev/null
+(setv nulls (&lt; ls devnull))
+(nulls)
+
+;; ls &lt;&lt; /dev/null
+(setv nulls (&lt;&lt; ls devnull))
+(nulls)
+
+;; Any of the above pipes or redirections with a tuple
+
+;; ls 2&gt;&amp;1 /dev/null
+(setv nulls (| ls (, devnull "2&gt;&amp;1")))
+(nulls)
+
+;; ls &amp;&gt; /dev/null
+(setv nulls (&gt; ls (, devnull "&amp;&gt;")))
+(nulls)
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org91fff0f" class="outline-3">
+<h3 id="org91fff0f">Use a <code>bakery</code> object with a context manager:</h3>
+<div class="outline-text-3" id="text-org91fff0f">
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">import hy
+from bakery import ls
+
+# ls -l -a
+with ls(_c = True, l = True) as lsl:
+    lsl(a = True)
+
+# ls -l -a | tail
+with ls([], l = True, a = True) | tail as tails:
+    tails()
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(import bakery [ls tail])
+
+;; ls -l -a
+(with [lsl (ls :m/c True :l True)]
+      (lsl :a True))
+
+;; ls -l -a | tail
+(with [tails (| (ls [] :l True :a True) tail)]
+      (tails))
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8157dd3" class="outline-3">
+<h3 id="org8157dd3">Ignore Stderr</h3>
+<div class="outline-text-3" id="text-org8157dd3">
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">ls(j = True)
+
+# Without `_ignore_stderr = True':
+
+# SystemError: In trying to run `ls -j':
+
+# ls: invalid option -- 'j'
+# Try 'ls --help' for more information.
+
+ls(j = True, _ignore_stderr = True)
+
+# With `_ignore_stderr = True':
+
+# ...
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(ls :j True)
+
+;; Without `:m/ignore-stderr True':
+
+;; SystemError: In trying to run `ls -j':
+
+;; ls: invalid option -- 'j'
+;; Try 'ls --help' for more information.
+
+(ls :j True :m/ignore-stderr True)
+
+;; With `:m/ignore-stderr True':
+
+;; ...
+</code></pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcf79c2b" class="outline-3">
+<h3 id="orgcf79c2b">Pipe Stderr to Stdout</h3>
+<div class="outline-text-3" id="text-orgcf79c2b">
+<p>
+<code>Python:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-python match-braces rainbow-braces">ls(j = True)
+
+# Without `_stdout_stderr = True':
+
+# SystemError: In trying to run `ls -j':
+
+# ls: invalid option -- 'j'
+# Try 'ls --help' for more information.
+
+ls(j = True, _stdout_stderr = True)
+
+# With `_stdout_stderr = True':
+
+# ls: invalid option -- 'j'
+# Try 'ls --help' for more information.
+</code></pre>
+</div>
+
+<p>
+<code>Hy:</code>
+</p>
+
+<div class="org-src-container">
+<pre><code class="language-hy match-braces rainbow-braces">(ls :j True)
+
+# Without `:m/stdout-stderr True':
+
+# SystemError: In trying to run `ls -j':
+
+# ls: invalid option -- 'j'
+# Try 'ls --help' for more information.
+
+(ls :j True :m/stdout-stderr True)
+
+# With `:m/stdout-stderr True':
+
+# ls: invalid option -- 'j'
+# Try 'ls --help' for more information.
+</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Jeet Ray</p>
+<p class="date">Created: 2022-02-23 Wed 01:00</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
