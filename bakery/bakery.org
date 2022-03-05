@@ -1061,7 +1061,7 @@ Print all the current values after each step; accepts a boolean or a dictionary 
                             [True (if (and self.m/sort (either? type/type/type list))
                                       input
                                       (type/type/type input))])))
-          (return input)))
+          (return (type/type/type input))))
 #+end_src
 
 ** Subcommand
