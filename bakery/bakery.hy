@@ -496,7 +496,7 @@
                             [True (if (and self.m/sort (either? type/type/type list))
                                       input
                                       (type/type/type input))])))
-          (return input)))
+          (return (type/type/type input))))
 
 (defn subcommand/get [self #** kwargs]
       (setv self.m/subcommand.current.intact (.cls/get-attr self.__class__ kwargs "m/intact-subcommand"))
