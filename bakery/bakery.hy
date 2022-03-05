@@ -472,9 +472,9 @@
       (.command/reset self))
 
 (defn m/convert-type [self input [type/type None]]
+      (setv type/type/type (or type/type self.m/type))
       (if input
-          (do (setv type/type/type (or type/type self.m/type))
-              (if (isinstance input self.m/type-groups.genstrings)
+          (do (if (isinstance input self.m/type-groups.genstrings)
                   (let [frosted-input (input)]
                        (cond [(isinstance frosted-input str)
                               (setv input [(.fill (TextWrapper :break-long-words False :break-on-hyphens False) frosted-input)])]
