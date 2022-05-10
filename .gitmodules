@@ -1,6 +1,6 @@
-[submodule "cookies"]
-	path = cookies
-	url = https://github.com/syvlorg/cookies.git
 [submodule "settings"]
 	path = settings
 	url = git@github.com:sylvorg/settings.git
+[submodule "cookies"]
+	path = cookies
+	url = git@github.com:syvlorg/cookies.git
