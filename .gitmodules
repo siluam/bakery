@@ -3,4 +3,4 @@
 	url = https://github.com/syvlorg/cookies.git
 [submodule "settings"]
 	path = settings
-	url = https://github.com/sylvorg/settings.git
+	url = git@github.com:sylvorg/settings.git
