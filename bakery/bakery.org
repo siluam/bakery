@@ -658,7 +658,7 @@ Named after [[https://gitea.io/en-us/][gitea]] and my own [[https://gitlab.com/p
 
 #+begin_src hy
 (setv self.m/gitea (D {})
-      self.m/gitea.list [ "git" "yadm" ]
+      self.m/gitea.list [ "git" "yadm" "tailapi" ]
       self.m/gitea.bool (or (in self.m/base-program self.m/gitea.list) False)
       self.m/gitea.off False)
 #+end_src

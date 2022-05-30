@@ -343,7 +343,7 @@
 (setv self.m/command (tea))
 
 (setv self.m/gitea (D {})
-      self.m/gitea.list [ "git" "yadm" ]
+      self.m/gitea.list [ "git" "yadm" "tailapi" ]
       self.m/gitea.bool (or (in self.m/base-program self.m/gitea.list) False)
       self.m/gitea.off False)
 
