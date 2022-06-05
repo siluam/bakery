@@ -179,12 +179,6 @@ ls(_debug = True)
 
 # OR
 ls.inspect_()
-
-# OR
-ls
-
-# OR
-repr(ls)
 #+end_src
 
 ~Hy:~
@@ -196,9 +190,6 @@ repr(ls)
 
 ;; OR
 (.inspect- ls)
-
-# OR
-(repr ls)
 #+end_src
 
 ** Here's how to use ~sudo~
