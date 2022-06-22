@@ -83,7 +83,11 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 ** Split and Flatten Iterable
 
 #+begin_src hy
-(defn split-and-flatten [iterable] (flatten (gfor j (flatten iterable) (.split j))))
+(defn split-and-flatten [iterable delim]
+      (flatten (gfor j (flatten iterable)
+               (if (isinstance delim bool)
+                   (.split j)
+                   (.split j (str delim))))))
 #+end_src
 
 ** Check Program
@@ -985,12 +989,20 @@ accepts a color string value:
 <<m/(setting="progress", value="None")>>
 #+end_src
 
-**** Split Output By Whitespace
+**** Split Output
 
-Split the output by newlines, tabs, spaces, etc.
+Split the output by newlines, tabs, spaces, etc. if set to ~True~, or else by the value provided:
 
 #+begin_src hy
 <<m/(setting="split", value="False")>>
+#+end_src
+
+***** Split After
+
+Split after converting the output, and optionally sorting and filtering:
+
+#+begin_src hy
+<<m/(setting="split-after", value="False")>>
 #+end_src
 
 **** Use Single Forward Slash Instead of Dash
@@ -1039,6 +1051,14 @@ Print all the current values after each step; accepts a boolean or a dictionary 
 <<m/(setting="default-inspect-kwargs", value="(D { \"all\" True })")>>
 #+end_src
 
+**** Sort Then Filter
+
+Sort then filter the output, if both settings are enabled:
+
+#+begin_src hy
+<<m/(setting="sort-then-filter", value="False")>>
+#+end_src
+
 *** End of Init
 
 #+begin_src hy
@@ -1062,9 +1082,34 @@ Print all the current values after each step; accepts a boolean or a dictionary 
 #+end_src
 
 ** Convert Type
+*** Filter
 
 #+begin_src hy
-(defn m/convert-type [self input [type/type None]]
+(defn ct/filter [self input]
+      (if self.m/filter
+          (do (setv string-like (isinstance input str)
+                    input (if self.m/filter.reverse
+                              (tuple (filterfalse self.m/filter.key input))
+                              (tuple (filter self.m/filter.key input))))
+               (if string-like (setv input (.join "" input)))))
+      input)
+#+end_src
+
+*** Sort
+
+#+begin_src hy
+(defn ct/sort [self input]
+      (if self.m/sort
+          (do (setv string-like (isinstance input str)
+                    input (sorted input #** self.m/sort))
+              (if string-like (setv input (.join "" input)))))
+      input)
+#+end_src
+
+*** Convert
+
+#+begin_src hy
+(defn ct/convert [self input [type/type None]]
       (setv type/type/type (or type/type self.m/type))
       (if input
           (do (if (isinstance input self.m/type-groups.genstrings)
@@ -1074,16 +1119,9 @@ Print all the current values after each step; accepts a boolean or a dictionary 
                              [(isinstance frosted-input int) (if (.misc/type-name-is-string self :type/type type/type/type)
                                                                  (return (pretty-repr frosted-input))
                                                                  (return frosted-input))])))
-              (if self.m/filter
-                  (do (setv string-like (isinstance input str)
-                            input (if self.m/filter.reverse
-                                      (tuple (filterfalse self.m/filter.key input))
-                                      (tuple (filter self.m/filter.key input))))
-                      (if string-like (setv input (.join "" input)))))
-              (if self.m/sort
-                  (do (setv string-like (isinstance input str)
-                            input (sorted input #** self.m/sort))
-                      (if string-like (setv input (.join "" input)))))
+              (setv input (if self.m/sort-then-filter
+                              (.ct/filter self (.ct/sort self input))
+                              (.ct/sort self (.ct/filter self input))))
               (return (cond [(and self.m/progress (coll? input)) (eclair input (.m/command self) self.m/progress)]
                             [(.misc/type-name-is-string self :type/type type/type/type) (.join "\n" input)]
                             [True (if (and self.m/sort (either? type/type/type list))
@@ -1764,21 +1802,20 @@ otherwise ~(isinstance value int)~ will catch both cases.
                      (for [std (, "out" "err")]
                           (setv stdstd (+ "std" std))
                           (if (hasattr frosted-output stdstd)
-                              (do (setv new-frosted-output (get frosted-output stdstd))
+                              (do (setv processed-output (get frosted-output stdstd))
                                   (if self.m/split
-                                      (setv new-frosted-output (split-and-flatten new-frosted-output)))
-
-                                  ;; TODO
-                                  #_(assoc frosted-output stdstd (.m/convert-type self new-frosted-output))
-
-                                  ;; TODO
-                                  (setv (. frosted-output [stdstd]) (.m/convert-type self new-frosted-output))
-
-                                  )))]
+                                      (setv processed-output (split-and-flatten processed-output self.m/split)))
+                                  (setv processed-output (.ct/convert self processed-output))
+                                  (if self.m/split-after
+                                      (setv processed-output (split-and-flatten processed-output self.m/split-after)))
+                                  (setv (. frosted-output [stdstd]) processed-output
+                                        new-frosted-output frosted-output))))]
                     [True (do (setv new-frosted-output (frosting frosted-output self.m/capture))
                               (if self.m/split
-                                  (setv new-frosted-output (split-and-flatten new-frosted-output)))
-                              (setv new-frosted-output (.m/convert-type self new-frosted-output)))])
+                                  (setv new-frosted-output (split-and-flatten new-frosted-output self.m/split)))
+                              (setv new-frosted-output (.ct/convert self new-frosted-output))
+                              (if self.m/split-after
+                                  (setv new-frosted-output (split-and-flatten new-frosted-output self.m/split-after))))])
               (return new-frosted-output))
           (return None)))
 #+end_src

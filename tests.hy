@@ -190,4 +190,12 @@
                   (= last-three)
                   (assert))))
 
+#@(zoom (defn splits []
+              (import bakery [ls])
+              (setv six-two ["6" "5" "4" "3" "2" "09" "08" "07" "06" "05" "04" "03" "02" "00" "0" "0"])
+              (-> cookies
+                  (ls :m/list True :m/split 1 :m/sort True :m/filter (fn [item] (.isnumeric item)))
+                  (= six-two)
+                  (assert))))
+
 (for [func (eclair funcs "tests" "blue")] (func))
