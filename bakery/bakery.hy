@@ -2,6 +2,7 @@
 (.install rich.traceback :show-locals True)
 
 (import builtins)
+(import sys)
 (import weakref)
 
 (import addict [Dict :as D])
@@ -394,6 +395,9 @@
 
 (setv self.m/dazzle False)
 (setv self.m/settings.defaults.m/dazzle (deepcopy self.m/dazzle))
+
+(setv self.m/dazzling None)
+(setv self.m/settings.defaults.m/dazzling (deepcopy self.m/dazzling))
 
 (setv self.m/ignore-stdout False)
 (setv self.m/settings.defaults.m/ignore-stdout (deepcopy self.m/ignore-stdout))
@@ -1004,16 +1008,20 @@
 (defn return/process [self]
     (if (.m/command self)
         (do (setv process (.m/popen-partial self))
-            (cond [(is self.m/wait None) (with [p (process :pp-stdout DEVNULL :pp-stderr DEVNULL)] (return None))]
+            (cond [(is self.m/wait None) (with [p (process :stdout DEVNULL :stderr DEVNULL)] (return None))]
                   [self.m/wait (with [p (process)]
                                      (setv return/process/return (D {}))
                                      (for [std (, "out" "err")]
                                           (setv chained []
                                                 stdstd (+ "std" std))
                                           (if (setx output (getattr p stdstd))
-                                              (for [line output] (setv chained (chain
-                                                   chained
-                                                   [(if (isinstance line (, bytes bytearray)) (.strip (.decode line "utf-8")) (.strip line))]))))
+                                              (for [line output]
+                                                   (setv line (if (isinstance line (, bytes bytearray))
+                                                                  (.strip (.decode line "utf-8"))
+                                                                  (.strip line))
+                                                         chained (chain chained [line]))
+                                                   (if (and (= std "out") self.m/dazzling)
+                                                       (print line))))
                                               
                                               ;; TODO
                                               #_(assoc return/process/return stdstd (iter chained))
@@ -1111,8 +1119,10 @@
                                      (cond [self.m/stdout-stderr (.get self.m/popen "stderr" STDOUT)]
                                            [self.m/ignore-stderr (.get self.m/popen "stderr" DEVNULL)]
                                            [True (.get self.m/popen "stderr" PIPE)])))
-            bufsize (.get self.m/popen "bufsize" -1)
-            universal-newlines (.get self.m/popen "universal-newlines" None)
+
+            bufsize (.get self.m/popen "bufsize" (if self.m/dazzling 1 -1))
+            universal-newlines (.get self.m/popen "universal-newlines" self.m/dazzling)
+
             universal-text (if (= bufsize 1)
                                True
                                universal-newlines)
@@ -1127,7 +1137,7 @@
                      "stdout" pp-stdout
                      "stderr" pp-stderr
                      "executable" executable
-                     "universal_newlines" universal-text
+                     "universal_newlines" universal-newlines
                      "text" universal-text
                      "shell" shell })
       (.update env self.m/exports)

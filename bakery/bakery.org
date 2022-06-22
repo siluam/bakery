@@ -14,6 +14,7 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 
 #+begin_src hy
 (import builtins)
+(import sys)
 (import weakref)
 #+end_src
 
@@ -791,12 +792,20 @@ What shell to use:
 <<m/(setting="shell", value="None")>>
 #+end_src
 
-**** Pretty Prining
+**** Pretty Printing
 
 Pretty print the output:
 
 #+begin_src hy
 <<m/(setting="dazzle", value="False")>>
+#+end_src
+
+***** Pretty Running
+
+Pretty print the output as it is generated; note that the default value is ~None~ to align with ~subprocess.Popen's universal_newlines~ default value:
+
+#+begin_src hy
+<<m/(setting="dazzling", value="None")>>
 #+end_src
 
 **** Ignore Output
@@ -1739,16 +1748,20 @@ otherwise ~(isinstance value int)~ will catch both cases.
 (defn return/process [self]
     (if (.m/command self)
         (do (setv process (.m/popen-partial self))
-            (cond [(is self.m/wait None) (with [p (process :pp-stdout DEVNULL :pp-stderr DEVNULL)] (return None))]
+            (cond [(is self.m/wait None) (with [p (process :stdout DEVNULL :stderr DEVNULL)] (return None))]
                   [self.m/wait (with [p (process)]
                                      (setv return/process/return (D {}))
                                      (for [std (, "out" "err")]
                                           (setv chained []
                                                 stdstd (+ "std" std))
                                           (if (setx output (getattr p stdstd))
-                                              (for [line output] (setv chained (chain
-                                                   chained
-                                                   [(if (isinstance line (, bytes bytearray)) (.strip (.decode line "utf-8")) (.strip line))]))))
+                                              (for [line output]
+                                                   (setv line (if (isinstance line (, bytes bytearray))
+                                                                  (.strip (.decode line "utf-8"))
+                                                                  (.strip line))
+                                                         chained (chain chained [line]))
+                                                   (if (and (= std "out") self.m/dazzling)
+                                                       (print line))))
                                               
                                               ;; TODO
                                               #_(assoc return/process/return stdstd (iter chained))
@@ -1854,8 +1867,16 @@ otherwise ~(isinstance value int)~ will catch both cases.
                                      (cond [self.m/stdout-stderr (.get self.m/popen "stderr" STDOUT)]
                                            [self.m/ignore-stderr (.get self.m/popen "stderr" DEVNULL)]
                                            [True (.get self.m/popen "stderr" PIPE)])))
-            bufsize (.get self.m/popen "bufsize" -1)
-            universal-newlines (.get self.m/popen "universal-newlines" None)
+#+end_src
+
+Adapted from [[https://stackoverflow.com/users/4279/jfs][jfs's]] answer [[https://stackoverflow.com/a/28319191/10827766][here]]:
+
+#+begin_src hy
+            bufsize (.get self.m/popen "bufsize" (if self.m/dazzling 1 -1))
+            universal-newlines (.get self.m/popen "universal-newlines" self.m/dazzling)
+#+end_src
+
+#+begin_src hy
             universal-text (if (= bufsize 1)
                                True
                                universal-newlines)
@@ -1876,7 +1897,7 @@ For some reason, ~Popen's env~ keyword doesn't like [[https://github.com/mewwts/
                      "stdout" pp-stdout
                      "stderr" pp-stderr
                      "executable" executable
-                     "universal_newlines" universal-text
+                     "universal_newlines" universal-newlines
                      "text" universal-text
                      "shell" shell })
       (.update env self.m/exports)
