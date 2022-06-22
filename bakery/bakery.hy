@@ -407,6 +407,9 @@
 (setv self.m/false-error False)
 (setv self.m/settings.defaults.m/false-error (deepcopy self.m/false-error))
 
+(setv self.m/replace-error False)
+(setv self.m/settings.defaults.m/replace-error (deepcopy self.m/replace-error))
+
 (setv self.m/verbosity 0)
 (setv self.m/settings.defaults.m/verbosity (deepcopy self.m/verbosity))
 
@@ -987,8 +990,8 @@
                                (if (and peek-value
                                         (not self.m/ignore-stderr)
                                         (not self.m/stdout-stderr))
-                                   (if self.m/false-error
-                                       (setv (. output ["stdout"]) False)
+                                   (if (or self.m/replace-error self.m/false-error)
+                                       (setv (. output ["stdout"]) (or self.m/replace-error False))
                                        (raise (SystemError (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr))))))
                                (for [[std opp] (zip stds (py "stds[::-1]"))]
                                     (setv stdstd (+ "std" std)
@@ -1042,6 +1045,7 @@
 (defn return/frosting [self]
       (if (setx output (.return/output self))
           (do (if self.m/frozen (return output))
+              (if (or self.m/replace-error self.m/false-error) (return output.stdout))
               (setv frosted-output (if (and (isinstance output dict)
                                             (= (len output) 1))
 

@@ -302,13 +302,24 @@ Check if temporary baking with a context manager works:
                   (assert))))
 #+end_src
 
-** Return `False' instead of Raising `SystemError'
+** Return `False' Instead of Raising `SystemError'
 
 #+begin_src hy
 #@(zoom (defn false-error []
               (import bakery [ls])
               (-> (ls :j True :m/false-error True)
                   (not)
+                  (assert))))
+#+end_src
+
+*** Return Another Value Instead of Raising `SystemError'
+
+#+begin_src hy
+#@(zoom (defn replace-error []
+              (import bakery [ls])
+              (assert (ls :j True :m/replace-error True))
+              (-> (ls :j True :m/replace-error "replace error test")
+                  (= "replace error test")
                   (assert))))
 #+end_src
 

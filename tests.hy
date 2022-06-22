@@ -204,4 +204,11 @@
                   (not)
                   (assert))))
 
+#@(zoom (defn replace-error []
+              (import bakery [ls])
+              (assert (ls :j True :m/replace-error True))
+              (-> (ls :j True :m/replace-error "replace error test")
+                  (= "replace error test")
+                  (assert))))
+
 (for [func (eclair funcs "tests" "blue")] (func))
