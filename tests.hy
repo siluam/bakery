@@ -198,4 +198,10 @@
                   (= six-two)
                   (assert))))
 
+#@(zoom (defn false-error []
+              (import bakery [ls])
+              (-> (ls :j True :m/false-error True)
+                  (not)
+                  (assert))))
+
 (for [func (eclair funcs "tests" "blue")] (func))

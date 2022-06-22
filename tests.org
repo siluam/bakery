@@ -302,6 +302,16 @@ Check if temporary baking with a context manager works:
                   (assert))))
 #+end_src
 
+** Return `False' instead of Raising `SystemError'
+
+#+begin_src hy
+#@(zoom (defn false-error []
+              (import bakery [ls])
+              (-> (ls :j True :m/false-error True)
+                  (not)
+                  (assert))))
+#+end_src
+
 * Run Everything
 
 #+begin_src hy

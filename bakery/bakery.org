@@ -822,6 +822,14 @@ Ignore standard error:
 <<m/(setting="stdout-stderr", value="False")>>
 #+end_src
 
+**** Return `False' instead of Raising `SystemError'
+
+Instead of raising a ~SystemError~, return ~False~:
+
+#+begin_src hy
+<<m/(setting="false-error", value="False")>>
+#+end_src
+
 **** Verbosity
 
 How verbose the output should be:
@@ -1705,7 +1713,9 @@ otherwise ~(isinstance value int)~ will catch both cases.
                                (if (and peek-value
                                         (not self.m/ignore-stderr)
                                         (not self.m/stdout-stderr))
-                                   (raise (SystemError (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr)))))
+                                   (if self.m/false-error
+                                       (setv (. output ["stdout"]) False)
+                                       (raise (SystemError (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr))))))
                                (for [[std opp] (zip stds (py "stds[::-1]"))]
                                     (setv stdstd (+ "std" std)
                                           stdopp (+ "std" opp))

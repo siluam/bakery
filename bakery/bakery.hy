@@ -404,6 +404,9 @@
 (setv self.m/stdout-stderr False)
 (setv self.m/settings.defaults.m/stdout-stderr (deepcopy self.m/stdout-stderr))
 
+(setv self.m/false-error False)
+(setv self.m/settings.defaults.m/false-error (deepcopy self.m/false-error))
+
 (setv self.m/verbosity 0)
 (setv self.m/settings.defaults.m/verbosity (deepcopy self.m/verbosity))
 
@@ -984,7 +987,9 @@
                                (if (and peek-value
                                         (not self.m/ignore-stderr)
                                         (not self.m/stdout-stderr))
-                                   (raise (SystemError (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr)))))
+                                   (if self.m/false-error
+                                       (setv (. output ["stdout"]) False)
+                                       (raise (SystemError (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr))))))
                                (for [[std opp] (zip stds (py "stds[::-1]"))]
                                     (setv stdstd (+ "std" std)
                                           stdopp (+ "std" opp))
