@@ -8,7 +8,7 @@ package_data = \
 {'': ['*']}
 
 install_requires = \
-['oreo @ git+https://github.com/syvlorg/oreo.git@main']
+['oreo @ git+https://github.com/syvlorg/oreo.git@main', 'py']
 
 setup_kwargs = {
     'name': 'bakery',

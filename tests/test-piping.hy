@@ -1,0 +1,16 @@
+(import bakery [ls])
+(import oreo)
+(import oreo [nots?])
+(import pathlib [Path])
+(require hyrule [->])
+(setv cookies (/ (.resolve (. (Path __file__) parent parent) :strict True) "cookies"))
+(setv cookies-ls (.ls oreo cookies))
+(setv assorted-cookies (.ls oreo cookies :sort True))
+(import bakery [env grep tail])
+(import oreo [first-last-n])
+(defn test-piping-first []
+      (setv tails (| (ls [] :a True cookies :m/list True :m/sort None :m/filter nots?) tail))
+      (-> assorted-cookies (first-last-n :last True :number 10 :type- list) (= (tails)) (assert)))
+(defn test-piping-both []
+      (setv egrep (| (env [] :m/exports { "FOO" "bar" } :m/str True) (grep [] "FOO")))
+      (assert (= (egrep) "FOO=bar")))

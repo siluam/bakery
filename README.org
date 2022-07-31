@@ -1,5 +1,3 @@
-#+setupfile: ./settings/README.org
-
 * Welcome to the ~bakery~! May I wrap your program?
 
 ~bakery~ is a [[https://docs.hylang.org/en/alpha/][hylang]] module heavily inspired by [[https://amoffat.github.io/sh/][sh]],

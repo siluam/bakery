@@ -1,4 +1,3 @@
-#+setupfile: ../settings/README.org
 #+property: header-args:py :tangle yes
 
 * Rich Traceback
@@ -30,7 +29,7 @@ from oreo import ModuleCaller
 Adapted from [[https://stackoverflow.com/users/799163/remcogerlich][RemcoGerlich's]] answer [[https://stackoverflow.com/a/21139466][here]]:
 
 #+begin_src py
-from .bakery import milcery
+from bakery.bakery import milcery
 #+end_src
 
 ** ModuleCaller
@@ -45,7 +44,7 @@ class bakery(ModuleCaller):
             return milcery
     def __getattr__(self, program_):
         if program_.startswith("_"):
-            raise AttributeError
+            raise AttributeError(program_)
         else:
             return milcery(program_ = program_)
     bakery = __call__

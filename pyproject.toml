@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "bakery"
 version = "2.0.0.0"
-description = "An \"sh\" alternative"
+description = "An \"sh\" alternative!"
 authors = ["sylvorg <jeet.ray@syvl.org>"]
 license = "OREO"
 include = [
@@ -12,9 +12,14 @@ include = [
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
 oreo = { git = "https://github.com/syvlorg/oreo.git", branch = "main" }
+py = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
+poetry = "*"
+poetry2setup = "*"
+pytest-hylang = "*"
+pytest-randomly = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

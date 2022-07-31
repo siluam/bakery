@@ -2,6 +2,7 @@
 (.install rich.traceback :show-locals True)
 
 (import builtins)
+(import py)
 (import sys)
 (import weakref)
 
@@ -12,21 +13,12 @@
 (import copy [copy deepcopy])
 (import functools [partial wraps])
 (import hy [mangle unmangle])
-
-;; TODO
-#_(import hyrule [coll?])
-
 (import inspect [isclass :as class?])
 (import itertools [chain filterfalse tee])
 (import more-itertools [peekable])
-
-;; TODO
-#_(import oreo [eclair either? flatten get-un-mangled int? recursive-unmangle tea first-last-n])
-
-;; TODO
 (import oreo [coll? eclair either? flatten get-un-mangled int? recursive-unmangle tea first-last-n])
-
 (import os [environ path :as osPath getcwd])
+(import pathlib [Path])
 (import rich [print inspect])
 (import rich.pretty [pretty-repr pprint])
 (import rich.progress [Progress])
@@ -43,13 +35,19 @@
      (except [ImportError]
              (import toolz [first])))
 
+(require hyrule [-> assoc unless])
+
 (defn split-and-flatten [iterable delim]
       (flatten (gfor j (flatten iterable)
                (if (isinstance delim bool)
                    (.split j)
                    (.split j (str delim))))))
 
-(defn check [self program] (return (if (is (which program) None) None self)))
+(defn check [self program] (-> program
+                               (which)
+                               (is None)
+                               (if None self)
+                               (return)))
 
 (defclass frosting [tea Slots]
 
@@ -59,9 +57,9 @@
             self.iterable (coll? output)
             self.output output)
 
-(cond [self.dict-like (.__init__ (super) #** self.output)]
-      [self.iterable (.__init__ (super) #* self.output)]
-      [True (.__init__ (super) self.output)])
+(cond self.dict-like (.__init__ (super) #** self.output)
+      self.iterable (.__init__ (super) #* self.output)
+      True (.__init__ (super) self.output))
 
 )
 
@@ -71,9 +69,9 @@
                       (.values self))))
 
 (defn __call__ [self]
-      (return (cond [(not self.iterable) self.output]
-                    [self.dict-like (D (.items self))]
-                    [True (.values self)])))
+      (return (cond (not self.iterable) self.output
+                    self.dict-like (D (.items self))
+                    True (.values self))))
 
 )
 
@@ -85,182 +83,152 @@
 
 (setv __slots__ [ "__weakref__" ])
 
-#@(classmethod (defn cls/freezer [cls value freezer]
-                      (cond [(not value) (setv freezer [])]
-                            [(coll? value)
-                             (do (if (not (isinstance freezer list))
-                                     (setv freezer []))
-                                 (.extend freezer value)
-                                 (setv freezer (flatten (gfor i freezer :if i i))))]
-                            [True (raise (TypeError f"Sorry! The 'm/freezer' can only accept non-string iterables or non-truthy values!"))])
-                      (return freezer)))
+(defn [classmethod] cls/freezer [cls value freezer]
+      (cond (not value) (setv freezer [])
+            (coll? value)
+            (do (unless (isinstance freezer list) (setv freezer []))
+                (.extend freezer value)
+                (setv freezer (flatten (gfor i freezer :if i i))))
+            True (raise (TypeError f"Sorry! The 'm/freezer' can only accept non-string iterables or non-truthy values!")))
+      (return freezer))
 
-#@(classmethod (defn cls/string-prefix [cls b a] (+ a b)))
+(defn [classmethod] cls/string-prefix [cls b a] (+ a b))
 
-#@(classmethod (defn cls/process-attr [cls attr prefix]
-                     (setv attr (unmangle attr))
-                     (if (.startswith attr prefix)
-                         (.replace attr "_" "-")
-                         (mangle (.replace (.cls/string-prefix cls (.lstrip attr "_") prefix) "_" "-")))))
+(defn [classmethod] cls/process-attr [cls attr prefix]
+      (setv attr (unmangle attr))
+      (if (.startswith attr prefix)
+          (.replace attr "_" "-")
+          (mangle (.replace (.cls/string-prefix cls (.lstrip attr "_") prefix) "_" "-"))))
 
-#@(classmethod (defn cls/is-attr [cls attr]
-                     (setv attr (unmangle attr))
-                     (cond [(.endswith attr "__") (return "__")]
-                           [(.startswith attr "__") (return "internal/")]
-                           [(.startswith attr "_") (return "m/")]
-                           [(.startswith attr "internal/") (return "internal/")]
-                           [(.startswith attr "m/") (return "m/")]
-                           [True (return False)])))
+(defn [classmethod] cls/is-attr [cls attr]
+      (setv attr (unmangle attr))
+      (cond (.endswith attr "__") (return "__")
+            (.startswith attr "__") (return "internal/")
+            (.startswith attr "_") (return "m/")
+            (.startswith attr "internal/") (return "internal/")
+            (.startswith attr "m/") (return "m/")
+            True (return False)))
 
-#@(classmethod (defn cls/process-if-attr [cls attr [return-bool False]]
-                     (setv attr (unmangle attr))
-                     (return (if (setx prefix (.cls/is-attr cls attr))
-                                 (mangle (.cls/process-attr cls attr prefix))
-                                 (if return-bool False (mangle attr))))))
+(defn [classmethod] cls/process-if-attr [cls attr [return-bool False]]
+      (setv attr (unmangle attr))
+      (return (if (setx prefix (.cls/is-attr cls attr))
+                  (mangle (.cls/process-attr cls attr prefix))
+                  (if return-bool False (mangle attr)))))
 
-#@(classmethod (defn cls/remove-if-not-attr [cls dct] (return (dfor [key value] (.items dct) :if (.cls/is-attr cls key) [ key value ]))))
+(defn [classmethod] cls/remove-if-not-attr [cls dct] (return (dfor [key value] (.items dct) :if (.cls/is-attr cls key) [ key value ])))
 
-#@(classmethod (defn cls/trim-attr-prefix [cls attr]
-                     (setv attr (unmangle attr))
-                     (let [prefix (.cls/is-attr cls attr)]
-                          (return (, prefix (if prefix (mangle (.removeprefix attr prefix)) (mangle attr)))))))
+(defn [classmethod] cls/trim-attr-prefix [cls attr]
+      (setv attr (unmangle attr))
+      (let [prefix (.cls/is-attr cls attr)]
+           (return #(prefix (if prefix (mangle (.removeprefix attr prefix)) (mangle attr))))))
 
-#@(classmethod (defn cls/get-attr [cls dct attr [default False]]
-                     (setv attr (unmangle attr))
-                     (setv [prefix cls/get-attr/attr] (.cls/trim-attr-prefix cls attr))
-                     (return (or (.get dct (mangle (+ "__" cls/get-attr/attr)) False)
-                                 (.get dct (mangle (+ "_" cls/get-attr/attr)) False)
-                                 (.get dct (mangle (+ "internal/" cls/get-attr/attr)) False)
-                                 (.get dct (mangle (+ "m/" cls/get-attr/attr)) default)))))
+(defn [classmethod] cls/get-attr [cls dct attr [default False]]
+      (setv attr (unmangle attr))
+      (setv [prefix cls/get-attr/attr] (.cls/trim-attr-prefix cls attr))
+      (return (or (.get dct (mangle (+ "__" cls/get-attr/attr)) False)
+                  (.get dct (mangle (+ "_" cls/get-attr/attr)) False)
+                  (.get dct (mangle (+ "internal/" cls/get-attr/attr)) False)
+                  (.get dct (mangle (+ "m/" cls/get-attr/attr)) default))))
 
-#@(property (defn m/freezer [self] (return self.internal/freezer)))
-#@(m/freezer.setter (defn m/freezer [self value] (setv self.internal/freezer (.cls/freezer self.__class__ value self.internal/freezer))))
+(defn [property] m/freezer [self] (return self.internal/freezer))
+(defn [m/freezer.setter] m/freezer [self value] (setv self.internal/freezer (.cls/freezer self.__class__ value self.internal/freezer)))
 
-#@(property (defn m/return-command [self] (return self.internal/return-command)))
-#@(m/return-command.setter (defn m/return-command [self value]
-                                 (setv self.internal/return-command (bool value))
-                                 (if value (setv self.m/type str))))
+(defn [property] m/return-command [self] (return self.internal/return-command))
+(defn [m/return-command.setter] m/return-command [self value] (setv self.internal/return-command (bool value)) (when value (setv self.m/type str)))
 
-#@(property (defn m/print-command [self] (return self.internal/print-command)))
-#@(m/print-command.setter (defn m/print-command [self value]
-                                (setv self.internal/print-command (bool value))
-                                (if value (setv self.m/return-command True))))
+(defn [property] m/print-command [self] (return self.internal/print-command))
+(defn [m/print-command.setter] m/print-command [self value] (setv self.internal/print-command (bool value)) (when value (setv self.m/return-command True)))
 
-#@(property (defn m/run [self] (return (= self.m/capture "run"))))
-#@(m/run.setter (defn m/run [self value] (if value (setv self.m/capture "run"))))
+(defn [property] m/run [self] (return (= self.m/capture "run")))
+(defn [m/run.setter] m/run [self value] (when value (setv self.m/capture "run")))
 
-#@(property (defn m/sort [self] (return self.internal/sort)))
-#@(m/sort.setter (defn m/sort [self value]
-                       (if (or (is value None)
-                               value)
-                           (setv dict-like (isinstance value dict)
-                                 iterable (coll? value)
-                                 reverse-default False
-                                 key-default None
-                                 self.internal/sort (D { "reverse" (cond [dict-like (.get value "reverse" reverse-default)]
-                                                                         [iterable (get (or (lfor item value :if (isinstance item bool) item)
-                                                                                            (, reverse-default)) 0)]
-                                                                         [(isinstance value bool) value]
-                                                                         [True reverse-default])
-                                                         "key" (cond [dict-like (.get value "key" key-default)]
-                                                                     [iterable (get (or (lfor item value :if (callable item) item)
-                                                                                        (, key-default)) 0)]
-                                                                     [(callable value) value]
-                                                                     [True key-default]) })))))
+(defn [property] m/sort [self] (return self.internal/sort))
+(defn [m/sort.setter] m/sort [self value]
+      (when (or (is value None) value)
+            (setv dict-like (isinstance value dict)
+                  iterable (coll? value)
+                  reverse-default False
+                  key-default None
+                  self.internal/sort (D { "reverse" (cond dict-like (.get value "reverse" reverse-default)
+                                                          iterable (get (or (lfor item value :if (isinstance item bool) item) #(reverse-default)) 0)
+                                                          (isinstance value bool) value
+                                                          True reverse-default)
+                                          "key" (cond dict-like (.get value "key" key-default)
+                                                      iterable (get (or (lfor item value :if (callable item) item) #(key-default)) 0)
+                                                      (callable value) value
+                                                      True key-default) }))))
 
-#@(property (defn m/filter [self] (return self.internal/filter)))
-#@(m/filter.setter (defn m/filter [self value]
-                         (if (or (is value None)
-                                 value)
-                             (setv dict-like (isinstance value dict)
-                                   iterable (coll? value)
-                                   reverse-default False
-                                   key-default None
-                                   self.internal/filter (D { "reverse" (cond [dict-like (.get value "reverse" reverse-default)]
-                                                                             [iterable (get (or (lfor item value :if (isinstance item bool) item)
-                                                                                                (, reverse-default)) 0)]
-                                                                             [(isinstance value bool) value]
-                                                                             [True reverse-default])
-                                                             "key" (cond [dict-like (.get value "key" key-default)]
-                                                                         [iterable (get (or (lfor item value :if (callable item) item)
-                                                                                            (, key-default)) 0)]
-                                                                         [(callable value) value]
-                                                                         [True key-default]) })))))
+(defn [property] m/filter [self] (return self.internal/filter))
+(defn [m/filter.setter] m/filter [self value]
+      (when (or (is value None) value)
+            (setv dict-like (isinstance value dict)
+                  iterable (coll? value)
+                  reverse-default False
+                  key-default None
+                  self.internal/filter (D { "reverse" (cond dict-like (.get value "reverse" reverse-default)
+                                                            iterable (get (or (lfor item value :if (isinstance item bool) item) #(reverse-default)) 0)
+                                                            (isinstance value bool) value
+                                                            True reverse-default)
+                                            "key" (cond dict-like (.get value "key" key-default)
+                                                        iterable (get (or (lfor item value :if (callable item) item) #(key-default)) 0)
+                                                        (callable value) value
+                                                        True key-default) }))))
 
-#@(property (defn m/n-lines [self] (return self.internal/n-lines)))
-#@(m/n-lines.setter (defn m/n-lines [self value]
-                       (setv dict-like (isinstance value dict)
-                             iterable (coll? value)
-                             last-default False
-                             number-default 0
-                             std-default "stdout"
-                             std (cond [dict-like (.get value "std" std-default)]
-                                       [iterable (get (or (lfor item value :if (isinstance item str) item)
-                                                          (, std-default)) 0)]
-                                       [(isinstance value str) value]
-                                       [True std-default])
-                             self.internal/n-lines (D {
+(defn [property] m/n-lines [self] (return self.internal/n-lines))
+(defn [m/n-lines.setter] m/n-lines [self value]
+      (setv dict-like (isinstance value dict)
+            iterable (coll? value)
+            last-default False
+            number-default 0
+            std-default "stdout"
+            std (cond dict-like (.get value "std" std-default)
+                      iterable (get (or (lfor item value :if (isinstance item str) item) #(std-default)) 0)
+                      (isinstance value str) value
+                      True std-default)
+            self.internal/n-lines (D {
 
-"last" (cond [dict-like (.get value "last" last-default)]
-             [iterable (get (or (lfor item value :if (isinstance item bool) item)
-                                (, last-default)) 0)]
-             [(isinstance value bool) value]
-             [True last-default])
-"number" (cond [dict-like (.get value "number" number-default)]
-               [iterable (get (or (lfor item value :if (int? item) item)
-                                  (, number-default)) 0)]
-               [(int? value) value]
-               [True number-default])
+                                        "last" (cond dict-like (.get value "last" last-default)
+                                                     iterable (get (or (lfor item value :if (isinstance item bool) item) #(last-default)) 0)
+                                                     (isinstance value bool) value
+                                                     True last-default)
+                                        "number" (cond dict-like (.get value "number" number-default)
+                                                       iterable (get (or (lfor item value :if (int? item) item) #(number-default)) 0)
+                                                       (int? value) value
+                                                       True number-default)
 
-"std" (if std
-          (if (not (in std (setx stds (, "stdout" "stderr" "both"))))
-              (raise (TypeError #[f[Sorry! You must choose an `std' value from: {(.join ", " stds)}]f]))
-              std))}))))
+                                        "std" (when std (if (in std (setx stds #("stdout" "stderr" "both")))
+                                                         std
+                                                         (raise (TypeError #[f[Sorry! You must choose an `std' value from: {(.join ", " stds)}]f]))))})))
 
-#@(property (defn m/c [self] (return self.m/context)))
-#@(m/c.setter (defn m/c [self value] (setv self.m/context (bool value))))
+(defn [property] m/c [self] (return self.m/context))
+(defn [m/c.setter] m/c [self value] (setv self.m/context (bool value)))
 
-#@(property (defn m/capture [self] (return self.internal/capture)))
-#@(m/capture.setter (defn m/capture [self value]
-                          (if (not (in value self.m/captures))
-                              (raise (TypeError #[f[Sorry! Capture type "{value}" is not permitted! Choose from one of: {(.join ", " self.m/captures)}]f])))
-                          (setv self.internal/capture value)))
+(defn [property] m/capture [self] (return self.internal/capture))
+(defn [m/capture.setter] m/capture [self value]
+      (if (in value self.m/captures)
+          (setv self.internal/capture value)
+          (raise (TypeError #[f[Sorry! Capture type "{value}" is not permitted! Choose from one of: {(.join ", " self.m/captures)}]f]))))
 
-#@(property (defn m/sudo [self] (return self.internal/sudo)))
-#@(m/sudo.setter (defn m/sudo [self value]
-                       (setv error-message
-                             #[[Sorry! `m/sudo' must be a string of "i" or "s", or a dict-like object of length 1, key "i" or "s", and value `user', or a boolean!]]
-                             self.internal/sudo (if value
-                                                    (if (or (isinstance value bool) (= (len value) 1))
-                                                        (cond [(isinstance value str)
-                                                               (if (in value (, "i" "s"))
-                                                                   { value "root" }
-                                                                   (raise (ValueError error-message)))]
-                                                              [(isinstance value bool) value]
+(defn [property] m/sudo [self] (return self.internal/sudo))
+(defn [m/sudo.setter] m/sudo [self value]
+      (setv error-message #[[Sorry! `m/sudo' must be a string of "i" or "s", or a dict-like object of length 1, key "i" or "s", and value `user', or a boolean!]]
+            self.internal/sudo (if value
+                                   (if (or (isinstance value bool) (= (len value) 1))
+                                       (cond (isinstance value str) (if (in value #("i" "s")) { value "root" } (raise (ValueError error-message)))
+                                             (isinstance value bool) value
+                                             (isinstance value dict) (if (-> value (.keys) (iter) (next) (in #("i" "s"))) value (raise (ValueError error-message))))
+                                       (raise (ValueError error-message)))
+                                   False)))
 
-                                                              ;; TODO
-                                                              #_[(isinstance value dict) (if (-> value (.keys) (iter) (next) (in (, "i" "s")))
-                                                                                           value
-                                                                                           (raise (ValueError error-message)))]
+(defn [property] m/exports [self] (return self.internal/exports))
+(defn [m/exports.setter] m/exports [self value]
+      (setv self.internal/exports value)
+      (when value (setv self.m/intact-command (bool value))))
 
-                                                              ;; TODO
-                                                              [(isinstance value dict) (if (in (next (iter (.keys value))) (, "i" "s"))
-                                                                                           value
-                                                                                           (raise (ValueError error-message)))]
-
-                                                                                           )
-                                                        (raise (ValueError error-message)))
-                                                    False))))
-
-#@(property (defn m/exports [self] (return self.internal/exports)))
-#@(m/exports.setter (defn m/exports [self value]
-                          (setv self.internal/exports value)
-                          (if value (setv self.m/intact-command (bool value)))))
-
-#@(property (defn m/new-exports [self] (return self.internal/new-exports)))
-#@(m/new-exports.setter (defn m/new-exports [self value]
-                              (setv self.internal/new-exports value)
-                              (if value (setv self.m/intact-command (bool value)))))
+(defn [property] m/new-exports [self] (return self.internal/new-exports))
+(defn [m/new-exports.setter] m/new-exports [self value]
+      (setv self.internal/new-exports value)
+      (when value (setv self.m/intact-command (bool value))))
 
 (defn __init__ [
         self
@@ -274,9 +242,9 @@
 
 (setv self.m/type-groups (D {}))
 
-(setv self.m/type-groups.acceptable-args [str int])
+(setv self.m/type-groups.acceptable-args [str int Path py._path.local.LocalPath])
 
-(setv self.m/type-groups.reprs (, "str" "repr"))
+(setv self.m/type-groups.reprs #("str" "repr"))
 
 (setv self.m/type-groups.this-class-subclass [self.__class__])
 (.extend self.m/type-groups.acceptable-args self.m/type-groups.this-class-subclass)
@@ -285,7 +253,7 @@
 (.extend self.m/type-groups.acceptable-args self.m/type-groups.genstrings)
 (setv self.m/type-groups.genstrings (tuple self.m/type-groups.genstrings))
 
-(setv self.m/type-groups.excluded-classes (, "type" "filter"))
+(setv self.m/type-groups.excluded-classes #("type" "filter"))
 
 (setv self.m/subcommand (D {})
       self.m/subcommand.default "supercalifragilisticexpialidocious"
@@ -328,15 +296,15 @@
 
 (if program-
     (do (setv self.m/program (or (.replace (unmangle program-) "_" "-") ""))
-        (if (in "--" self.m/program)
-            (setv self.m/program (.join osPath (getcwd) (.replace self.m/program "--" "."))))
-        (if (not (check self self.m/program))
-            (raise (ImportError f"cannot import name '{self.m/program}' from '{self.__class__.__module__}'")))
+        (when (in "--" self.m/program)
+              (setv self.m/program (.join osPath (getcwd) (.replace self.m/program "--" "."))))
+        (unless (check self self.m/program)
+                (raise (ImportError f"cannot import name '{self.m/program}' from '{self.__class__.__module__}'")))
         (setv self.m/base-program (or base-program- self.m/program)))
     (setv self.m/program ""
           self.m/base-program (or base-program- self.m/program)))
 
-(setv self.m/return-categories (,
+(setv self.m/return-categories #(
     "stdout"
     "stderr"
     "return-codes"
@@ -386,7 +354,7 @@
 (setv self.m/frozen False)
 (setv self.m/settings.defaults.m/frozen (deepcopy self.m/frozen))
 
-(setv self.m/captures (, "stdout" "stderr" "both" "run"))
+(setv self.m/captures #("stdout" "stderr" "both" "run"))
 (setv self.internal/capture "stdout")
 (setv self.m/settings.defaults.m/capture (deepcopy self.internal/capture))
 
@@ -444,7 +412,7 @@
 (setv self.m/input None)
 (setv self.m/settings.defaults.m/input (deepcopy self.m/input))
 
-(setv self.m/regular-args (,))
+(setv self.m/regular-args #())
 (setv self.m/settings.defaults.m/regular-args (deepcopy self.m/regular-args))
 
 (setv self.m/regular-kwargs (D {}))
@@ -504,51 +472,47 @@
       (.command/reset self))
 
 (defn ct/filter [self input]
-      (if self.m/filter
-          (do (setv string-like (isinstance input str)
-                    input (if self.m/filter.reverse
-                              (tuple (filterfalse self.m/filter.key input))
-                              (tuple (filter self.m/filter.key input))))
-               (if string-like (setv input (.join "" input)))))
+      (when self.m/filter
+            (setv string-like (isinstance input str)
+                  input (if self.m/filter.reverse
+                            (tuple (filterfalse self.m/filter.key input))
+                            (tuple (filter self.m/filter.key input))))
+            (when string-like (setv input (.join "" input))))
       input)
 
 (defn ct/sort [self input]
-      (if self.m/sort
-          (do (setv string-like (isinstance input str)
-                    input (sorted input #** self.m/sort))
-              (if string-like (setv input (.join "" input)))))
+      (when self.m/sort
+            (setv string-like (isinstance input str)
+                  input (sorted input #** self.m/sort))
+            (when string-like (setv input (.join "" input))))
       input)
 
 (defn ct/convert [self input [type/type None]]
       (setv type/type/type (or type/type self.m/type))
       (if input
-          (do (if (isinstance input self.m/type-groups.genstrings)
-                  (let [frosted-input (input)]
-                       (cond [(isinstance frosted-input str)
-                              (setv input [(.fill (TextWrapper :break-long-words False :break-on-hyphens False) frosted-input)])]
-                             [(isinstance frosted-input int) (if (.misc/type-name-is-string self :type/type type/type/type)
-                                                                 (return (pretty-repr frosted-input))
-                                                                 (return frosted-input))])))
+          (do (when (isinstance input self.m/type-groups.genstrings)
+                    (let [frosted-input (input)]
+                         (cond (isinstance frosted-input str) (setv input [(.fill (TextWrapper :break-long-words False :break-on-hyphens False) frosted-input)])
+                               (isinstance frosted-input int) (if (.misc/type-name-is-string self :type/type type/type/type)
+                                                                  (return (pretty-repr frosted-input))
+                                                                  (return frosted-input)))))
               (setv input (if self.m/sort-then-filter
                               (.ct/filter self (.ct/sort self input))
                               (.ct/sort self (.ct/filter self input))))
-              (return (cond [(and self.m/progress (coll? input)) (eclair input (.m/command self) self.m/progress)]
-                            [(.misc/type-name-is-string self :type/type type/type/type) (.join "\n" input)]
-                            [True (if (and self.m/sort (either? type/type/type list))
-                                      input
-                                      (type/type/type input))])))
+              (return (cond (and self.m/progress (coll? input)) (eclair input (.m/command self) self.m/progress)
+                            (.misc/type-name-is-string self :type/type type/type/type) (.join "\n" input)
+                            True (if (and self.m/sort (either? type/type/type list)) input (type/type/type input)))))
           (return (type/type/type input))))
 
 (defn subcommand/get [self #** kwargs]
       (setv self.m/subcommand.current.intact (.cls/get-attr self.__class__ kwargs "m/intact-subcommand"))
       (setv subcommand (.cls/get-attr self.__class__ kwargs "m/subcommand" :default self.m/subcommand.default))
-      (if (!= subcommand self.m/subcommand.default)
-          (setv self.m/subcommand.current.unprocessed subcommand)))
+      (when (!= subcommand self.m/subcommand.default) (setv self.m/subcommand.current.unprocessed subcommand)))
 
 (defn subcommand/process [self]
-    (setv self.m/subcommand.current.processed (if self.m/subcommand.current.intact
-                                                  self.m/subcommand.current.unprocessed
-                                                  (.replace (unmangle self.m/subcommand.current.unprocessed) "_" "-"))))
+      (setv self.m/subcommand.current.processed (if self.m/subcommand.current.intact
+                                                    self.m/subcommand.current.unprocessed
+                                                    (.replace (unmangle self.m/subcommand.current.unprocessed) "_" "-"))))
 
 (defn var/set-defaults [self]
       (for [[key value] (.items self.m/settings.defaults)]
@@ -571,8 +535,8 @@
               (.subcommand/get self #** (. self m/kwargs baked [subcommand-]))
               (.subcommand/get self #** kwargs))
           (setv self.m/subcommand.current.unprocessed subcommand-))
-      (if (not self.m/subcommand.current.unprocessed)
-          (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
+      (unless self.m/subcommand.current.unprocessed
+              (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
       (.subcommand/process self)
 
       (setv self.m/current-settings.subcommand (get-un-mangled self.m/current-settings.program
@@ -599,63 +563,27 @@
             [subcommand "supercalifragilisticexpialidocious"]
             [set-defaults True]]
       (setv self.m/current-settings (D {}))
-      (for [m (, "settings" "subcommand" "args" "kwargs")]
-           
-           ;; TODO
-           #_(assoc (getattr self (mangle (+ "m/" m))) "current" (D {}))
-
-           ;; TODO
-           (setv (. (getattr self (mangle (+ "m/" m))) current) (D {}))
-
-           )
+      (for [m #("settings" "subcommand" "args" "kwargs")]
+           (assoc (getattr self (mangle (+ "m/" m))) "current" (D {})))
       (setv self.m/args.called [])
             self.m/kwargs.called (D {})
-      (if world
-          (for [store (.chain- self)]
-               (if args (setv store.m/args.world []))
-               (if kwargs (setv store.m/kwargs.world (D {})))))
-      (if instantiated
-          (do (if args (setv self.m/args.instantiated []))
-              (if kwargs (setv self.m/args.instantiated (D {})))))
-      (if baked
-          (do (if args
+      (when world
+            (for [store (.chain- self)]
+                 (when args (setv store.m/args.world []))
+                 (when kwargs (setv store.m/kwargs.world (D {})))))
+      (when instantiated
+            (when args (setv self.m/args.instantiated []))
+            (when kwargs (setv self.m/args.instantiated (D {}))))
+      (when baked
+            (when args
                   (if all-subs
-                      (do (setv self.m/args.baked (D {}))
-
-                          ;; TODO
-                          #_(assoc self.m/args.baked self.m/subcommand.default [])
-
-                          ;; TODO
-                          (setv (. self.m/args.baked [self.m/subcommand.default]) [])
-
-                          )
-                          
-                          ;; TODO
-                          #_(assoc self.m/args.baked subcommand [])
-
-                          ;; TODO
-                          (setv (. self.m/args.baked [subcommand]) [])
-                          
-                          ))
-              (if kwargs
+                      (do (setv self.m/args.baked (D {})) (assoc self.m/args.baked self.m/subcommand.default []))
+                      (assoc self.m/args.baked subcommand [])))
+            (when kwargs
                   (if all-subs
-                      (do (setv self.m/kwargs.baked (D {}))
-                          
-                          ;; TODO
-                          #_(assoc self.m/kwargs.baked self.m/subcommand.default (D {}))
-
-                          ;; TODO
-                          (setv (. self.m/kwargs.baked [self.m/subcommand.default]) (D {}))
-                          )
-                          
-                          ;; TODO
-                          #_(assoc self.m/kwargs.baked subcommand (D {}))
-
-                          ;; TODO
-                          (setv (. self.m/kwargs.baked [subcommand]) (D {}))
-
-                          ))))
-      (if set-defaults (.var/set-defaults self)))
+                      (do (setv self.m/kwargs.baked (D {})) (assoc self.m/kwargs.baked self.m/subcommand.default (D {})))
+                      (assoc self.m/kwargs.baked subcommand (D {})))))
+      (when set-defaults (.var/set-defaults self)))
 
 (defn var/process-all [self #* args #** kwargs]
       (.var/process-args self #* self.m/args.world)
@@ -669,63 +597,42 @@
       (.var/process-kwargs self #** kwargs))
 
 (defn var/process-args [self #* args [starter False]]
-      (for [arg args]
-           (if (isinstance arg (tuple self.m/type-groups.acceptable-args))
-               (if (isinstance (. self m/args current unprocessed [(if starter "starter" "regular")]) list)
-                   (.append (. self m/args current unprocessed [(if starter "starter" "regular")]) arg)
-
-                   ;; TODO
-                   #_(assoc self.m/args.current.unprocessed (if starter "starter" "regular") [arg])
-                   
-                   ;; TODO
-                   (setv (. self.m/args.current.unprocessed [(if starter "starter" "regular")]) [arg])
-                   
-                   )
-               (setv self.m/settings.current.m/frozen True))))
+      (let [ sr (if starter "starter" "regular") ]
+           (for [arg args]
+                (if (isinstance arg (tuple self.m/type-groups.acceptable-args))
+                    (if (isinstance (. self m/args current unprocessed [sr]) list)
+                        (.append (. self m/args current unprocessed [sr]) arg)
+                        (assoc self.m/args.current.unprocessed sr [arg]))
+                    (setv self.m/settings.current.m/frozen True)))))
 
 (defn var/process-kwargs [self #** kwargs]
       (defn inner [itr [starter False]]
             (for [[key value] (.items itr)]
                  (if (setx var/process/key-prefix (.cls/is-attr self.__class__ key))
                      (let [var/process/key (.cls/process-attr self.__class__ key var/process/key-prefix)]
-                          (cond [(= var/process/key "m/starter-args")
-                                 (.var/process-args self #* (if (isinstance value str) (, value) value) :starter True)]
-                                [(= var/process/key "m/starter-kwargs") (inner value :starter True)]
+                          (cond (= var/process/key "m/starter-args") (.var/process-args self #* (if (isinstance value str) #(value) value) :starter True)
+                                (= var/process/key "m/starter-kwargs") (inner value :starter True)
 
-                                [(= var/process/key "m/regular-args") (.var/process-args self #* value)]
+                                (= var/process/key "m/regular-args") (.var/process-args self #* value)
 
-                                [(= var/process/key "m/regular-kwargs") (inner value)]
+                                (= var/process/key "m/regular-kwargs") (inner value)
 
-                                [(let [trimmed-attr (get (.cls/trim-attr-prefix self.__class__ var/process/key) 1)]
-                                      (and (not (in trimmed-attr self.m/type-groups.excluded-classes))
-                                           (class? (setx literal-attr (.get (globals) trimmed-attr (getattr builtins trimmed-attr None))))
-                                           value))
-                                 (setv self.m/settings.current.m/type literal-attr)]
+                                (let [trimmed-attr (-> self.__class__ (.cls/trim-attr-prefix var/process/key) (get 1))]
+                                     (and (not (in trimmed-attr self.m/type-groups.excluded-classes))
+                                          (class? (setx literal-attr (.get (globals) trimmed-attr (getattr builtins trimmed-attr None))))
+                                          value))
+                                (setv self.m/settings.current.m/type literal-attr)
 
-                                [True (if (not (in var/process/key (, "m/subcommand")))
-                                          
-                                          ;; TODO
-                                          #_(assoc self.m/settings.current key value)
-                                          
-                                          ;; TODO
-                                          (setv (. self.m/settings.current [key]) value)
-                                          
-                                          )]))
-
-                     ;; TODO
-                     #_(assoc (. self m/kwargs current unprocessed [(if starter "starter" "regular")]) key value)
-                     
-                     ;; TODO
-                     (setv (. self m/kwargs current unprocessed [(if starter "starter" "regular")] [key]) value)
-                     
-                     )))
+                                True (when (not (in var/process/key #("m/subcommand")))
+                                           (assoc self.m/settings.current key value))))
+                     (assoc (. self m/kwargs current unprocessed [(if starter "starter" "regular")]) key value))))
       (inner kwargs))
 
 (defn var/apply [self]
     (for [[key value] (.items self.m/settings.current)]
          (setattr self key value)))
 
-(defn command/reset [self] (if (not self.m/frozen) (setv self.m/command (tea))))
+(defn command/reset [self] (unless self.m/frozen (setv self.m/command (tea))))
 
 (defn command/process-all [self]
       (for [i (range 2)]
@@ -733,200 +640,147 @@
            (.command/process-kwargs self :starter i)))
 
 (defn command/process-args [self [starter False]]
-      (for [arg (. self m/args current unprocessed [(if starter "starter" "regular")])]
-           (setv command/process-args/arg (cond [(isinstance arg self.m/type-groups.genstrings) (arg)]
-                                                [(isinstance arg int) (str arg)]
-                                                [(isinstance arg self.__class__) (arg :m/type str)]
-                                                [True arg]))
-           (if (isinstance (. self m/args current processed [(if starter "starter" "regular")]) list)
-               (.append (. self m/args current processed [(if starter "starter" "regular")]) command/process-args/arg)
-               
-               ;; TODO
-               #_(assoc self.m/args.current.processed (if starter "starter" "regular") [command/process-args/arg])
-               
-               ;; TODO
-               (setv (. self.m/args.current.processed [(if starter "starter" "regular")]) [command/process-args/arg])
-               
-               )))
+      (let [ sr (if starter "starter" "regular") ]
+           (for [arg (. self m/args current unprocessed [sr])]
+                (setv command/process-args/arg (cond (isinstance arg self.m/type-groups.genstrings) (arg)
+                                                     (isinstance arg int) (str arg)
+                                                     (isinstance arg self.__class__) (arg :m/type str)
+                                                     True arg))
+                (if (isinstance (. self m/args current processed [sr]) list)
+                    (.append (. self m/args current processed [sr]) command/process-args/arg)
+                    (assoc self.m/args.current.processed sr [command/process-args/arg])))))
 
 (defn command/process-kwargs [self [starter False]]
       (defn inner [value]
-            (setv new-value (cond [(isinstance value self.m/type-groups.genstrings) (value)]
+            (setv new-value (cond (isinstance value self.m/type-groups.genstrings) (value)
 
-                                  [(isinstance value bool) None]
-                                  [(isinstance value int) (str value)]
+                                  (isinstance value bool) None
+                                  (isinstance value int) (str value)
 
-                                  [(isinstance value self.__class__) (value :m/type str)]
-                                  [True value]))
+                                  (isinstance value self.__class__) (value :m/type str)
+                                  True value))
             (return new-value))
-      (for [[key value] (.items (. self m/kwargs current unprocessed [(if starter "starter" "regular")]))]
-           (if value
-               (let [aa (tuple (+ self.m/type-groups.acceptable-args [dict bool]))]
-                    (if (isinstance value aa)
-                        (if (isinstance value dict)
-                            (let [no-value-options ["repeat" "repeat-with-values" "rwv"]
-                                  options (+ no-value-options ["fixed" "dos" "one-dash" "value"])
-                                  dct-value (.get value "value" None)]
-                                 (cond [dct-value (setv command/process-kwargs/value (inner dct-value))]
-                                       [(any (gfor o (.keys value) (in o no-value-options))) (setv command/process-kwargs/value None)]
-                                       [True (raise (AttributeError #[f[Sorry! You must use the "value" keyword if you do not use any of the following: {(.join ", " no-value-options)}]f]))])
-                                 (for [[k v] (.items value)]
-                                       (if (in k options)
-                                           (if v
-                                               (setv command/process-kwargs/key (if (or (= k "fixed")
-                                                                                        self.m/fixed)
-                                                                                    key
-                                                                                    (.replace (unmangle key) "_" "-"))
-                                                     command/process-kwargs/key (cond [(or (= k "dos")
-                                                                                           self.m/dos)
-                                                                                       (+ "/" command/process-kwargs/key)]
-                                                                                      [(or (= k "one-dash")
-                                                                                           self.m/one-dash
-                                                                                           (= (len command/process-kwargs/key) 1))
-                                                                                       (+ "-" command/process-kwargs/key)]
-                                                                                      [True (+ "--" command/process-kwargs/key)])
-                                                     command/process-kwargs/key-values (cond [(= k "repeat") (lfor i (range v) command/process-kwargs/key)]
-                                                                                             [(in k (, "repeat-with-values" "rwv"))
-                                                                                              (do (setv key-values [])
-                                                                                                  (for [j v]
-                                                                                                       (.append key-values command/process-kwargs/key)
-                                                                                                       (if (setx l (inner j))
-                                                                                                           (do (if (isinstance (. self
-                                                                                                                                  m/kwargs
-                                                                                                                                  current
-                                                                                                                                  processed
-                                                                                                                                  [(if starter
-                                                                                                                                       "starter-values"
-                                                                                                                                       "regular-values")]) list)
-                                                                                                                   (.append (. self
+      (setv sr (if starter "starter" "regular"))
+      (for [[key value] (.items (. self m/kwargs current unprocessed [sr]))]
+           (when value
+                 (let [aa (tuple (+ self.m/type-groups.acceptable-args [dict bool]))]
+                      (if (isinstance value aa)
+                          (if (isinstance value dict)
+                              (let [no-value-options ["repeat" "repeat-with-values" "rwv"]
+                                    options (+ no-value-options ["fixed" "dos" "one-dash" "value"])
+                                    dct-value (.get value "value" None)]
+                                   (cond dct-value (setv command/process-kwargs/value (inner dct-value))
+                                         (any (gfor o (.keys value) (in o no-value-options))) (setv command/process-kwargs/value None)
+                                         True (raise (AttributeError #[f[Sorry! You must use the "value" keyword if you do not use any of the following: {(.join ", " no-value-options)}]f])))
+                                   (for [[k v] (.items value)]
+                                         (if (in k options)
+                                             (if v
+                                                 (setv command/process-kwargs/key (if (or (= k "fixed")
+                                                                                          self.m/fixed)
+                                                                                      key
+                                                                                      (.replace (unmangle key) "_" "-"))
+                                                       command/process-kwargs/key (cond (or (= k "dos")
+                                                                                            self.m/dos)
+                                                                                        (+ "/" command/process-kwargs/key)
+                                                                                        (or (= k "one-dash")
+                                                                                            self.m/one-dash
+                                                                                            (= (len command/process-kwargs/key) 1))
+                                                                                        (+ "-" command/process-kwargs/key)
+                                                                                        True (+ "--" command/process-kwargs/key))
+                                                       command/process-kwargs/key-values (cond (= k "repeat")
+                                                                                               (lfor i (range v) command/process-kwargs/key)
+                                                                                               (in k #("repeat-with-values" "rwv"))
+                                                                                               (do (setv key-values [])
+                                                                                                   (for [j v]
+                                                                                                        (.append key-values command/process-kwargs/key)
+                                                                                                        (when (setx l (inner j))
+                                                                                                            (if (isinstance (. self
                                                                                                                                m/kwargs
                                                                                                                                current
                                                                                                                                processed
                                                                                                                                [(if starter
                                                                                                                                     "starter-values"
-                                                                                                                                    "regular-values")]) l)
+                                                                                                                                    "regular-values")]) list)
+                                                                                                                (.append (. self
+                                                                                                                            m/kwargs
+                                                                                                                            current
+                                                                                                                            processed
+                                                                                                                            [(if starter
+                                                                                                                                 "starter-values"
+                                                                                                                                 "regular-values")]) l)
+                                                                                                                (assoc self.m/kwargs.current.processed
+                                                                                                                       (if starter
+                                                                                                                           "starter-values"
+                                                                                                                           "regular-values") [l]))
+                                                                                                            (.append key-values l)))
+                                                                                                   key-values)))
+                                                 (setv command/process-kwargs/key None
+                                                       command/process-kwargs/value None
+                                                       command/process-kwargs/key-values None))
+                                             (raise (AttributeError #[f[Sorry! A keyword argument value of type dict can only have the following keys: {(.join ", " options)}]f])))))
+                                (setv command/process-kwargs/value (inner value)
+                                      command/process-kwargs/key (if self.m/fixed key (.replace (unmangle key) "_" "-"))
+                                      command/process-kwargs/key (cond self.m/dos (+ "/" command/process-kwargs/key)
+                                                                       (or self.m/one-dash
+                                                                           (= (len command/process-kwargs/key) 1))
+                                                                       (+ "-" command/process-kwargs/key)
+                                                                       True (+ "--" command/process-kwargs/key))
+                                      command/process-kwargs/key-values None))
 
-                                                                                                                   ;; TODO
-                                                                                                                   #_(assoc self.m/kwargs.current.processed
-                                                                                                                          (if starter
-                                                                                                                              "starter-values"
-                                                                                                                              "regular-values") [l])
-
-                                                                                                                   ;; TODO
-                                                                                                                   (setv (. self.m/kwargs.current.processed
-                                                                                                                          [(if starter
-                                                                                                                              "starter-values"
-                                                                                                                              "regular-values")]) [l])
-
-                                                                                                                              )
-                                                                                                               (.append key-values l))))
-                                                                                                  key-values)]
-                                                                                             [True None]))
-                                               (setv command/process-kwargs/key None
-                                                     command/process-kwargs/value None
-                                                     command/process-kwargs/key-values None))
-                                           (raise (AttributeError #[f[Sorry! A keyword argument value of type dict can only have the following keys: {(.join ", " options)}]f])))))
-                              [True (setv command/process-kwargs/value (inner value)
-                                          command/process-kwargs/key (if self.m/fixed key (.replace (unmangle key) "_" "-"))
-                                          command/process-kwargs/key (cond [self.m/dos (+ "/" command/process-kwargs/key)]
-                                                                           [(or self.m/one-dash
-                                                                                (= (len command/process-kwargs/key) 1))
-                                                                            (+ "-" command/process-kwargs/key)]
-                                                                           [True (+ "--" command/process-kwargs/key)])
-                                          command/process-kwargs/key-values None)])
-                        (raise (TypeError #[f[Sorry! Keyword argument value "{value}" of type "{(type value)}" must be one of the following types: {(.join ", " (gfor arg aa arg.__name__))}]f])))
-           (if (or command/process-kwargs/key-values
-                   command/process-kwargs/key)
-               (do (if (isinstance (. self m/kwargs current processed [(if starter "starter" "regular")]) list)
-                       (if command/process-kwargs/key-values
-                           (.extend (. self m/kwargs current processed [(if starter "starter" "regular")]) command/process-kwargs/key-values)
-                           (.append (. self m/kwargs current processed [(if starter "starter" "regular")]) command/process-kwargs/key))
-                       (if command/process-kwargs/key-values
-
-                           ;; TODO
-                           #_(assoc self.m/kwargs.current.processed (if starter "starter" "regular") command/process-kwargs/key-values)
-
-                           ;; TODO
-                           (setv (. self.m/kwargs.current.processed [(if starter "starter" "regular")]) command/process-kwargs/key-values)
-
-                           ;; TODO
-                           #_(assoc self.m/kwargs.current.processed (if starter "starter" "regular") [command/process-kwargs/key])
-
-                           ;; TODO
-                           (setv (. self.m/kwargs.current.processed [(if starter "starter" "regular")]) [command/process-kwargs/key])
-
-                           ))))
-           (if (and command/process-kwargs/value
-                    (not command/process-kwargs/key-values))
-               (do (if (isinstance (. self
-                                      m/kwargs
-                                      current
-                                      processed
-                                      [(if starter
-                                           "starter-values"
-                                           "regular-values")]) list)
-                       (.append (. self
-                                   m/kwargs
-                                   current
-                                   processed
-                                   [(if starter
-                                        "starter-values"
-                                        "regular-values")]) command/process-kwargs/value)
-
-                       ;; TODO
-                       #_(assoc self.m/kwargs.current.processed
-                             (if starter
-                                 "starter-values"
-                                 "regular-values") [command/process-kwargs/value])
-
-                       ;; TODO
-                       (setv (. self.m/kwargs.current.processed
-                             [(if starter
-                                 "starter-values"
-                                 "regular-values")]) [command/process-kwargs/value])
-
-                                 )
-                   (if (isinstance (. self
-                                      m/kwargs
-                                      current
-                                      processed
-                                      [(if starter
-                                           "starter"
-                                           "regular")]) list)
-                       (.append (. self
-                                   m/kwargs
-                                   current
-                                   processed
-                                   [(if starter
-                                        "starter"
-                                        "regular")]) command/process-kwargs/value)
-
-                       ;; TODO
-                       #_(assoc self.m/kwargs.current.processed
-                             (if starter
-                                 "starter"
-                                 "regular") [command/process-kwargs/value])
-
-                       ;; TODO
-                       (setv (. self.m/kwargs.current.processed
-                             [(if starter
-                                 "starter"
-                                 "regular")]) [command/process-kwargs/value])
-
-                                 )))))))
+                          (raise (TypeError #[f[Sorry! Keyword argument value "{value}" of type "{(type value)}" must be one of the following types: {(.join ", " (gfor arg aa arg.__name__))}]f])))))
+           (when (or command/process-kwargs/key-values
+                     command/process-kwargs/key)
+                 (if (isinstance (. self m/kwargs current processed [sr]) list)
+                     (if command/process-kwargs/key-values
+                         (.extend (. self m/kwargs current processed [sr]) command/process-kwargs/key-values)
+                         (.append (. self m/kwargs current processed [sr]) command/process-kwargs/key))
+                     (if command/process-kwargs/key-values
+                         (assoc self.m/kwargs.current.processed sr command/process-kwargs/key-values)
+                         (assoc self.m/kwargs.current.processed sr [command/process-kwargs/key]))))
+           (when (and command/process-kwargs/value
+                      (not command/process-kwargs/key-values))
+                 (if (isinstance (. self
+                                    m/kwargs
+                                    current
+                                    processed
+                                    [(if starter
+                                         "starter-values"
+                                         "regular-values")]) list)
+                     (.append (. self
+                                 m/kwargs
+                                 current
+                                 processed
+                                 [(if starter
+                                      "starter-values"
+                                      "regular-values")]) command/process-kwargs/value)
+                     (assoc self.m/kwargs.current.processed
+                            (if starter
+                                "starter-values"
+                                "regular-values") [command/process-kwargs/value]))
+                 (if (isinstance (. self
+                                    m/kwargs
+                                    current
+                                    processed
+                                    [(if starter
+                                         "starter"
+                                         "regular")]) list)
+                     (.append (. self
+                                 m/kwargs
+                                 current
+                                 processed
+                                 [(if starter
+                                      "starter"
+                                      "regular")]) command/process-kwargs/value)
+                     (assoc self.m/kwargs.current.processed
+                            (if starter
+                                "starter"
+                                "regular") [command/process-kwargs/value])))))
 
 (defn command/create [self]
-      (if self.m/sudo
-          (if (isinstance self.m/sudo bool)
-              (.append self.m/command "sudo")
-              
-              ;; TODO
-              #_(.append self.m/command f"sudo -{(-> self.m/sudo (.keys) (iter) (next))} -u {(-> self.m/sudo (.values) (iter) (next))}")
-
-              ;; TODO
-              (.append self.m/command f"sudo -{(next (iter (.keys self.m/sudo)))} -u {(next (iter (.values self.m/sudo)))}")
-              
-              ))
+      (when self.m/sudo
+            (if (isinstance self.m/sudo bool)
+                (.append self.m/command "sudo")
+                (.append self.m/command f"sudo -{(-> self.m/sudo (.keys) (iter) (next))} -u {(-> self.m/sudo (.values) (iter) (next))}")))
 
       (if (and self.m/shell (not self.m/freezer))
           (do (.extend self.m/command self.m/shell "-c" "'")
@@ -938,194 +792,156 @@
               (.extend self.m/command self.m/run-as self.m/program)
               (.append self.m/command self.m/program)))
 
-      (if self.m/freezer
-          (do (if self.m/shell
+      (when self.m/freezer
+            (when self.m/shell
                   (for [[index value] (enumerate self.m/freezer)]
-                       (if (= (get value -1) "'")
-                           
-                           ;; TODO
-                           #_(assoc self.m/freezer index (cut value 0 -1))
-
-                           ;; TODO
-                           (setv (. self.m/freezer [index]) (cut value 0 -1))
-                           
-                           )))
-              (.extend self.m/command #* self.m/freezer)))
+                       (when (= (get value -1) "'")
+                             (assoc self.m/freezer index (cut value 0 -1)))))
+            (.extend self.m/command #* self.m/freezer))
 
       (.extend self.m/command #* self.m/kwargs.current.processed.starter)
-      (if (!= self.m/subcommand.default self.m/subcommand.current.unprocessed)
-          (.append self.m/command self.m/subcommand.current.processed))
+      (when (!= self.m/subcommand.default self.m/subcommand.current.unprocessed) (.append self.m/command self.m/subcommand.current.processed))
       (.extend self.m/command
                #* self.m/args.current.processed.starter
                #* self.m/kwargs.current.processed.regular
                #* self.m/args.current.processed.regular)
-      (if self.m/shell
-          (.glue self.m/command "'"))
-      (if self.m/tiered
-          (let [tier "{{ b.t }}"
-                replacements (+ self.m/kwargs.current.processed.starter-values
-                                self.m/args.current.processed.starter
-                                self.m/kwargs.current.processed.regular-values
-                                self.m/args.current.processed.regular)
-                to-be-replaced (.count (.values self.m/command) tier)]
-               (if (= to-be-replaced (len replacements))
-                   (for [[index kv] (.items self.m/command :indexed True)]
-                        (if (= kv.value tier)
-                            
-                            ;; TODO
-                            #_(assoc self.m/command kv.key (get replacements index))
-
-                            ;; TODO
-                            (setv (. self.m/command [kv.key]) (get replacements index))
-                            
-                            )))
-                   (raise (ValueError "Sorry! The number of tiered replacements must be equal to the number of arguments provided!")))))
+      (when self.m/shell (.glue self.m/command "'"))
+      (when self.m/tiered
+            (let [tier "{{ b.t }}"
+                  replacements (+ self.m/kwargs.current.processed.starter-values
+                                  self.m/args.current.processed.starter
+                                  self.m/kwargs.current.processed.regular-values
+                                  self.m/args.current.processed.regular)
+                  to-be-replaced (.count (.values self.m/command) tier)]
+                 (if (= to-be-replaced (len replacements))
+                     (for [[index kv] (.items self.m/command :indexed True)]
+                          (when (= kv.value tier)
+                                (assoc self.m/command kv.key (get replacements index))))
+                     (raise (ValueError "Sorry! The number of tiered replacements must be equal to the number of arguments provided!"))))))
 
 (defn return/output [self]
-      (cond [self.m/frozen (return (deepcopy self))]
-            [self.m/return-command (return (.m/command self))]
-            [True (let [output (.return/process self)]
-                       (if (isinstance output dict)
-                           (do (setv output.stderr (peekable output.stderr)
-                                     stds (, "out" "err"))
-                               (try (setv peek-value (.peek output.stderr))
-                                    (except [StopIteration]
-                                            (setv peek-value None)))
-                               (if (and peek-value
-                                        (not self.m/ignore-stderr)
-                                        (not self.m/stdout-stderr))
-                                   (if (or self.m/replace-error self.m/false-error)
-                                       (setv (. output ["stdout"]) (or self.m/replace-error False))
-                                       (raise (SystemError (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr))))))
-                               (for [[std opp] (zip stds (py "stds[::-1]"))]
-                                    (setv stdstd (+ "std" std)
-                                          stdopp (+ "std" opp))
-                                    (if (< self.m/verbosity 1)
-                                        (if (= self.m/capture stdstd)
-                                            (del (get output stdopp)))))))
-                       (return output))]))
+      (cond self.m/frozen (return (deepcopy self))
+            self.m/return-command (return (.m/command self))
+            True (let [output (.return/process self)]
+                      (when (isinstance output dict)
+                            (setv output.stderr (peekable output.stderr)
+                                  stds #("out" "err"))
+                            (try (setv peek-value (.peek output.stderr))
+                                 (except [StopIteration]
+                                         (setv peek-value None)))
+                            (when (and peek-value
+                                       (not self.m/ignore-stderr)
+                                       (not self.m/stdout-stderr))
+                                  (if (or self.m/replace-error self.m/false-error)
+                                      (setv (. output ["stdout"]) (or self.m/replace-error False))
+                                      (raise (SystemError (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr))))))
+                            (for [[std opp] (zip stds (py "stds[::-1]"))]
+                                 (setv stdstd (+ "std" std)
+                                       stdopp (+ "std" opp))
+                                 (when (and (< self.m/verbosity 1) (= self.m/capture stdstd)) (del (get output stdopp)))))
+                      (return output))))
 
 (defn return/process [self]
     (if (.m/command self)
         (do (setv process (.m/popen-partial self))
-            (cond [(is self.m/wait None) (with [p (process :stdout DEVNULL :stderr DEVNULL)] (return None))]
-                  [self.m/wait (with [p (process)]
-                                     (setv return/process/return (D {}))
-                                     (for [std (, "out" "err")]
-                                          (setv chained []
-                                                stdstd (+ "std" std))
-                                          (if (setx output (getattr p stdstd))
-                                              (for [line output]
-                                                   (setv line (if (isinstance line (, bytes bytearray))
-                                                                  (.strip (.decode line "utf-8"))
-                                                                  (.strip line))
-                                                         chained (chain chained [line]))
-                                                   (if (and (= std "out") self.m/dazzling)
-                                                       (print line))))
-                                              
-                                              ;; TODO
-                                              #_(assoc return/process/return stdstd (iter chained))
-
-                                              ;; TODO
-                                              (setv (. return/process/return [stdstd]) (iter chained))
-                                              
-                                              )
-                                     (.wait p)
-                                     (if (> self.m/verbosity 0)
-                                         (setv return/process/return.returns.code p.returncode
-                                               ;; return/process/return.returns.codes p.returncodes
-                                               return/process/return.command.bakery (.m/command self)
-                                               return/process/return.command.subprocess p.args
-                                               return/process/return.pid p.pid))
-                                     (if (> self.m/verbosity 1)
-                                         (setv return/process/return.tea self.m/command
-                                               return/process/return.subcommand self.m/subcommand))
-                                     (let [first-last-n-part (partial first-last-n :last self.m/n-lines.last
-                                                                                   :number self.m/n-lines.number)]
-                                          (if (in self.m/n-lines.std (, "stdout" "both"))
-                                              (setv return/process/return.stdout (first-last-n-part :iterable return/process/return.stdout)))
-                                          (if (in self.m/n-lines.std (, "stderr" "both"))
-                                              (setv return/process/return.stderr (first-last-n-part :iterable return/process/return.stderr))))
-                                     (return return/process/return))]
-                  [True (return (process))]))
+            (cond (is self.m/wait None) (with [p (process :stdout DEVNULL :stderr DEVNULL)] (return None))
+                  self.m/wait (with [p (process)]
+                                    (setv return/process/return (D {}))
+                                    (for [std #("out" "err")]
+                                         (setv chained []
+                                               stdstd (+ "std" std))
+                                         (when (setx output (getattr p stdstd))
+                                               (for [line output]
+                                                    (setv line (if (isinstance line #(bytes bytearray))
+                                                                   (.strip (.decode line "utf-8"))
+                                                                   (.strip line))
+                                                          chained (chain chained [line]))
+                                                    (when (and (= std "out") self.m/dazzling) (print line))))
+                                         (assoc return/process/return stdstd (iter chained)))
+                                    (.wait p)
+                                    (when (> self.m/verbosity 0)
+                                          (setv return/process/return.returns.code p.returncode
+                                                ;; return/process/return.returns.codes p.returncodes
+                                                return/process/return.command.bakery (.m/command self)
+                                                return/process/return.command.subprocess p.args
+                                                return/process/return.pid p.pid))
+                                    (when (> self.m/verbosity 1)
+                                          (setv return/process/return.tea self.m/command
+                                                return/process/return.subcommand self.m/subcommand))
+                                    (let [first-last-n-part (partial first-last-n :last self.m/n-lines.last
+                                                                                  :number self.m/n-lines.number)]
+                                         (when (in self.m/n-lines.std #("stdout" "both"))
+                                               (setv return/process/return.stdout (first-last-n-part :iterable return/process/return.stdout)))
+                                         (when (in self.m/n-lines.std #("stderr" "both"))
+                                               (setv return/process/return.stderr (first-last-n-part :iterable return/process/return.stderr))))
+                                    (return return/process/return))
+                  True (return (process))))
         (return None)))
 
 (defn return/frosting [self]
       (if (setx output (.return/output self))
-          (do (if self.m/frozen (return output))
-              (if (or self.m/replace-error self.m/false-error) (return output.stdout))
+          (do (when self.m/frozen (return output))
+              (when (or self.m/replace-error self.m/false-error) (return output.stdout))
               (setv frosted-output (if (and (isinstance output dict)
                                             (= (len output) 1))
-
-                                       ;; TODO
-                                       #_(-> output (.values) (iter) (next))
-
-                                       ;; TODO
-                                       (next (iter (.values output)))
-
+                                       (-> output (.values) (iter) (next))
                                        output)
                     dict-like-frosted-output (isinstance frosted-output dict)
                     frosted-output (if self.m/dazzle
-                                       (cond [dict-like-frosted-output frosted-output]
-                                             [(coll? frosted-output) (tuple frosted-output)]
-                                             [True (, frosted-output)])
+                                       (cond dict-like-frosted-output frosted-output
+                                             (coll? frosted-output) (tuple frosted-output)
+                                             True #(frosted-output))
                                        frosted-output))
-              (if self.m/print-command-and-run (print (.m/command self)))
-              (cond [self.m/print-command (print frosted-output)]
-                    [self.m/dazzle (if dict-like-frosted-output
-                                       (for [cat frosted-output]
-                                            (setv outcat (get output cat))
-                                            (if (or (isinstance outcat int)
-                                                    (isinstance outcat str))
-                                                (print f"{cat}: {outcat}")
-                                                (do (if (not (in cat self.m/captures))
-                                                        (print (+ cat ": ")))
-                                                    (if (= cat "return-codes")
-                                                        (print outcat)
-                                                        (for [line outcat]
-                                                             (print line))))))
-                                       (for [line frosted-output]
-                                            (print line)))])
-              (cond [dict-like-frosted-output
-                     (for [std (, "out" "err")]
-                          (setv stdstd (+ "std" std))
-                          (if (hasattr frosted-output stdstd)
-                              (do (setv processed-output (get frosted-output stdstd))
-                                  (if self.m/split
-                                      (setv processed-output (split-and-flatten processed-output self.m/split)))
-                                  (setv processed-output (.ct/convert self processed-output))
-                                  (if self.m/split-after
-                                      (setv processed-output (split-and-flatten processed-output self.m/split-after)))
-                                  (setv (. frosted-output [stdstd]) processed-output
-                                        new-frosted-output frosted-output))))]
-                    [True (do (setv new-frosted-output (frosting frosted-output self.m/capture))
-                              (if self.m/split
-                                  (setv new-frosted-output (split-and-flatten new-frosted-output self.m/split)))
-                              (setv new-frosted-output (.ct/convert self new-frosted-output))
-                              (if self.m/split-after
-                                  (setv new-frosted-output (split-and-flatten new-frosted-output self.m/split-after))))])
+              (when self.m/print-command-and-run (print (.m/command self)))
+              (cond self.m/print-command (print frosted-output)
+                    self.m/dazzle (if dict-like-frosted-output
+                                      (for [cat frosted-output]
+                                           (setv outcat (get output cat))
+                                           (if (or (isinstance outcat int)
+                                                   (isinstance outcat str))
+                                               (print f"{cat}: {outcat}")
+                                               (do (unless (in cat self.m/captures)
+                                                           (print (+ cat ": ")))
+                                                   (if (= cat "return-codes")
+                                                       (print outcat)
+                                                       (for [line outcat]
+                                                            (print line))))))
+                                      (for [line frosted-output]
+                                           (print line))))
+              (cond dict-like-frosted-output
+                    (for [std #("out" "err")]
+                         (setv stdstd (+ "std" std))
+                         (when (hasattr frosted-output stdstd)
+                               (setv processed-output (get frosted-output stdstd))
+                               (when self.m/split (setv processed-output (split-and-flatten processed-output self.m/split)))
+                               (setv processed-output (.ct/convert self processed-output))
+                               (when self.m/split-after (setv processed-output (split-and-flatten processed-output self.m/split-after)))
+                               (setv (. frosted-output [stdstd]) processed-output
+                                     new-frosted-output frosted-output)))
+                    True (do (setv new-frosted-output (frosting frosted-output self.m/capture))
+                             (when self.m/split (setv new-frosted-output (split-and-flatten new-frosted-output self.m/split)))
+                             (setv new-frosted-output (.ct/convert self new-frosted-output))
+                             (when self.m/split-after (setv new-frosted-output (split-and-flatten new-frosted-output self.m/split-after)))))
               (return new-frosted-output))
           (return None)))
 
 (defn m/popen-partial [self [stdout None] [stderr None]]
-      (setv pp-stdout (cond [stdout]
-                            [(= self.m/capture "stderr") (.get self.m/popen "stdout" DEVNULL)]
-                            [(= self.m/capture "run") (.get self.m/popen "stdout" None)]
-                            [True (if self.m/ignore-stdout
-                                      (.get self.m/popen "stdout" DEVNULL)
-                                      (.get self.m/popen "stdout" PIPE))])
+      (setv pp-stdout (cond stdout stdout
+                            (= self.m/capture "stderr") (.get self.m/popen "stdout" DEVNULL)
+                            (= self.m/capture "run") (.get self.m/popen "stdout" None)
+                            True (if self.m/ignore-stdout
+                                     (.get self.m/popen "stdout" DEVNULL)
+                                     (.get self.m/popen "stdout" PIPE)))
             pp-stderr (or stderr (if (= self.m/capture "run")
                                      (.get self.m/popen "stderr" None)
-                                     (cond [self.m/stdout-stderr (.get self.m/popen "stderr" STDOUT)]
-                                           [self.m/ignore-stderr (.get self.m/popen "stderr" DEVNULL)]
-                                           [True (.get self.m/popen "stderr" PIPE)])))
+                                     (cond self.m/stdout-stderr (.get self.m/popen "stderr" STDOUT)
+                                           self.m/ignore-stderr (.get self.m/popen "stderr" DEVNULL)
+                                           True (.get self.m/popen "stderr" PIPE))))
 
-            bufsize (.get self.m/popen "bufsize" (if self.m/dazzling 1 -1))
+            bufsize (.get self.m/popen "bufsize" (when self.m/dazzling 1 -1))
             universal-newlines (.get self.m/popen "universal-newlines" self.m/dazzling)
 
-            universal-text (if (= bufsize 1)
-                               True
-                               universal-newlines)
+            universal-text (if (= bufsize 1) True universal-newlines)
             shell (.get self.m/popen "shell" self.m/intact-command)
             command (.m/command self)
 
@@ -1141,13 +957,7 @@
                      "text" universal-text
                      "shell" shell })
       (.update env self.m/exports)
-
-      ;; TODO
-      #_(assoc kwargs "env" env)
-
-      ;; TODO
-      (setv (get kwargs "env") env)
-
+      (assoc kwargs "env" env)
       (.update kwargs self.m/popen)
       (return (partial Popen
                        (if self.m/intact-command
@@ -1164,10 +974,10 @@
             (if (isinstance opts dict)
                 (do (.update opts { "title" title })
                     (.inspect- self #** opts))
-                (if opts
-                    (do (.update bool-opts self.m/default-inspect-kwargs)
-                        (.update bool-opts { "title" title })
-                        (.inspect- self #** bool-opts)))))
+                (when opts
+                      (.update bool-opts self.m/default-inspect-kwargs)
+                      (.update bool-opts { "title" title })
+                      (.inspect- self #** bool-opts))))
       (try (inner "Setup")
            (.var/setup self #* args :subcommand- subcommand- #** kwargs)
 
@@ -1189,10 +999,10 @@
           (let [type-string (.join ", " (gfor t (+ (list self.m/type-groups.genstrings)
                                                    self.m/type-groups.this-class-subclass
                                                    [str]) t.__name__))]
-               (return (cond [(isinstance v self.m/type-groups.genstrings) [(v)]]
-                             [is-milcery (or v.m/freezer (.values v.m/command) [v.m/base-program])]
-                             [(isinstance v str) [v]]
-                             [True (raise (NotImplemented f"Sorry! Value '{v}' can only be of the following types: {type-string}"))]))))
+               (return (cond (isinstance v self.m/type-groups.genstrings) [(v)]
+                             is-milcery (or v.m/freezer (.values v.m/command) [v.m/base-program])
+                             (isinstance v str) [v]
+                             True (raise (NotImplemented f"Sorry! Value '{v}' can only be of the following types: {type-string}"))))))
 
     (if (isinstance value tuple)
         (if (= (len value) 2)
@@ -1207,21 +1017,21 @@
           freezer- (+ (or self.m/freezer (list (.values self.m/command)) [self.m/base-program]) [processed-pr processed-value]))
 
     (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.world))
-    (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.world)))
+    (when is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.world)))
 
     (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.instantiated))
-    (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.instantiated)))
+    (when is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.instantiated)))
 
     (.update kwargs
              (.cls/remove-if-not-attr self.__class__ (. self m/kwargs baked [(or self.m/subcommand.current.unprocessed self.m/subcommand.default)])))
-    (if is-milcery
-        (.update kwargs (.cls/remove-if-not-attr value.__class__ (. value
-                                                                    m/kwargs
-                                                                    baked
-                                                                    [(or value.m/subcommand.current.unprocessed value.m/subcommand.default)]))))
+    (when is-milcery
+          (.update kwargs (.cls/remove-if-not-attr value.__class__ (. value
+                                                                      m/kwargs
+                                                                      baked
+                                                                      [(or value.m/subcommand.current.unprocessed value.m/subcommand.default)]))))
 
     (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.called))
-    (if is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.called)))
+    (when is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.called)))
 
     (return (.__class__ self :freezer- freezer-
                              :base-program- self.m/base-program
@@ -1262,13 +1072,12 @@
                                                          self.__slots__
                                                          :if (!= var "__dict__")
                                                          [var (getattr self var)])) }))
-      (if (hasattr self "__dict__")
-          (setv sd.__dict__ self.__dict__))
+      (when (hasattr self "__dict__") (setv sd.__dict__ self.__dict__))
       (return sd))
 
 (defn inspect- [self #** kwargs] 
-      (if (not kwargs)
-          (setv kwargs self.m/default-inspect-kwargs))
+      (unless kwargs
+              (setv kwargs self.m/default-inspect-kwargs))
       (inspect self :Hy True #** kwargs))
 
 (defn origin- [self] (return (. (first self.__class__.m/stores) __callback__)))
@@ -1278,16 +1087,16 @@
 (defn __call__ [
         self
         #* args
-        [args-before-func (,)]
+        [args-before-func #()]
         #** kwargs ]
     (if (and (not self.m/gitea.off)
              (or self.m/gitea.bool
                  (in self.m/base-program self.m/gitea.list)))
         (return (.deepcopy- self :m/starter-args args :m/starter-kwargs kwargs))
-        (cond [(or (.cls/get-attr self.__class__ kwargs "m/context" False)
+        (cond (or (.cls/get-attr self.__class__ kwargs "m/context" False)
                    (.cls/get-attr self.__class__ kwargs "m/c" False))
-               (return (.deepcopy- self #* args  #** kwargs))]
-              [True (return (.m/spin self #* args  #** kwargs))])))
+               (return (.deepcopy- self #* args  #** kwargs))
+              True (return (.m/spin self #* args  #** kwargs)))))
 
 (defn __setattr__ [self attr value] (.__setattr__ (super) (.cls/process-if-attr self.__class__ attr) value))
 
@@ -1296,12 +1105,12 @@
         (getattr self __getattr__/attr (raise (AttributeError f"Sorry! `{(unmangle subcommand)}' doesn't exist as an attribute!")))
         (do (defn inner [
                     #* args
-                    [args-before-func (,)]
+                    [args-before-func #()]
                     #** kwargs ]
-                  (cond [(or (.cls/get-attr self.__class__ kwargs "m/context" False)
+                  (cond (or (.cls/get-attr self.__class__ kwargs "m/context" False)
                              (.cls/get-attr self.__class__ kwargs "m/c" False))
-                         (return (.deepcopy- self #* args :subcommand- subcommand #** kwargs))]
-                        [True (return (.m/spin self #* args :subcommand- subcommand #** kwargs))]))
+                         (return (.deepcopy- self #* args :subcommand- subcommand #** kwargs))
+                        True (return (.m/spin self #* args :subcommand- subcommand #** kwargs))))
             (return inner))))
 
 (defn __copy__ [self]
@@ -1311,10 +1120,8 @@
 
           slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__" []))))
 
-    (for [var slots] (if (not (in var (, "__weakref__")))
-                         (setattr result var (copy (getattr self var)))))
-    (if (hasattr self "__dict__")
-        (.update result.__dict__ self.__dict__))
+    (for [var slots] (unless (in var #("__weakref__")) (setattr result var (copy (getattr self var)))))
+    (when (hasattr self "__dict__") (.update result.__dict__ self.__dict__))
 
     (setv result.m/frozen result.m/settings.defaults.m/frozen)
 
@@ -1325,25 +1132,18 @@
     (setv cls self.__class__
           result (.__new__ cls cls))
 
-    (setv (. memo [(id self)]) result)
+    (assoc memo (id self) result)
 
-    (if (and (hasattr self "m/cache") self.m/cache)
-        
-        ;; TODO
-        #_(assoc memo (id self.m/cache) (.__new__ self.m/cache dict))
-
-        ;; TODO
-        (setv (. memo [(id self.m/cache)]) (.__new__ self.m/cache dict))
-
-        )
+    (when (and (hasattr self "m/cache") self.m/cache)
+          (assoc memo (id self.m/cache) (.__new__ self.m/cache dict)))
 
     (setv slots (.from-iterable chain (lfor s self.__class__.__mro__ (getattr s "__slots__" []))))
 
     (for [var slots]
-         (if (not (in var (, "__weakref__")))
-             (setattr result var (deepcopy (getattr self var) memo))))
-    (if (hasattr self "__dict__")
-        (for [[k v] (.items self.__dict__)] (setattr result k (deepcopy v memo))))
+         (when (not (in var #("__weakref__")))
+               (setattr result var (deepcopy (getattr self var) memo))))
+    (when (hasattr self "__dict__")
+          (for [[k v] (.items self.__dict__)] (setattr result k (deepcopy v memo))))
 
     (setv result.m/frozen result.m/settings.defaults.m/frozen)
 

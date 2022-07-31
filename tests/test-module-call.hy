@@ -1,0 +1,11 @@
+(import bakery [ls])
+(import oreo)
+(import oreo [nots?])
+(import pathlib [Path])
+(require hyrule [->])
+(setv cookies (/ (.resolve (. (Path __file__) parent parent) :strict True) "cookies"))
+(setv cookies-ls (.ls oreo cookies))
+(setv assorted-cookies (.ls oreo cookies :sort True))
+(import bakery)
+(defn test-module-call []
+      (-> assorted-cookies (= ((bakery :program- "ls") :a True :m/list True :m/sort None :m/filter nots? cookies)) (assert)))

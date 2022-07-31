@@ -1,330 +1,179 @@
-#+setupfile: ./settings/README.org
-#+property: header-args:hy :tangle yes
-
-* Preparations
-** Rich Traceback
-
+#+name: 3572653c-1819-4b51-a09a-cbda5bfd863d
 #+begin_src hy
-(import rich.traceback)
-(.install rich.traceback)
-#+end_src
-
-** Imports
-*** From
-
-#+begin_src hy
-(import oreo [eclair either? nots?])
-(import os [path :as osPath])
-#+end_src
-
-** Requires
-
-#+begin_src hy
+(import oreo)
+(import oreo [nots?])
+(import pathlib [Path])
 (require hyrule [->])
+(setv cookies (/ (.resolve (. (Path __file__) parent parent) :strict True) "cookies"))
+(setv cookies-ls (.ls oreo cookies))
+(setv assorted-cookies (.ls oreo cookies :sort True))
 #+end_src
 
-** Zoom Decorator
+#+name: 75a09b5c-aadf-4346-aba6-145d5cc6dd4b
+#+begin_src hy
+(import bakery [ls])
+<<3572653c-1819-4b51-a09a-cbda5bfd863d>>
+#+end_src
+
+* tests
+:PROPERTIES:
+:header-args:hy+: :tangle (meq/tangle-path) :prologue (meq/get-block "75a09b5c-aadf-4346-aba6-145d5cc6dd4b")
+:header-args:python+: :tangle (meq/tangle-path)
+:END:
+
+** test-list-output.hy
 
 #+begin_src hy
-(setv funcs [])
-(defn zoom [func] (.append funcs func))
+(defn test-list-output-short [] (-> cookies (ls :m/list True) (isinstance list) (assert)))
+(defn test-list-output-long [] (-> cookies (ls :m/type list) (isinstance list) (assert)))
 #+end_src
 
-** Cookies!
-
-#+begin_src hy
-(setv cookies (.join osPath (.dirname osPath (.realpath osPath __file__)) "cookies"))
-#+end_src
-
-* Tests
-** List Output
-
-#+begin_src hy
-#@(zoom (defn list-output []
-              (import bakery [ls])
-              (-> cookies
-                  (ls :m/list True)
-                  (isinstance list)
-                  (assert))
-              (-> cookies
-                  (ls :m/type list)
-                  (isinstance list)
-                  (assert))))
-#+end_src
-
-** Sorted Output
+** test-sorted-output.hy
 
 # TODO: Test sorting strings, by using :m/frosting True and :m/type frosting
 # TODO: Test sorting with lambdas
 
 #+begin_src hy
-#@(zoom (defn sorted-output []
-              (import bakery [ls])
-              (-> (ls)
-                  (sorted)
-                  (= (ls :m/list True :m/sort None))
-                  (assert))))
+(defn test-sorted-output [] (-> (ls) (sorted) (= (ls :m/list True :m/sort None)) (assert)))
 #+end_src
 
-** Filtered Output
+** test-filtered-output.hy
 
 #+begin_src hy
-#@(zoom (defn filtered-output []
-              (import bakery [ls])
-              (setv sixteen [ "11" "12" "13" "14" "15" "16" ])
-              (-> cookies
-                  (ls :m/list True :m/filter (fn [item] (and (.isnumeric item) (not (in "0" item)))))
-                  (= sixteen)
-                  (assert))
-              (-> cookies
-                  (ls :m/list True :m/filter (, True (fn [item] (or (not (.isnumeric item)) (in "0" item)))))
-                  (= sixteen)
-                  (assert))))
+(defn not-zero? [i] (and (.isnumeric i) (not (in "0" i))))
+(setv ones (sorted (gfor i cookies-ls :if (not-zero? i) i)))
+(setv not-ones (sorted (gfor i cookies-ls :if (not (not-zero? i)) i)))
+(defn test-filtered-output-function [] (-> cookies (ls :m/list True :m/sort None :m/filter not-zero?) (= ones) (assert)))
+(defn test-filtered-output-collection [] (-> cookies (ls :m/list True :m/sort None :m/filter #(True not-zero?)) (= not-ones) (assert)))
 #+end_src
 
-** Main
+** test-bakery.hy
 
 #+begin_src hy
-#@(zoom (defn main []
-              (import bakery [ls])
-              (import os [listdir])
-              (assert (= (ls :m/list True cookies :m/sort None :m/filter (, True (fn [item] (.startswith item "."))))
-                         (sorted (gfor item (listdir cookies) :if (not (.startswith item ".")) item))))))
+(import oreo [hidden?])
+(defn test-bakery [] (-> assorted-cookies (= (ls :m/list True cookies :m/sort None :m/filter #(True hidden?))) (assert)))
+(defn test-program-options [] (-> assorted-cookies (= (ls :m/list True :a True cookies :m/sort None :m/filter nots?)) (assert)))
 #+end_src
 
-** Program Options
-
-#+begin_src hy
-#@(zoom (defn program-options []
-              (import bakery [ls])
-              (import os [listdir])
-              (-> cookies
-                  (listdir)
-                  (sorted)
-                  (= (ls :m/list True :a True cookies :m/sort None :m/filter nots?))
-                  (assert))))
-#+end_src
-
-** Context Manager
+** test-context-manager.hy
 
 Check if temporary baking with a context manager works:
 
 #+begin_src hy
-#@(zoom (defn context-manager []
-              (import bakery [ls])
-              (import os [listdir])
-              (with [lsa (ls :a True cookies :m/context True :m/list True :m/sort None :m/filter nots?)]
-                    (-> cookies
-                        (listdir)
-                        (sorted)
-                        (= (lsa))
-                        (assert)))
-              (-> cookies
-                  (ls :m/list True :m/sort None :m/filter (, True (fn [item] (.startswith item "."))))
-                  (= (sorted (gfor item (listdir cookies) :if (not (.startswith item ".")) item)))
-                  (assert))))
+(import oreo [hidden?])
+(defn test-context-manager []
+      (with [lsa (ls :a True cookies :m/context True :m/list True :m/sort None :m/filter nots?)]
+            (-> assorted-cookies (= (lsa)) (assert)))
+      (-> cookies
+          (ls :m/list True :m/sort None :m/filter #(True hidden?))
+          (= assorted-cookies)
+          (assert)))
 #+end_src
 
-** Loop
+** test-loop.hy
 
 #+begin_src hy
-#@(zoom (defn loop []
-              (import bakery [ls])
-              (import os [listdir chdir getcwd])
-              (setv output (listdir cookies)
-                    cwd (getcwd))
-              (try (chdir cookies)
-                   (for [item ls] (assert (in item output)))
-                   (finally (chdir cwd)))))
+(import os [chdir])
+(require oreo [with-cwd])
+(defn test-loop [] (with-cwd cookies (for [item ls] (assert (in item cookies-ls)))))
 #+end_src
 
-** Progress
+** test-progress.hy
 
 #+begin_src hy
-#@(zoom (defn progress []
-              (import bakery [ls])
-              (import os [listdir])
-              (setv output (listdir cookies))
-              (for [item (ls :a True cookies :m/progress "red")]
-                   (if (nots? item)
-                       (assert (in item output))))))
+(defn test-progress []
+      (for [item (ls :a True cookies :m/progress "red")]
+           (when (nots? item) (assert (in item cookies-ls)))))
 #+end_src
 
-** Baking
+** test-baking.hy
 
 #+begin_src hy
-#@(zoom (defn baking []
-              (import bakery [ls])
-              (import os [listdir])
-              (.bake- ls :a True :m/progress "green" cookies)
-              (setv output (listdir cookies))
-              (for [item ls]
-                   (if (nots? item)
-                       (assert (in item output))))))
+(defn test-baking []
+      (.bake- ls :a True :m/progress "green" cookies)
+      (for [item ls]
+           (when (nots? item) (assert (in item cookies-ls)))))
 #+end_src
 
-** Module Call
+** test-module-call.hy
 
 #+begin_src hy
-#@(zoom (defn module-call []
-              (import bakery)
-              (import os [listdir])
-              (setv ls (bakery :program- "ls"))
-              (-> cookies
-                  (listdir)
-                  (sorted)
-                  (= (ls :a True :m/list True :m/sort None :m/filter nots? cookies))
-                  (assert))))
+(import bakery)
+(defn test-module-call []
+      (-> assorted-cookies (= ((bakery :program- "ls") :a True :m/list True :m/sort None :m/filter nots? cookies)) (assert)))
 #+end_src
 
-** Freezing
+** test-freezing.hy
 
 #+begin_src hy
-#@(zoom (defn freezing []
-              (import bakery)
-              (import bakery [ls])
-              (-> []
-                  (ls)
-                  (either? bakery)
-                  (assert))))
+(import bakery)
+(import oreo [either?])
+(defn test-freezing [] (-> [] (ls) (either? bakery) (assert)))
 #+end_src
 
-** Git Remote
+** test-git-remote.hy
 
 #+begin_src hy
-#@(zoom (defn git-status []
-              (import bakery [git])
-              (-> (git :C cookies)
-                  (.remote :m/str True)
-                  (= "origin")
-                  (assert))))
+(import bakery [git])
+(defn test-git-status [request] (-> (git :C request.config.rootdir) (.remote :m/str True) (= "origin") (assert)))
 #+end_src
 
-** String Output
+** test-string-output.hy
 
 #+begin_src hy
-#@(zoom (defn string-output []
-              (import bakery [echo])
-              (-> "Hello!"
-                  (echo :m/str True)
-                  (= "Hello!")
-                  (assert))))
+(import bakery [echo])
+(defn test-string-output [] (-> "Hello!" (echo :m/str True) (= "Hello!") (assert)))
 #+end_src
 
-** Piping
-*** First
+** test-split.hy
 
 #+begin_src hy
-#@(zoom (defn piping/first []
-              (import bakery [ls tail])
-              (import oreo [first-last-n])
-              (import os [listdir])
-              (setv tails (| (ls [] :a True cookies :m/list True :m/sort None :m/filter nots? :m/shell "xonsh") tail))
-              (-> cookies
-                  (listdir)
-                  (sorted)
-                  (first-last-n :last True :number 10 :type- list)
-                  (= (tails))
-                  (assert))))
+(defn test-split []
+      (setv six-two ["6" "5" "4" "3" "2" "09" "08" "07" "06" "05" "04" "03" "02" "00" "0" "0"])
+      (-> cookies (ls :m/list True :m/split 1 :m/sort True :m/filter (fn [item] (.isnumeric item))) (= six-two) (assert)))
 #+end_src
 
-*** Both
+** test-error.hy
 
 #+begin_src hy
-#@(zoom (defn piping/both []
-              (import bakery [env grep])
-              (setv egrep (| (env [] :m/exports { "FOO" "bar" } :m/str True) (grep [] "FOO")))
-              (assert (= (egrep) "FOO=bar"))))
+(defn test-false-error [] (-> (ls :j True :m/false-error True) (not) (assert)))
+(defn test-replace-error []
+      (assert (ls :j True :m/replace-error True))
+      (-> (ls :j True :m/replace-error "replace error test") (= "replace error test") (assert)))
 #+end_src
 
-** Exports
+** test-exports.hy
 
 #+begin_src hy
-#@(zoom (defn exports []
-              (import bakery [echo])
-              (-> "$FOO"
-                  (echo :m/exports { "FOO" "bar" } :m/str True)
-                  (= "bar")
-                  (assert))))
+(import bakery [echo])
+(defn test-exports [] (-> "$FOO" (echo :m/exports { "FOO" "bar" } :m/str True) (= "bar") (assert)))
 #+end_src
 
-** Number of Lines of Output
+** test-piping.hy
 
 #+begin_src hy
-#@(zoom (defn trim []
-              (import bakery [cat])
-              (setv bulbasaur (sorted (, "001: Bulbasaur" "002: Ivysaur" "003: Venusaur" ))
-                    last-three (sorted (, "058: Growlithe" "059: Arcanine" "060: Poliwag" )))
-              (.bake- cat :m/list True :m/sort None)
-
-              (print (cat (+ cookies "/01") :m/n-lines 3))
-
-              (-> cookies
-                  (+ "/01")
-                  (cat :m/n-lines 3)
-                  (= bulbasaur)
-                  (assert))
-
-              (-> cookies
-                  (+ "/01")
-                  (cat :m/n-lines (, 3))
-                  (= bulbasaur)
-                  (assert))
-
-              (-> cookies
-                  (+ "/01")
-                  (cat :m/n-lines { "number" 3 })
-                  (= bulbasaur)
-                  (assert))
-
-              (-> cookies
-                  (+ "/01")
-                  (cat :m/n-lines (, True 3))
-                  (= last-three)
-                  (assert))
-
-              (-> cookies
-                  (+ "/01")
-                  (cat :m/n-lines { "last" True "number" 3 })
-                  (= last-three)
-                  (assert))))
+(import bakery [env grep tail])
+(import oreo [first-last-n])
+(defn test-piping-first []
+      (setv tails (| (ls [] :a True cookies :m/list True :m/sort None :m/filter nots?) tail))
+      (-> assorted-cookies (first-last-n :last True :number 10 :type- list) (= (tails)) (assert)))
+(defn test-piping-both []
+      (setv egrep (| (env [] :m/exports { "FOO" "bar" } :m/str True) (grep [] "FOO")))
+      (assert (= (egrep) "FOO=bar")))
 #+end_src
 
-** Split
+** test-trim.hy
 
 #+begin_src hy
-#@(zoom (defn splits []
-              (import bakery [ls])
-              (setv six-two ["6" "5" "4" "3" "2" "09" "08" "07" "06" "05" "04" "03" "02" "00" "0" "0"])
-              (-> cookies
-                  (ls :m/list True :m/split 1 :m/sort True :m/filter (fn [item] (.isnumeric item)))
-                  (= six-two)
-                  (assert))))
-#+end_src
-
-** Return `False' Instead of Raising `SystemError'
-
-#+begin_src hy
-#@(zoom (defn false-error []
-              (import bakery [ls])
-              (-> (ls :j True :m/false-error True)
-                  (not)
-                  (assert))))
-#+end_src
-
-*** Return Another Value Instead of Raising `SystemError'
-
-#+begin_src hy
-#@(zoom (defn replace-error []
-              (import bakery [ls])
-              (assert (ls :j True :m/replace-error True))
-              (-> (ls :j True :m/replace-error "replace error test")
-                  (= "replace error test")
-                  (assert))))
-#+end_src
-
-* Run Everything
-
-#+begin_src hy
-(for [func (eclair funcs "tests" "blue")] (func))
+(import bakery [cat])
+(setv bulbasaur (sorted #("001: Bulbasaur" "002: Ivysaur" "003: Venusaur" ))
+      last-three (sorted #("058: Growlithe" "059: Arcanine" "060: Poliwag" ))
+      one-cookie (/ cookies "01"))
+(defn test-trim []
+      (.bake- cat :m/list True :m/sort None)
+      (-> one-cookie (cat :m/n-lines 3) (= bulbasaur) (assert))
+      (-> one-cookie (cat :m/n-lines #(3)) (= bulbasaur) (assert))
+      (-> one-cookie (cat :m/n-lines { "number" 3 }) (= bulbasaur) (assert))
+      (-> one-cookie (cat :m/n-lines #(True 3)) (= last-three) (assert))
+      (-> one-cookie (cat :m/n-lines { "last" True "number" 3 }) (= last-three) (assert)))
 #+end_src

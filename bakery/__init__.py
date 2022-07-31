@@ -6,7 +6,7 @@ import sys
 
 from oreo import ModuleCaller
 
-from .bakery import milcery
+from bakery.bakery import milcery
 
 class bakery(ModuleCaller):
     def __call__(self, *args, **kwargs):
@@ -16,7 +16,7 @@ class bakery(ModuleCaller):
             return milcery
     def __getattr__(self, program_):
         if program_.startswith("_"):
-            raise AttributeError
+            raise AttributeError(program_)
         else:
             return milcery(program_ = program_)
     bakery = __call__
