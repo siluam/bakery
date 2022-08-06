@@ -242,6 +242,27 @@ as well as from the [[https://github.com/cjrh/autoslot][autoslot]] documentation
            (return #(prefix (if prefix (mangle (.removeprefix attr prefix)) (mangle attr))))))
 #+end_src
 
+*** Equals Attribute
+
+#+begin_src hy
+(defn [classmethod] cls/equals-attr [cls a b]
+      (return (in (get (.cls/trim-attr-prefix cls a) 1) #(b (mangle b) (unmangle b)))))
+#+end_src
+
+*** In Attribute List
+
+#+begin_src hy
+(defn [classmethod] cls/any-attrs [cls attr #* attrs]
+      (return (any (gfor a attrs (.cls/equals-attr cls attr a)))))
+#+end_src
+
+*** Is Attribute List
+
+#+begin_src hy
+(defn [classmethod] cls/all-attrs [cls attr #* attrs]
+      (return (all (gfor a attrs (.cls/equals-attr cls attr a)))))
+#+end_src
+
 *** Get Attribute
 
 #+begin_src hy
@@ -742,6 +763,7 @@ passed in as dictionary of variable names and values:
 **** Return Output
 
 #+begin_src hy
+(setv self.m/return-output-attrs #("call" "model" "frozen" "return-output"))
 <<m/(setting="return-output", value="False")>>
 #+end_src
 
@@ -1603,7 +1625,7 @@ otherwise ~(isinstance value int)~ will catch both cases.
                 (let [ k (unmangle setting)
                        v (getattr self setting) ]
                      (.append settings (.Keyword hy.models k))
-                     (.append settings (cond (= (get (.cls/trim-attr-prefix self.__class__ k) 1) "model") False
+                     (.append settings (cond (.cls/any-attrs self.__class__ k #* self.m/return-output-attrs) False
                                              (isinstance v D) (._dict_wrapper hy.models v)
                                              (callable v) (.Symbol hy.models v.__name__)
                                              True v))))
@@ -1621,7 +1643,7 @@ otherwise ~(isinstance value int)~ will catch both cases.
            (for [setting self.m/settings.defaults]
                 (let [ k (unmangle setting)
                        v (getattr self setting) ]
-                     (+= settings f" :{k} {(cond (= (get (.cls/trim-attr-prefix self.__class__ k) 1) "call") False
+                     (+= settings f" :{k} {(cond (.cls/any-attrs self.__class__ k #* self.m/return-output-attrs) False
                                                  (and (isinstance v str) (not v)) "''"
                                                  (callable v) v.__name__
                                                  True v)}")))

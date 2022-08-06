@@ -123,6 +123,15 @@
       (let [prefix (.cls/is-attr cls attr)]
            (return #(prefix (if prefix (mangle (.removeprefix attr prefix)) (mangle attr))))))
 
+(defn [classmethod] cls/equals-attr [cls a b]
+      (return (in (get (.cls/trim-attr-prefix cls a) 1) #(b (mangle b) (unmangle b)))))
+
+(defn [classmethod] cls/any-attrs [cls attr #* attrs]
+      (return (any (gfor a attrs (.cls/equals-attr cls attr a)))))
+
+(defn [classmethod] cls/all-attrs [cls attr #* attrs]
+      (return (all (gfor a attrs (.cls/equals-attr cls attr a)))))
+
 (defn [classmethod] cls/get-attr [cls dct attr [default False]]
       (setv attr (unmangle attr))
       (setv [prefix cls/get-attr/attr] (.cls/trim-attr-prefix cls attr))
@@ -361,6 +370,7 @@
 (setv self.internal/new-exports (D {}))
 (setv self.m/settings.defaults.m/new-exports (deepcopy self.internal/new-exports))
 
+(setv self.m/return-output-attrs #("call" "model" "frozen" "return-output"))
 (setv self.m/return-output False)
 (setv self.m/settings.defaults.m/return-output (deepcopy self.m/return-output))
 
@@ -868,7 +878,7 @@
                 (let [ k (unmangle setting)
                        v (getattr self setting) ]
                      (.append settings (.Keyword hy.models k))
-                     (.append settings (cond (= (get (.cls/trim-attr-prefix self.__class__ k) 1) "model") False
+                     (.append settings (cond (.cls/any-attrs self.__class__ k #* self.m/return-output-attrs) False
                                              (isinstance v D) (._dict_wrapper hy.models v)
                                              (callable v) (.Symbol hy.models v.__name__)
                                              True v))))
@@ -882,7 +892,7 @@
            (for [setting self.m/settings.defaults]
                 (let [ k (unmangle setting)
                        v (getattr self setting) ]
-                     (+= settings f" :{k} {(cond (= (get (.cls/trim-attr-prefix self.__class__ k) 1) "call") False
+                     (+= settings f" :{k} {(cond (.cls/any-attrs self.__class__ k #* self.m/return-output-attrs) False
                                                  (and (isinstance v str) (not v)) "''"
                                                  (callable v) v.__name__
                                                  True v)}")))
