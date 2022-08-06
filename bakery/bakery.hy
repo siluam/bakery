@@ -868,7 +868,7 @@
                 (let [ v (getattr self setting) ]
                      (.append settings (.Keyword hy.models (unmangle setting)))
                      (.append settings (cond (= setting "model") False
-                                             (isinstance v D) (.Dict hy.models v)
+                                             (isinstance v D) (._dict_wrapper hy.models v)
                                              (callable v) (.Symbol hy.models v.__name__)
                                              True v))))
            (return (.as-model hy.models `(bakery :program- ~self.m/program
