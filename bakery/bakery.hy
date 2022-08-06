@@ -865,9 +865,10 @@
 (defn return/model [self]
       (let [ settings [] ]
            (for [setting self.m/settings.defaults]
-                (let [ v (getattr self setting) ]
-                     (.append settings (.Keyword hy.models (unmangle setting)))
-                     (.append settings (cond (= setting "model") False
+                (let [ k (unmangle setting)
+                       v (getattr self setting) ]
+                     (.append settings (.Keyword hy.models k))
+                     (.append settings (cond (= (get (.cls/trim-attr-prefix self.__class__ k) 1) "model") False
                                              (isinstance v D) (._dict_wrapper hy.models v)
                                              (callable v) (.Symbol hy.models v.__name__)
                                              True v))))
@@ -879,11 +880,12 @@
 (defn return/call [self]
       (let [ settings "" ]
            (for [setting self.m/settings.defaults]
-                (let [ v (getattr self setting) ]
-                     (+= settings f" :{(unmangle setting)} {(cond (= setting "call") False
-                                                                  (and (isinstance v str) (not v)) "''"
-                                                                  (callable v) v.__name__
-                                                                  True v)}")))
+                (let [ k (unmangle setting)
+                       v (getattr self setting) ]
+                     (+= settings f" :{k} {(cond (= (get (.cls/trim-attr-prefix self.__class__ k) 1) "call") False
+                                                 (and (isinstance v str) (not v)) "''"
+                                                 (callable v) v.__name__
+                                                 True v)}")))
            (return f"bakery :program- {(or self.m/program "''")} :base-program- {self.m/base-program} :freezer- {self.m/freezer}{settings}")))
 
 (defn return/process [self]
@@ -1146,7 +1148,7 @@
 (defn __setattr__ [self attr value] (.__setattr__ (super) (.cls/process-if-attr self.__class__ attr) value))
 
 (defn __getattr__ [self subcommand]
-    (if (setx attr (.cls/process-if-attr self.__class__ subcommand :return-bool True))
+    (if (.cls/process-if-attr self.__class__ subcommand :return-bool True)
         (getattr self __getattr__/attr (raise (AttributeError f"Sorry! `{(unmangle subcommand)}' doesn't exist as an attribute!")))
         (do (defn inner [
                     #* args
