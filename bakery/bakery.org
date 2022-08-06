@@ -13,6 +13,7 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 
 #+begin_src hy
 (import builtins)
+(import hy)
 (import py)
 (import sys)
 (import weakref)
@@ -263,6 +264,28 @@ This tells the bakery that the program is a combination of multiple programs, su
 (defn [m/freezer.setter] m/freezer [self value] (setv self.internal/freezer (.cls/freezer self.__class__ value self.internal/freezer)))
 #+end_src
 
+*** Return Output
+**** Frozen
+
+#+begin_src hy
+(defn [property] m/frozen [self] (return self.internal/frozen))
+(defn [m/frozen.setter] m/frozen [self value] (setv self.internal/frozen (bool value)) (when value (setv self.m/return-output True)))
+#+end_src
+
+**** Hy Model
+
+#+begin_src hy
+(defn [property] m/model [self] (return self.internal/model))
+(defn [m/model.setter] m/model [self value] (setv self.internal/model (bool value)) (when value (setv self.m/return-output True)))
+#+end_src
+
+**** Function Call
+
+#+begin_src hy
+(defn [property] m/call [self] (return self.internal/call))
+(defn [m/call.setter] m/call [self value] (setv self.internal/call (bool value)) (when value (setv self.m/return-output True)))
+#+end_src
+
 *** Command
 **** Return
 
@@ -282,7 +305,7 @@ Print the final command:
 (defn [m/print-command.setter] m/print-command [self value] (setv self.internal/print-command (bool value)) (when value (setv self.m/return-command True)))
 #+end_src
 
-**** Run Interactively
+*** Run Interactively
 
 #+begin_src hy
 (defn [property] m/run [self] (return (= self.m/capture "run")))
@@ -490,12 +513,7 @@ Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn P
 
 *** Subcommand
 
-#+call: hash() :exports none
-
-#+RESULTS:
-: 20220111111603650875845
-
-#+name: 20220111111603650875845
+#+name: a1454c95-afbf-4c1a-ad12-0b6be7cc9768
 #+begin_src text
 supercalifragilisticexpialidocious
 #+end_src
@@ -504,11 +522,11 @@ Note that only via ~baking~ can subcommand-specific arguments and keyword argume
 
 #+begin_src hy
 (setv self.m/subcommand (D {})
-      self.m/subcommand.default "<<20220111111603650875845>>"
+      self.m/subcommand.default "<<a1454c95-afbf-4c1a-ad12-0b6be7cc9768>>"
       self.m/subcommand.current (D {})
-      self.m/subcommand.current.unprocessed "<<20220111111603650875845>>"
+      self.m/subcommand.current.unprocessed self.m/subcommand.default
       self.m/subcommand.current.intact False
-      self.m/subcommand.current.processed "<<20220111111603650875845>>")
+      self.m/subcommand.current.processed self.m/subcommand.default)
 #+end_src
 
 *** Arguments
@@ -518,7 +536,7 @@ Note that only via ~baking~ can subcommand-specific arguments and keyword argume
       self.m/args.world []
       self.m/args.instantiated (list args)
       self.m/args.baked (D {})
-      self.m/args.baked.<<20220111111603650875845>> []
+      self.m/args.baked.<<a1454c95-afbf-4c1a-ad12-0b6be7cc9768>> []
       self.m/args.called []
       self.m/args.current (D {})
       self.m/args.current.unprocessed (D {})
@@ -536,7 +554,7 @@ Note that only via ~baking~ can subcommand-specific arguments and keyword argume
       self.m/kwargs.world (D {})
       self.m/kwargs.instantiated (D kwargs)
       self.m/kwargs.baked (D {})
-      self.m/kwargs.baked.<<20220111111603650875845>> (D {})
+      self.m/kwargs.baked.<<a1454c95-afbf-4c1a-ad12-0b6be7cc9768>> (D {})
       self.m/kwargs.called (D {})
       self.m/kwargs.current (D {})
       self.m/kwargs.current.unprocessed (D {})
@@ -697,7 +715,7 @@ Default settings for certain programs and their subcommands:
 ****** Default Subcommand
 
 #+begin_src hy
-(setv self.m/settings.programs.rich.<<20220111111603650875845>>.m/run True)
+(setv self.m/settings.programs.rich.<<a1454c95-afbf-4c1a-ad12-0b6be7cc9768>>.m/run True)
 #+end_src
 
 **** Environment Variables
@@ -721,12 +739,34 @@ passed in as dictionary of variable names and values:
 <<internal/(setting="new-exports", value="(D {})")>>
 #+end_src
 
-**** Frozen Program
+**** Return Output
+
+#+begin_src hy
+<<m/(setting="return-output", value="False")>>
+#+end_src
+
+***** Frozen Program
 
 Return the bakery just before running the command; any type not in ~m/type-groups.acceptable-args~ will freeze the bakery:
 
 #+begin_src hy
-<<m/(setting="frozen", value="False")>>
+<<internal/(setting="frozen", value="False")>>
+#+end_src
+
+***** Hy Model
+
+Return a Hy Model:
+
+#+begin_src hy
+<<internal/(setting="model", value="False")>>
+#+end_src
+
+***** Function Call
+
+Return a function call which can be evaluated:
+
+#+begin_src hy
+<<internal/(setting="call", value="False")>>
 #+end_src
 
 **** Capture Type
@@ -1135,14 +1175,14 @@ Sort then filter the output, if both settings are enabled:
       (setv self.m/current-settings.program (get-un-mangled self.m/settings.programs
                                                             self.m/base-program
                                                             :default (D {})))
-      (for [[key value] (.items self.m/current-settings.program.<<20220111111603650875845>>)]
+      (for [[key value] (.items self.m/current-settings.program.<<a1454c95-afbf-4c1a-ad12-0b6be7cc9768>>)]
            (setattr self key (deepcopy value))))
 #+end_src
 
 *** Setup
 
 #+begin_src hy
-(defn var/setup [self #* args [subcommand- "<<20220111111603650875845>>"] #** kwargs]
+(defn var/setup [self #* args [subcommand- "<<a1454c95-afbf-4c1a-ad12-0b6be7cc9768>>"] #** kwargs]
       (.var/set-defaults self)
 
       (setv self.m/args.world (or (. (.origin- self) m/args world) []))
@@ -1185,7 +1225,7 @@ Note that ~subcommand~ is only really needed here to help reset the baked argume
             [args False]
             [kwargs False]
             [all-subs False]
-            [subcommand "<<20220111111603650875845>>"]
+            [subcommand "<<a1454c95-afbf-4c1a-ad12-0b6be7cc9768>>"]
             [set-defaults True]]
       (setv self.m/current-settings (D {}))
       (for [m #("settings" "subcommand" "args" "kwargs")]
@@ -1530,7 +1570,9 @@ otherwise ~(isinstance value int)~ will catch both cases.
 
 #+begin_src hy
 (defn return/output [self]
-      (cond self.m/frozen (return (deepcopy self))
+      (cond self.m/model (return (.return/model self))
+            self.m/call (return (.return/call self))
+            self.m/frozen (return (deepcopy self))
             self.m/return-command (return (.m/command self))
             True (let [output (.return/process self)]
                       (when (isinstance output dict)
@@ -1550,6 +1592,38 @@ otherwise ~(isinstance value int)~ will catch both cases.
                                        stdopp (+ "std" opp))
                                  (when (and (< self.m/verbosity 1) (= self.m/capture stdstd)) (del (get output stdopp)))))
                       (return output))))
+#+end_src
+
+**** Hy Model
+
+#+begin_src hy
+(defn return/model [self]
+      (let [ settings [] ]
+           (for [setting self.m/settings.defaults]
+                (let [ v (getattr self setting) ]
+                     (.append settings (.Keyword hy.models (unmangle setting)))
+                     (.append settings (cond (= setting "model") False
+                                             (isinstance v D) (.Dict hy.models v)
+                                             (callable v) (.Symbol hy.models v.__name__)
+                                             True v))))
+           (return (.as-model hy.models `(bakery :program- ~self.m/program
+                                                 :base-program- ~self.m/base-program
+                                                 :freezer- ~self.m/freezer
+                                                 ~@settings)))))
+#+end_src
+
+**** Function Call
+
+#+begin_src hy
+(defn return/call [self]
+      (let [ settings "" ]
+           (for [setting self.m/settings.defaults]
+                (let [ v (getattr self setting) ]
+                     (+= settings f" :{(unmangle setting)} {(cond (= setting "call") False
+                                                                  (and (isinstance v str) (not v)) "''"
+                                                                  (callable v) v.__name__
+                                                                  True v)}")))
+           (return f"bakery :program- {(or self.m/program "''")} :base-program- {self.m/base-program} :freezer- {self.m/freezer}{settings}")))
 #+end_src
 
 **** Process
@@ -1598,7 +1672,7 @@ otherwise ~(isinstance value int)~ will catch both cases.
 #+begin_src hy
 (defn return/frosting [self]
       (if (setx output (.return/output self))
-          (do (when self.m/frozen (return output))
+          (do (when self.m/return-output (return output))
               (when (or self.m/replace-error self.m/false-error) (return output.stdout))
               (setv frosted-output (if (and (isinstance output dict)
                                             (= (len output) 1))
@@ -1705,7 +1779,7 @@ For some reason, ~Popen's env~ keyword doesn't like [[https://github.com/mewwts/
 ** Run
 
 #+begin_src hy
-(defn m/spin [self #* args [subcommand- "<<20220111111603650875845>>"] #** kwargs]
+(defn m/spin [self #* args [subcommand- "<<a1454c95-afbf-4c1a-ad12-0b6be7cc9768>>"] #** kwargs]
       (defn inner [title]
             (setv opts (or self.m/debug (.cls/get-attr self.__class__ kwargs "m/debug" :default self.m/debug))
                   bool-opts {})
@@ -1798,7 +1872,7 @@ Note that ~freezer-~ will always use the ~m/freezer~ value from the bakery on th
 **** Deepcopy With Arguments
 
 #+begin_src hy
-(defn deepcopy- [self #* args [subcommand- "<<20220111111603650875845>>"] #** kwargs]
+(defn deepcopy- [self #* args [subcommand- "<<a1454c95-afbf-4c1a-ad12-0b6be7cc9768>>"] #** kwargs]
       (setv cls (deepcopy self))
       (.bake- cls #* args :instantiated- True :m/subcommand subcommand- #** kwargs)
       (return cls))
@@ -1827,7 +1901,7 @@ Note that ~freezer-~ will always use the ~m/freezer~ value from the bakery on th
 [["Bake"][https://amoffat.github.io/sh/sections/baking.html]] arguments and options into the command from before for specific subcommands:
 
 #+begin_src hy
-(defn bake- [self #* args [subcommand- "<<20220111111603650875845>>"] [instantiated- False] #** kwargs ]
+(defn bake- [self #* args [subcommand- "<<a1454c95-afbf-4c1a-ad12-0b6be7cc9768>>"] [instantiated- False] #** kwargs ]
       (.extend (if instantiated-
                    self.m/args.instantiated
                    (. self m/args baked [subcommand-])) args)
@@ -1876,7 +1950,7 @@ can be used for debugging purposes or otherwise.
                                                          self.__slots__
                                                          :if (!= var "__dict__")
                                                          [var (getattr self var)])) }))
-      (when (hasattr self "__dict__") (setv sd.__dict__ self.__dict__))
+      (when (hasattr self "__dict__") (setv sd.__dict__ (recursive-unmangle self.__dict__)))
       (return sd))
 #+end_src
 

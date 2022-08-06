@@ -2,6 +2,7 @@
 (.install rich.traceback :show-locals True)
 
 (import builtins)
+(import hy)
 (import py)
 (import sys)
 (import weakref)
@@ -133,6 +134,15 @@
 (defn [property] m/freezer [self] (return self.internal/freezer))
 (defn [m/freezer.setter] m/freezer [self value] (setv self.internal/freezer (.cls/freezer self.__class__ value self.internal/freezer)))
 
+(defn [property] m/frozen [self] (return self.internal/frozen))
+(defn [m/frozen.setter] m/frozen [self value] (setv self.internal/frozen (bool value)) (when value (setv self.m/return-output True)))
+
+(defn [property] m/model [self] (return self.internal/model))
+(defn [m/model.setter] m/model [self value] (setv self.internal/model (bool value)) (when value (setv self.m/return-output True)))
+
+(defn [property] m/call [self] (return self.internal/call))
+(defn [m/call.setter] m/call [self value] (setv self.internal/call (bool value)) (when value (setv self.m/return-output True)))
+
 (defn [property] m/return-command [self] (return self.internal/return-command))
 (defn [m/return-command.setter] m/return-command [self value] (setv self.internal/return-command (bool value)) (when value (setv self.m/type str)))
 
@@ -258,9 +268,9 @@
 (setv self.m/subcommand (D {})
       self.m/subcommand.default "supercalifragilisticexpialidocious"
       self.m/subcommand.current (D {})
-      self.m/subcommand.current.unprocessed "supercalifragilisticexpialidocious"
+      self.m/subcommand.current.unprocessed self.m/subcommand.default
       self.m/subcommand.current.intact False
-      self.m/subcommand.current.processed "supercalifragilisticexpialidocious")
+      self.m/subcommand.current.processed self.m/subcommand.default)
 
 (setv self.m/args (D {})
       self.m/args.world []
@@ -351,8 +361,17 @@
 (setv self.internal/new-exports (D {}))
 (setv self.m/settings.defaults.m/new-exports (deepcopy self.internal/new-exports))
 
-(setv self.m/frozen False)
-(setv self.m/settings.defaults.m/frozen (deepcopy self.m/frozen))
+(setv self.m/return-output False)
+(setv self.m/settings.defaults.m/return-output (deepcopy self.m/return-output))
+
+(setv self.internal/frozen False)
+(setv self.m/settings.defaults.m/frozen (deepcopy self.internal/frozen))
+
+(setv self.internal/model False)
+(setv self.m/settings.defaults.m/model (deepcopy self.internal/model))
+
+(setv self.internal/call False)
+(setv self.m/settings.defaults.m/call (deepcopy self.internal/call))
 
 (setv self.m/captures #("stdout" "stderr" "both" "run"))
 (setv self.internal/capture "stdout")
@@ -820,7 +839,9 @@
                      (raise (ValueError "Sorry! The number of tiered replacements must be equal to the number of arguments provided!"))))))
 
 (defn return/output [self]
-      (cond self.m/frozen (return (deepcopy self))
+      (cond self.m/model (return (.return/model self))
+            self.m/call (return (.return/call self))
+            self.m/frozen (return (deepcopy self))
             self.m/return-command (return (.m/command self))
             True (let [output (.return/process self)]
                       (when (isinstance output dict)
@@ -840,6 +861,30 @@
                                        stdopp (+ "std" opp))
                                  (when (and (< self.m/verbosity 1) (= self.m/capture stdstd)) (del (get output stdopp)))))
                       (return output))))
+
+(defn return/model [self]
+      (let [ settings [] ]
+           (for [setting self.m/settings.defaults]
+                (let [ v (getattr self setting) ]
+                     (.append settings (.Keyword hy.models (unmangle setting)))
+                     (.append settings (cond (= setting "model") False
+                                             (isinstance v D) (.Dict hy.models v)
+                                             (callable v) (.Symbol hy.models v.__name__)
+                                             True v))))
+           (return (.as-model hy.models `(bakery :program- ~self.m/program
+                                                 :base-program- ~self.m/base-program
+                                                 :freezer- ~self.m/freezer
+                                                 ~@settings)))))
+
+(defn return/call [self]
+      (let [ settings "" ]
+           (for [setting self.m/settings.defaults]
+                (let [ v (getattr self setting) ]
+                     (+= settings f" :{(unmangle setting)} {(cond (= setting "call") False
+                                                                  (and (isinstance v str) (not v)) "''"
+                                                                  (callable v) v.__name__
+                                                                  True v)}")))
+           (return f"bakery :program- {(or self.m/program "''")} :base-program- {self.m/base-program} :freezer- {self.m/freezer}{settings}")))
 
 (defn return/process [self]
     (if (.m/command self)
@@ -880,7 +925,7 @@
 
 (defn return/frosting [self]
       (if (setx output (.return/output self))
-          (do (when self.m/frozen (return output))
+          (do (when self.m/return-output (return output))
               (when (or self.m/replace-error self.m/false-error) (return output.stdout))
               (setv frosted-output (if (and (isinstance output dict)
                                             (= (len output) 1))
@@ -1072,7 +1117,7 @@
                                                          self.__slots__
                                                          :if (!= var "__dict__")
                                                          [var (getattr self var)])) }))
-      (when (hasattr self "__dict__") (setv sd.__dict__ self.__dict__))
+      (when (hasattr self "__dict__") (setv sd.__dict__ (recursive-unmangle self.__dict__)))
       (return sd))
 
 (defn inspect- [self #** kwargs] 
