@@ -92,6 +92,12 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
                                (return)))
 #+end_src
 
+** Mangle Keys
+
+#+begin_src hy
+(defn mangle-keys [kwargs] (dfor [k v] (.items kwargs) [(mangle k) v]))
+#+end_src
+
 * The Frosting Class
 
 #+begin_src hy
@@ -1998,7 +2004,8 @@ CAREFUL! These variables need to be before the variables in the block below, and
 #+end_src
 
 #+begin_src hy
-            args (list args))
+            args (list args)
+            kwargs (mangle-keys kwargs))
 #+end_src
 
 CAREFUL! The order is important here; it is meant to conflict with similar blocks above!
@@ -2032,6 +2039,7 @@ Remove baked arguments and options; accepts keyword arguments taken by ~reset-~:
 
 #+begin_src hy
 (defn splat- [self [set-defaults False] #** kwargs ]
+      (setv kwargs (mangle-keys kwargs))
       (if (any (gfor akc self.m/arg-kwarg-classes (.get kwargs akc False)))
           (.reset- self :set-defaults set-defaults #** kwargs)
           (.reset- self :baked True :set-defaults set-defaults #** kwargs)))

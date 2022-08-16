@@ -51,6 +51,8 @@
                                (if None self)
                                (return)))
 
+(defn mangle-keys [kwargs] (dfor [k v] (.items kwargs) [(mangle k) v]))
+
 (defclass frosting [tea Slots]
 
 (defn __init__ [self output [capture "stdout"]]
@@ -1160,7 +1162,8 @@
             base-program (or (when self.m/freezer program) (when (= program "") base-program) base-program self.m/base-program)
             freezer-hash (or freezer-hash self.m/freezer-hash)
 
-            args (list args))
+            args (list args)
+            kwargs (mangle-keys kwargs))
 
       (cond world (for [store (.chain- self)]
                        (if (isinstance store.m/args.world list)
@@ -1184,6 +1187,7 @@
                      (.update (get self.m/kwargs.baked subcommand) kwargs))))
 
 (defn splat- [self [set-defaults False] #** kwargs ]
+      (setv kwargs (mangle-keys kwargs))
       (if (any (gfor akc self.m/arg-kwarg-classes (.get kwargs akc False)))
           (.reset- self :set-defaults set-defaults #** kwargs)
           (.reset- self :baked True :set-defaults set-defaults #** kwargs)))

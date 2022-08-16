@@ -18,11 +18,11 @@
                     (assert (not (in (mangle "m/sort") (get tails.m/kwargs.freezer fhash)))))))
 (defn [mark.baking mark.piping (.parametrize mark "cls" #(
       {}
-      { "base-program" "tail" }
+      { "base_program" "tail" }
       { "program" "tail" }
 ))] test-bake-freezer-failures [cls]
       (let [ command (tails :m/return-command True) ]
            (try (.bake- tails cookies :m/list True :help True #** cls)
                 (assert (= command (tails :m/return-command True)))
-                (finally (eval f"(.splat- tails {(if cls f":{(next (iter (.keys cls)))} {(next (iter (.values cls)))}" "")})")
+                (finally (.splat- tails #** cls)
                          (-> tails.m/kwargs.baked (get tails.m/subcommand.default) (get (mangle "m/type")) (!= list) assert)))))
