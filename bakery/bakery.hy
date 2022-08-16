@@ -51,8 +51,6 @@
                                (if None self)
                                (return)))
 
-(defn mangle-keys [kwargs] (dfor [k v] (.items kwargs) [(mangle k) v]))
-
 (defclass frosting [tea Slots]
 
 (defn __init__ [self output [capture "stdout"]]
@@ -578,21 +576,21 @@
       (for [[key value] (.items (get self.m/current-settings.program self.m/subcommand.default))]
            (setattr self key (deepcopy value))))
 
-(defn var/setup [self #* args [subcommand None] #** kwargs]
+(defn var/setup [self #* args [subcommand- None] #** kwargs]
       (.var/set-defaults self)
       
       (if self.m/freezer
           (setv self.m/subcommand.current.unprocessed self.m/subcommand.default)
-          (let [ subcommand (or subcommand self.m/subcommand.default) ]
-               (if (= subcommand self.m/subcommand.default)
+          (let [ subcommand- (or subcommand- self.m/subcommand.default) ]
+               (if (= subcommand- self.m/subcommand.default)
                    (for [keywords #(self.m/kwargs.world
                                     (get self.m/kwargs.base-program self.m/base-program)
                                     (get self.m/kwargs.program self.m/program)
                                     self.m/kwargs.instantiated
-                                    (get self.m/kwargs.baked subcommand)
+                                    (get self.m/kwargs.baked subcommand-)
                                     kwargs)]
                         (.subcommand/get self #** keywords))
-                   (setv self.m/subcommand.current.unprocessed subcommand))
+                   (setv self.m/subcommand.current.unprocessed subcommand-))
                (unless self.m/subcommand.current.unprocessed (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))))
       (.subcommand/process self)
 
@@ -610,72 +608,72 @@
       (.var/apply self))
 
 (defn reset- [ self
-               [world False]
-               [base-programs False]
-               [programs False]
-               [freezers False]
-               [instantiated False]
-               [baked False]
-               [args False]
-               [kwargs False]
-               [all-args False]
-               [all-kwargs False]
-               [all-classes False]
-               [base-program None]
-               [program None]
-               [freezer-hash None]
-               [subcommand None]
-               [set-defaults True] ]
-      (setv base-programs (or base-programs base-program)
-            programs (or programs program)
-            freezers (or freezers freezer-hash)
-            baked (or baked subcommand)
-            and-args-kwargs (and args kwargs)
+               [world- False]
+               [base-programs- False]
+               [programs- False]
+               [freezers- False]
+               [instantiated- False]
+               [baked- False]
+               [args- False]
+               [kwargs- False]
+               [all-args- False]
+               [all-kwargs- False]
+               [all-classes- False]
+               [base-program- None]
+               [program- None]
+               [freezer-hash- None]
+               [subcommand- None]
+               [set-defaults- True] ]
+      (setv base-programs- (or base-programs- base-program-)
+            programs- (or programs- program-)
+            freezers- (or freezers- freezer-hash-)
+            baked- (or baked- subcommand-)
+            and-args-kwargs (and args- kwargs-)
             args-kwargs (or and-args-kwargs (not and-args-kwargs))
-            and-all-args-kwargs (and all-args all-kwargs)
+            and-all-args-kwargs (and all-args- all-kwargs-)
             all-args-kwargs (or and-all-args-kwargs (not and-all-args-kwargs))
             self.m/current-settings (D {})
-            subcommand (or subcommand self.m/subcommand.default)
-            base-program (or base-program self.m/base-program)
-            program (or program self.m/program)
-            freezer-hash (or freezer-hash self.m/freezer-hash))
+            subcommand- (or subcommand- self.m/subcommand.default)
+            base-program- (or base-program- self.m/base-program)
+            program- (or program- self.m/program)
+            freezer-hash- (or freezer-hash- self.m/freezer-hash))
       (defn inner [store name value [default-value None]]
             (setv default-value (or default-value (getattr store (mangle (+ "m/" name)))))
-            (when (or args args-kwargs)
-                  (if (or all-args all-args-kwargs)
+            (when (or args- args-kwargs)
+                  (if (or all-args- all-args-kwargs)
                       (do (assoc store.m/args name (D {}))
                           (setv (. store m/args [name] [default-value]) []))
                       (setv (. store m/args [name] [value]) [])))
-            (when (or kwargs args-kwargs)
-                  (if (or all-kwargs all-args-kwargs)
+            (when (or kwargs- args-kwargs)
+                  (if (or all-kwargs- all-args-kwargs)
                       (assoc store.m/kwargs name (D {}))
                       (setv (. store m/kwargs [name] [value]) (D {})))))
       (for [m #("settings" "subcommand" "args" "kwargs")]
            (assoc (getattr self (mangle (+ "m/" m))) "current" (D {})))
       (setv self.m/args.called [])
             self.m/kwargs.called (D {})
-      (when (or world all-classes)
+      (when (or world- all-classes-)
             (for [store (.chain- self)]
-                 (when (or args args-kwargs) (setv store.m/args.world []))
-                 (when (or kwargs args-kwargs) (setv store.m/kwargs.world (D {})))))
-      (when (or base-programs all-classes)
+                 (when (or args- args-kwargs) (setv store.m/args.world []))
+                 (when (or kwargs- args-kwargs) (setv store.m/kwargs.world (D {})))))
+      (when (or base-programs- all-classes-)
             (for [store (.chain- self)]
-                 (inner store "base-program" base-program)))
-      (when (or programs all-classes)
+                 (inner store "base-program" base-program-)))
+      (when (or programs- all-classes-)
             (for [store (.chain- self)]
-                 (inner store "program" program)))
-      (when (or freezers all-classes)
+                 (inner store "program" program-)))
+      (when (or freezers- all-classes-)
             (for [store (.chain- self)]
-                 (when (or kwargs args-kwargs)
-                       (if (or all-kwargs all-args-kwargs)
+                 (when (or kwargs- args-kwargs)
+                       (if (or all-kwargs- all-args-kwargs)
                            (setv store.m/kwargs.freezer (D {}))
                            (assoc store.m/kwargs.freezer freezer-hash (D {}))))))
-      (when instantiated
-            (when (or args args-kwargs) (setv self.m/args.instantiated []))
-            (when (or kwargs args-kwargs) (setv self.m/args.instantiated (D {}))))
-      (when (or baked all-classes)
-            (inner self "baked" subcommand :default-value self.m/subcommand.default))
-      (when set-defaults (.var/set-defaults self)))
+      (when instantiated-
+            (when (or args- args-kwargs) (setv self.m/args.instantiated []))
+            (when (or kwargs- args-kwargs) (setv self.m/args.instantiated (D {}))))
+      (when (or baked- all-classes-)
+            (inner self "baked" subcommand- :default-value self.m/subcommand.default))
+      (when set-defaults- (.var/set-defaults self)))
 
 (defn var/process-all [self #* args #** kwargs]
       (unless self.m/freezer
@@ -1055,8 +1053,8 @@
                                (split command)))
                        #** kwargs)))
 
-(defn m/spin [self #* args [subcommand None] #** kwargs]
-      (setv subcommand (or subcommand self.m/subcommand.default))
+(defn m/spin [self #* args [subcommand- None] #** kwargs]
+      (setv subcommand- (or subcommand- self.m/subcommand.default))
       (defn inner [title]
             (setv opts (or self.m/debug (.cls/get-attr self.__class__ kwargs "m/debug" :default self.m/debug))
                   bool-opts {})
@@ -1068,7 +1066,7 @@
                       (.update bool-opts { "title" title })
                       (.inspect- self #** bool-opts))))
       (try (inner "Setup")
-           (.var/setup self #* args :subcommand subcommand #** kwargs)
+           (.var/setup self #* args :subcommand- subcommand- #** kwargs)
 
            (inner "Process")
            (.command/process-all self)
@@ -1127,10 +1125,10 @@
                              :base-program- self.m/base-program
                              #** kwargs)))
 
-(defn deepcopy- [self #* args [subcommand None] #** kwargs]
-      (setv subcommand (or subcommand self.m/subcommand.default)
+(defn deepcopy- [self #* args [subcommand- None] #** kwargs]
+      (setv subcommand- (or subcommand- self.m/subcommand.default)
             cls (deepcopy self))
-      (.bake- cls #* args :instantiated True :m/subcommand subcommand #** kwargs)
+      (.bake- cls #* args :instantiated- True :m/subcommand subcommand- #** kwargs)
       (return cls))
 
 (defn check- [self] (return (check self self.m/program)))
@@ -1141,60 +1139,58 @@
 
 (defn bake- [ self
               #* args
-              [world False]
-              [base-programs False]
-              [programs False]
-              [freezers False]
-              [instantiated False]
-              [baked True]
-              [base-program None]
-              [program None]
-              [freezer-hash None]
-              [subcommand None]
+              [world- False]
+              [base-programs- False]
+              [programs- False]
+              [freezers- False]
+              [instantiated- False]
+              [baked- True]
+              [base-program- None]
+              [program- None]
+              [freezer-hash- None]
+              [subcommand- None]
               #** kwargs ]
-      (setv subcommand (if self.m/freezer self.m/subcommand.default (or subcommand self.m/subcommand.default))
+      (setv subcommand- (if self.m/freezer self.m/subcommand.default (or subcommand- self.m/subcommand.default))
 
-            programs (or programs program)
-            base-programs (or (and self.m/freezer program) (= program "") base-programs base-program)
-            freezers (or freezers freezer-hash)
+            programs- (or programs- program-)
+            base-programs- (or (and self.m/freezer program-) (= program- "") base-programs- base-program-)
+            freezers- (or freezers- freezer-hash-)
 
-            program (or program self.m/program)
-            base-program (or (when self.m/freezer program) (when (= program "") base-program) base-program self.m/base-program)
-            freezer-hash (or freezer-hash self.m/freezer-hash)
+            program- (or program- self.m/program)
+            base-program- (or (when self.m/freezer program-) (when (= program- "") base-program-) base-program- self.m/base-program)
+            freezer-hash- (or freezer-hash- self.m/freezer-hash)
 
-            args (list args)
-            kwargs (mangle-keys kwargs))
+            args (list args))
 
-      (cond world (for [store (.chain- self)]
-                       (if (isinstance store.m/args.world list)
-                           (.extend store.m/args.world args)
-                           (setv store.m/args.world args))
-                       (.update store.m/kwargs.world kwargs))
-            base-programs (for [store (.chain- self)]
-                               (if (isinstance (setx base-program-args (get store.m/args.base-program base-program)) list)
-                                   (.extend base-program-args args)
-                                   (setv base-program-args args))
-                               (.update (get store.m/kwargs.base-program base-program) kwargs))
-            programs (for [[index store] (enumerate (.chain- self))]
-                          (if (isinstance (setx program-args (get store.m/args.program program)) list)
-                              (.extend program-args args)
-                              (setv program-args args))
-                          (.update (get store.m/kwargs.program program) kwargs))
-            freezers (for [store (.chain- self)] (.update (get store.m/kwargs.freezer freezer-hash) kwargs))
-            instantiated (do (.extend self.m/args.instantiated args)
-                             (.update self.m/kwargs.instantiated kwargs))
-            True (do (.extend (get self.m/args.baked subcommand) args)
-                     (.update (get self.m/kwargs.baked subcommand) kwargs))))
+      (cond world- (for [store (.chain- self)]
+                        (if (isinstance store.m/args.world list)
+                            (.extend store.m/args.world args)
+                            (setv store.m/args.world args))
+                        (.update store.m/kwargs.world kwargs))
+            base-programs- (for [store (.chain- self)]
+                                (if (isinstance (setx base-program-args (get store.m/args.base-program base-program-)) list)
+                                    (.extend base-program-args args)
+                                    (setv base-program-args args))
+                                (.update (get store.m/kwargs.base-program base-program-) kwargs))
+            programs- (for [[index store] (enumerate (.chain- self))]
+                           (if (isinstance (setx program-args (get store.m/args.program program-)) list)
+                               (.extend program-args args)
+                               (setv program-args args))
+                           (.update (get store.m/kwargs.program program-) kwargs))
+            freezers- (for [store (.chain- self)] (.update (get store.m/kwargs.freezer freezer-hash-) kwargs))
+            instantiated- (do (.extend self.m/args.instantiated args)
+                              (.update self.m/kwargs.instantiated kwargs))
+            True (do (.extend (get self.m/args.baked subcommand-) args)
+                     (.update (get self.m/kwargs.baked subcommand-) kwargs))))
 
-(defn splat- [self [set-defaults False] #** kwargs ]
-      (setv kwargs (mangle-keys kwargs))
+(defn splat- [self [set-defaults- False] #** kwargs ]
       (if (any (gfor akc self.m/arg-kwarg-classes (.get kwargs akc False)))
-          (.reset- self :set-defaults set-defaults #** kwargs)
-          (.reset- self :baked True :set-defaults set-defaults #** kwargs)))
+          (.reset- self :set-defaults- set-defaults- #** kwargs)
+          (.reset- self :baked- True :set-defaults- set-defaults- #** kwargs)))
 
-(defn oh-no- [self [set-defaults False] #** kwargs]
+(defn oh-no- [self [set-defaults- False] #** kwargs]
       (for [store (.chain- self)]
-           (.splat- store :set-defaults set-defaults #** kwargs)))
+           (.splat- store :set-defaults- set-defaults- #** kwargs)))
 
 (defn current-values- [self]
       (setv sd (D { "__slots__" (recursive-unmangle (dfor var
@@ -1236,8 +1232,8 @@
                     #** kwargs ]
                   (cond (or (.cls/get-attr self.__class__ kwargs "m/context" False)
                              (.cls/get-attr self.__class__ kwargs "m/c" False))
-                         (return (.deepcopy- self #* args :subcommand subcommand #** kwargs))
-                        True (return (.m/spin self #* args :subcommand subcommand #** kwargs))))
+                         (return (.deepcopy- self #* args :subcommand- subcommand #** kwargs))
+                        True (return (.m/spin self #* args :subcommand- subcommand #** kwargs))))
             (return inner))))
 
 (defn __copy__ [self]

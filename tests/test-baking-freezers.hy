@@ -11,15 +11,15 @@
 (import hy [mangle eval] oreo [first-last-n])
 (setv tails (| (ls [] :a True cookies) tail))
 (defn [mark.baking mark.piping (.parametrize mark "fhash" #(tails.m/freezer-hash (hash (tuple tails.m/freezer))))] test-bake-freezer [fhash]
-      (try (.bake- ls :freezer-hash fhash :m/list True :m/sort None :m/filter nots?)
+      (try (.bake- ls :freezer-hash- fhash :m/list True :m/sort None :m/filter nots?)
            (-> assorted-cookies (first-last-n :last True :number 10 :type- list) (= (tails)) assert)
            (-> (ls) (isinstance list) (not) assert)
-           (finally (.splat- ls :freezer-hash fhash)
+           (finally (.splat- ls :freezer-hash- fhash)
                     (assert (not (in (mangle "m/sort") (get tails.m/kwargs.freezer fhash)))))))
 (defn [mark.baking mark.piping (.parametrize mark "cls" #(
       {}
-      { "base_program" "tail" }
-      { "program" "tail" }
+      { "base_program_" "tail" }
+      { "program_" "tail" }
 ))] test-bake-freezer-failures [cls]
       (let [ command (tails :m/return-command True) ]
            (try (.bake- tails cookies :m/list True :help True #** cls)
