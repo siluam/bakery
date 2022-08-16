@@ -14,7 +14,7 @@
 (import copy [copy deepcopy])
 (import functools [partial wraps])
 (import hy [mangle unmangle])
-(import inspect [isclass :as class?])
+(import inspect [isclass :as class? stack])
 (import itertools [chain filterfalse tee])
 (import more-itertools [peekable])
 (import oreo [coll? eclair either? flatten get-un-mangled int? recursive-unmangle tea first-last-n])
@@ -28,6 +28,7 @@
 (import subprocess [DEVNULL PIPE Popen STDOUT])
 (import textwrap [TextWrapper])
 (import types [MethodType])
+(import uuid [uuid4 uuid5])
 
 (try (import coconut *)
      (except [ImportError] None))
@@ -66,7 +67,9 @@
 
 (defn __iter__ [self]
       (yield-from (if self.dict-like
+
                       (get self self.capture)
+
                       (.values self))))
 
 (defn __call__ [self]
@@ -141,7 +144,10 @@
                   (.get dct (mangle (+ "m/" cls/get-attr/attr)) default))))
 
 (defn [property] m/freezer [self] (return self.internal/freezer))
-(defn [m/freezer.setter] m/freezer [self value] (setv self.internal/freezer (.cls/freezer self.__class__ value self.internal/freezer)))
+(defn [m/freezer.setter] m/freezer [self value]
+      (let [ freezer (.cls/freezer self.__class__ value self.internal/freezer) ]
+           (setv self.internal/freezer freezer
+                 self.m/freezer-hash (hash (tuple freezer)))))
 
 (defn [property] m/frozen [self] (return self.internal/frozen))
 (defn [m/frozen.setter] m/frozen [self value] (setv self.internal/frozen (bool value)) (when value (setv self.m/return-output True)))
@@ -169,11 +175,11 @@
                   reverse-default False
                   key-default None
                   self.internal/sort (D { "reverse" (cond dict-like (.get value "reverse" reverse-default)
-                                                          iterable (get (or (lfor item value :if (isinstance item bool) item) #(reverse-default)) 0)
+                                                          iterable (first (or (lfor item value :if (isinstance item bool) item) #(reverse-default)))
                                                           (isinstance value bool) value
                                                           True reverse-default)
                                           "key" (cond dict-like (.get value "key" key-default)
-                                                      iterable (get (or (lfor item value :if (callable item) item) #(key-default)) 0)
+                                                      iterable (first (or (lfor item value :if (callable item) item) #(key-default)))
                                                       (callable value) value
                                                       True key-default) }))))
 
@@ -185,11 +191,11 @@
                   reverse-default False
                   key-default None
                   self.internal/filter (D { "reverse" (cond dict-like (.get value "reverse" reverse-default)
-                                                            iterable (get (or (lfor item value :if (isinstance item bool) item) #(reverse-default)) 0)
+                                                            iterable (first (or (lfor item value :if (isinstance item bool) item) #(reverse-default)))
                                                             (isinstance value bool) value
                                                             True reverse-default)
                                             "key" (cond dict-like (.get value "key" key-default)
-                                                        iterable (get (or (lfor item value :if (callable item) item) #(key-default)) 0)
+                                                        iterable (first (or (lfor item value :if (callable item) item) #(key-default)))
                                                         (callable value) value
                                                         True key-default) }))))
 
@@ -201,17 +207,17 @@
             number-default 0
             std-default "stdout"
             std (cond dict-like (.get value "std" std-default)
-                      iterable (get (or (lfor item value :if (isinstance item str) item) #(std-default)) 0)
+                      iterable (first (or (lfor item value :if (isinstance item str) item) #(std-default)))
                       (isinstance value str) value
                       True std-default)
             self.internal/n-lines (D {
 
                                         "last" (cond dict-like (.get value "last" last-default)
-                                                     iterable (get (or (lfor item value :if (isinstance item bool) item) #(last-default)) 0)
+                                                     iterable (first (or (lfor item value :if (isinstance item bool) item) #(last-default)))
                                                      (isinstance value bool) value
                                                      True last-default)
                                         "number" (cond dict-like (.get value "number" number-default)
-                                                       iterable (get (or (lfor item value :if (int? item) item) #(number-default)) 0)
+                                                       iterable (first (or (lfor item value :if (int? item) item) #(number-default)))
                                                        (int? value) value
                                                        True number-default)
 
@@ -257,7 +263,12 @@
         [freezer- None]
         #** kwargs]
 
+(setv self.m/id (uuid5 (uuid4) (str (uuid4)))
+      self.m/ids [ self.m/id ])
+
 (.append self.__class__.m/stores (.ref weakref self self))
+(setv self.m/flagship (= (len self.__class__.m/stores) 1)
+      self.m/origin (if self.m/flagship self (getattr (first self.__class__.m/stores) "__callback__")))
 
 (setv self.m/type-groups (D {}))
 
@@ -275,43 +286,14 @@
 (setv self.m/type-groups.excluded-classes #("type" "filter"))
 
 (setv self.m/subcommand (D {})
-      self.m/subcommand.default "supercalifragilisticexpialidocious"
+      self.m/subcommand.default "a1454c95-afbf-4c1a-ad12-0b6be7cc9768"
       self.m/subcommand.current (D {})
       self.m/subcommand.current.unprocessed self.m/subcommand.default
       self.m/subcommand.current.intact False
       self.m/subcommand.current.processed self.m/subcommand.default)
 
-(setv self.m/args (D {})
-      self.m/args.world []
-      self.m/args.instantiated (list args)
-      self.m/args.baked (D {})
-      self.m/args.baked.supercalifragilisticexpialidocious []
-      self.m/args.called []
-      self.m/args.current (D {})
-      self.m/args.current.unprocessed (D {})
-      self.m/args.current.unprocessed.starter []
-      self.m/args.current.unprocessed.regular []
-      self.m/args.current.processed (D {})
-      self.m/args.current.unprocessed.starter []
-      self.m/args.current.unprocessed.regular [])
-
-(setv self.m/kwargs (D {})
-      self.m/kwargs.world (D {})
-      self.m/kwargs.instantiated (D kwargs)
-      self.m/kwargs.baked (D {})
-      self.m/kwargs.baked.supercalifragilisticexpialidocious (D {})
-      self.m/kwargs.called (D {})
-      self.m/kwargs.current (D {})
-      self.m/kwargs.current.unprocessed (D {})
-      self.m/kwargs.current.unprocessed.starter (D {})
-      self.m/kwargs.current.unprocessed.regular (D {})
-      self.m/kwargs.current.processed (D {})
-      self.m/kwargs.current.processed.starter []
-      self.m/kwargs.current.processed.regular []
-      self.m/kwargs.current.processed.starter-values []
-      self.m/kwargs.current.processed.regular-values [])
-
 (setv self.internal/freezer (.cls/freezer self.__class__ freezer- []))
+(setv self.m/freezer-hash (hash (tuple self.m/freezer)))
 
 (if program-
     (do (setv self.m/program (or (.replace (unmangle program-) "_" "-") ""))
@@ -322,6 +304,48 @@
         (setv self.m/base-program (or base-program- self.m/program)))
     (setv self.m/program ""
           self.m/base-program (or base-program- self.m/program)))
+
+(setv self.m/arg-kwarg-classes #("world" "base-programs" "base-program" "programs" "program" "freezers" "freezer-hash" "instantiated" "baked" "subcommand"))
+
+(setv self.m/args (D {})
+      self.m/args.world (if self.m/flagship [] (deepcopy self.m/origin.m/args.world))
+      self.m/args.base-program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/args.base-program))
+      (get self.m/args.base-program self.m/base-program) (if self.m/flagship [] (deepcopy (get self.m/origin.m/args.base-program self.m/base-program)))
+      self.m/args.program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/args.program))
+      (get self.m/args.program self.m/program) (if self.m/flagship [] (deepcopy (get self.m/origin.m/args.program self.m/program)))
+      self.m/args.instantiated (list args)
+      self.m/args.baked (D {})
+      (get self.m/args.baked self.m/subcommand.default) []
+      self.m/args.called []
+      self.m/args.current (D {})
+      self.m/args.current.unprocessed (D {})
+      self.m/args.current.unprocessed.starter []
+      self.m/args.current.unprocessed.regular []
+      self.m/args.current.processed (D {})
+      self.m/args.current.unprocessed.starter []
+      self.m/args.current.unprocessed.regular [])
+
+(setv self.m/kwargs (D {})
+      self.m/kwargs.world (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.world))
+      self.m/kwargs.base-program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.base-program))
+      (get self.m/kwargs.base-program self.m/base-program) (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.base-program self.m/base-program)))
+      self.m/kwargs.program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.program))
+      (get self.m/kwargs.program self.m/program) (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.program self.m/program)))
+      self.m/kwargs.freezer (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.freezer))
+      (get self.m/kwargs.freezer self.m/freezer-hash) (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.freezer self.m/freezer-hash)))
+      self.m/kwargs.instantiated (D kwargs)
+      self.m/kwargs.baked (D {})
+      (get self.m/kwargs.baked self.m/subcommand.default) (D {})
+      self.m/kwargs.called (D {})
+      self.m/kwargs.current (D {})
+      self.m/kwargs.current.unprocessed (D {})
+      self.m/kwargs.current.unprocessed.starter (D {})
+      self.m/kwargs.current.unprocessed.regular (D {})
+      self.m/kwargs.current.processed (D {})
+      self.m/kwargs.current.processed.starter []
+      self.m/kwargs.current.processed.regular []
+      self.m/kwargs.current.processed.starter-values []
+      self.m/kwargs.current.processed.regular-values [])
 
 (setv self.m/return-categories #(
     "stdout"
@@ -362,7 +386,7 @@
 
 (setv self.m/settings.programs.rich (D {}))
 
-(setv self.m/settings.programs.rich.supercalifragilisticexpialidocious.m/run True)
+(assoc (get self.m/settings.programs.rich self.m/subcommand.default) "m/run" True)
 
 (setv self.internal/exports (D {}))
 (setv self.m/settings.defaults.m/exports (deepcopy self.internal/exports))
@@ -405,11 +429,11 @@
 (setv self.m/stdout-stderr False)
 (setv self.m/settings.defaults.m/stdout-stderr (deepcopy self.m/stdout-stderr))
 
-(setv self.m/false-error False)
-(setv self.m/settings.defaults.m/false-error (deepcopy self.m/false-error))
+(setv self.m/false-stderr False)
+(setv self.m/settings.defaults.m/false-stderr (deepcopy self.m/false-stderr))
 
-(setv self.m/replace-error False)
-(setv self.m/settings.defaults.m/replace-error (deepcopy self.m/replace-error))
+(setv self.m/replace-stderr False)
+(setv self.m/settings.defaults.m/replace-stderr (deepcopy self.m/replace-stderr))
 
 (setv self.m/verbosity 0)
 (setv self.m/settings.defaults.m/verbosity (deepcopy self.m/verbosity))
@@ -494,7 +518,7 @@
 )
 
 (defn misc/type-name-is-string [self [type/type None]]
-      (return (in (. (or type/type self.m/type) __name__) self.m/type-groups.reprs)))
+      (return (in (getattr (or type/type self.m/type) "__name__") self.m/type-groups.reprs)))
 
 (defn m/reset-all [self]
       (.reset- self)
@@ -549,23 +573,25 @@
       (setv self.m/current-settings.program (get-un-mangled self.m/settings.programs
                                                             self.m/base-program
                                                             :default (D {})))
-      (for [[key value] (.items self.m/current-settings.program.supercalifragilisticexpialidocious)]
+      (for [[key value] (.items (get self.m/current-settings.program self.m/subcommand.default))]
            (setattr self key (deepcopy value))))
 
-(defn var/setup [self #* args [subcommand- "supercalifragilisticexpialidocious"] #** kwargs]
+(defn var/setup [self #* args [subcommand None] #** kwargs]
       (.var/set-defaults self)
-
-      (setv self.m/args.world (or (. (.origin- self) m/args world) []))
-      (setv self.m/kwargs.world (or (. (.origin- self) m/kwargs world) (D {})))
-
-      (if (= subcommand- self.m/subcommand.default)
-          (do (.subcommand/get self #** self.m/kwargs.world)
-              (.subcommand/get self #** self.m/kwargs.instantiated)
-              (.subcommand/get self #** (. self m/kwargs baked [subcommand-]))
-              (.subcommand/get self #** kwargs))
-          (setv self.m/subcommand.current.unprocessed subcommand-))
-      (unless self.m/subcommand.current.unprocessed
-              (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))
+      
+      (if self.m/freezer
+          (setv self.m/subcommand.current.unprocessed self.m/subcommand.default)
+          (let [ subcommand (or subcommand self.m/subcommand.default) ]
+               (if (= subcommand self.m/subcommand.default)
+                   (for [keywords #(self.m/kwargs.world
+                                    (get self.m/kwargs.base-program self.m/base-program)
+                                    (get self.m/kwargs.program self.m/program)
+                                    self.m/kwargs.instantiated
+                                    (get self.m/kwargs.baked subcommand)
+                                    kwargs)]
+                        (.subcommand/get self #** keywords))
+                   (setv self.m/subcommand.current.unprocessed subcommand))
+               (unless self.m/subcommand.current.unprocessed (setv self.m/subcommand.current.unprocessed self.m/subcommand.default))))
       (.subcommand/process self)
 
       (setv self.m/current-settings.subcommand (get-un-mangled self.m/current-settings.program
@@ -574,67 +600,107 @@
       (for [[key value] (.items self.m/current-settings.subcommand)]
            (setattr self key (deepcopy value)))
 
-      (setv self.m/args.called args)
-      (setv self.m/kwargs.called kwargs)
+      (setv self.m/args.called args
+            self.m/kwargs.called kwargs)
 
       (.var/process-all self #* args #** kwargs)
 
       (.var/apply self))
 
-(defn reset- [
-            self
-            [world False]
-            [instantiated False]
-            [baked False]
-            [args False]
-            [kwargs False]
-            [all-subs False]
-            [subcommand "supercalifragilisticexpialidocious"]
-            [set-defaults True]]
-      (setv self.m/current-settings (D {}))
+(defn reset- [ self
+               [world False]
+               [base-programs False]
+               [programs False]
+               [freezers False]
+               [instantiated False]
+               [baked False]
+               [args False]
+               [kwargs False]
+               [all-args False]
+               [all-kwargs False]
+               [all-classes False]
+               [base-program None]
+               [program None]
+               [freezer-hash None]
+               [subcommand None]
+               [set-defaults True] ]
+      (setv base-programs (or base-programs base-program)
+            programs (or programs program)
+            freezers (or freezers freezer-hash)
+            baked (or baked subcommand)
+            and-args-kwargs (and args kwargs)
+            args-kwargs (or and-args-kwargs (not and-args-kwargs))
+            and-all-args-kwargs (and all-args all-kwargs)
+            all-args-kwargs (or and-all-args-kwargs (not and-all-args-kwargs))
+            self.m/current-settings (D {})
+            subcommand (or subcommand self.m/subcommand.default)
+            base-program (or base-program self.m/base-program)
+            program (or program self.m/program)
+            freezer-hash (or freezer-hash self.m/freezer-hash))
+      (defn inner [store name value [default-value None]]
+            (setv default-value (or default-value (getattr store (mangle (+ "m/" name)))))
+            (when (or args args-kwargs)
+                  (if (or all-args all-args-kwargs)
+                      (do (assoc store.m/args name (D {}))
+                          (setv (. store m/args [name] [default-value]) []))
+                      (setv (. store m/args [name] [value]) [])))
+            (when (or kwargs args-kwargs)
+                  (if (or all-kwargs all-args-kwargs)
+                      (assoc store.m/kwargs name (D {}))
+                      (setv (. store m/kwargs [name] [value]) (D {})))))
       (for [m #("settings" "subcommand" "args" "kwargs")]
            (assoc (getattr self (mangle (+ "m/" m))) "current" (D {})))
       (setv self.m/args.called [])
             self.m/kwargs.called (D {})
-      (when world
+      (when (or world all-classes)
             (for [store (.chain- self)]
-                 (when args (setv store.m/args.world []))
-                 (when kwargs (setv store.m/kwargs.world (D {})))))
+                 (when (or args args-kwargs) (setv store.m/args.world []))
+                 (when (or kwargs args-kwargs) (setv store.m/kwargs.world (D {})))))
+      (when (or base-programs all-classes)
+            (for [store (.chain- self)]
+                 (inner store "base-program" base-program)))
+      (when (or programs all-classes)
+            (for [store (.chain- self)]
+                 (inner store "program" program)))
+      (when (or freezers all-classes)
+            (for [store (.chain- self)]
+                 (when (or kwargs args-kwargs)
+                       (if (or all-kwargs all-args-kwargs)
+                           (setv store.m/kwargs.freezer (D {}))
+                           (assoc store.m/kwargs.freezer freezer-hash (D {}))))))
       (when instantiated
-            (when args (setv self.m/args.instantiated []))
-            (when kwargs (setv self.m/args.instantiated (D {}))))
-      (when baked
-            (when args
-                  (if all-subs
-                      (do (setv self.m/args.baked (D {})) (assoc self.m/args.baked self.m/subcommand.default []))
-                      (assoc self.m/args.baked subcommand [])))
-            (when kwargs
-                  (if all-subs
-                      (do (setv self.m/kwargs.baked (D {})) (assoc self.m/kwargs.baked self.m/subcommand.default (D {})))
-                      (assoc self.m/kwargs.baked subcommand (D {})))))
+            (when (or args args-kwargs) (setv self.m/args.instantiated []))
+            (when (or kwargs args-kwargs) (setv self.m/args.instantiated (D {}))))
+      (when (or baked all-classes)
+            (inner self "baked" subcommand :default-value self.m/subcommand.default))
       (when set-defaults (.var/set-defaults self)))
 
 (defn var/process-all [self #* args #** kwargs]
       (.var/process-args self #* self.m/args.world)
+      (.var/process-args self #* (get self.m/args.base-program self.m/base-program))
+      (.var/process-args self #* (get self.m/args.program self.m/program))
       (.var/process-args self #* self.m/args.instantiated)
-      (.var/process-args self #* (. self m/args baked [self.m/subcommand.current.unprocessed]))
+      (.var/process-args self #* (get self.m/args.baked self.m/subcommand.current.unprocessed))
       (.var/process-args self #* args)
 
       (.var/process-kwargs self #** self.m/kwargs.world)
+      (.var/process-kwargs self #** (get self.m/kwargs.base-program self.m/base-program))
+      (.var/process-kwargs self #** (get self.m/kwargs.program self.m/program))
+      (.var/process-kwargs self :var/freezer True #** (get self.m/kwargs.freezer self.m/freezer-hash))
       (.var/process-kwargs self #** self.m/kwargs.instantiated)
-      (.var/process-kwargs self #** (. self m/kwargs baked [self.m/subcommand.current.unprocessed]))
+      (.var/process-kwargs self #** (get self.m/kwargs.baked self.m/subcommand.current.unprocessed))
       (.var/process-kwargs self #** kwargs))
 
 (defn var/process-args [self #* args [starter False]]
       (let [ sr (if starter "starter" "regular") ]
            (for [arg args]
                 (if (isinstance arg (tuple self.m/type-groups.acceptable-args))
-                    (if (isinstance (. self m/args current unprocessed [sr]) list)
-                        (.append (. self m/args current unprocessed [sr]) arg)
+                    (if (isinstance (get self.m/args.current.unprocessed sr) list)
+                        (.append (get self.m/args.current.unprocessed sr) arg)
                         (assoc self.m/args.current.unprocessed sr [arg]))
                     (setv self.m/settings.current.m/frozen True)))))
 
-(defn var/process-kwargs [self #** kwargs]
+(defn var/process-kwargs [self [var/freezer False] #** kwargs]
       (defn inner [itr [starter False]]
             (for [[key value] (.items itr)]
                  (if (setx var/process/key-prefix (.cls/is-attr self.__class__ key))
@@ -654,7 +720,7 @@
 
                                 True (when (not (in var/process/key #("m/subcommand")))
                                            (assoc self.m/settings.current key value))))
-                     (assoc (. self m/kwargs current unprocessed [(if starter "starter" "regular")]) key value))))
+                     (unless var/freezer (assoc (get self.m/kwargs.current.unprocessed (if starter "starter" "regular")) key value)))))
       (inner kwargs))
 
 (defn var/apply [self]
@@ -670,13 +736,13 @@
 
 (defn command/process-args [self [starter False]]
       (let [ sr (if starter "starter" "regular") ]
-           (for [arg (. self m/args current unprocessed [sr])]
+           (for [arg (get self.m/args.current.unprocessed sr)]
                 (setv command/process-args/arg (cond (isinstance arg self.m/type-groups.genstrings) (arg)
                                                      (isinstance arg int) (str arg)
                                                      (isinstance arg self.__class__) (arg :m/type str)
                                                      True arg))
-                (if (isinstance (. self m/args current processed [sr]) list)
-                    (.append (. self m/args current processed [sr]) command/process-args/arg)
+                (if (isinstance (get self.m/args.current.processed sr) list)
+                    (.append (get self.m/args.current.processed sr) command/process-args/arg)
                     (assoc self.m/args.current.processed sr [command/process-args/arg])))))
 
 (defn command/process-kwargs [self [starter False]]
@@ -689,8 +755,9 @@
                                   (isinstance value self.__class__) (value :m/type str)
                                   True value))
             (return new-value))
-      (setv sr (if starter "starter" "regular"))
-      (for [[key value] (.items (. self m/kwargs current unprocessed [sr]))]
+      (setv sr (if starter "starter" "regular")
+            srv (+ sr "-values"))
+      (for [[key value] (.items (get self.m/kwargs.current.unprocessed sr))]
            (when value
                  (let [aa (tuple (+ self.m/type-groups.acceptable-args [dict bool]))]
                       (if (isinstance value aa)
@@ -723,20 +790,8 @@
                                                                                                    (for [j v]
                                                                                                         (.append key-values command/process-kwargs/key)
                                                                                                         (when (setx l (inner j))
-                                                                                                            (if (isinstance (. self
-                                                                                                                               m/kwargs
-                                                                                                                               current
-                                                                                                                               processed
-                                                                                                                               [(if starter
-                                                                                                                                    "starter-values"
-                                                                                                                                    "regular-values")]) list)
-                                                                                                                (.append (. self
-                                                                                                                            m/kwargs
-                                                                                                                            current
-                                                                                                                            processed
-                                                                                                                            [(if starter
-                                                                                                                                 "starter-values"
-                                                                                                                                 "regular-values")]) l)
+                                                                                                            (if (isinstance (get self.m/kwargs.current.processed srv) list)
+                                                                                                                (.append (get self.m/kwargs.current.processed srv) l)
                                                                                                                 (assoc self.m/kwargs.current.processed
                                                                                                                        (if starter
                                                                                                                            "starter-values"
@@ -759,51 +814,21 @@
                           (raise (TypeError #[f[Sorry! Keyword argument value "{value}" of type "{(type value)}" must be one of the following types: {(.join ", " (gfor arg aa arg.__name__))}]f])))))
            (when (or command/process-kwargs/key-values
                      command/process-kwargs/key)
-                 (if (isinstance (. self m/kwargs current processed [sr]) list)
+                 (if (isinstance (get self.m/kwargs.current.processed sr) list)
                      (if command/process-kwargs/key-values
-                         (.extend (. self m/kwargs current processed [sr]) command/process-kwargs/key-values)
-                         (.append (. self m/kwargs current processed [sr]) command/process-kwargs/key))
+                         (.extend (get self.m/kwargs.current.processed sr) command/process-kwargs/key-values)
+                         (.append (get self.m/kwargs.current.processed sr) command/process-kwargs/key))
                      (if command/process-kwargs/key-values
                          (assoc self.m/kwargs.current.processed sr command/process-kwargs/key-values)
                          (assoc self.m/kwargs.current.processed sr [command/process-kwargs/key]))))
            (when (and command/process-kwargs/value
                       (not command/process-kwargs/key-values))
-                 (if (isinstance (. self
-                                    m/kwargs
-                                    current
-                                    processed
-                                    [(if starter
-                                         "starter-values"
-                                         "regular-values")]) list)
-                     (.append (. self
-                                 m/kwargs
-                                 current
-                                 processed
-                                 [(if starter
-                                      "starter-values"
-                                      "regular-values")]) command/process-kwargs/value)
-                     (assoc self.m/kwargs.current.processed
-                            (if starter
-                                "starter-values"
-                                "regular-values") [command/process-kwargs/value]))
-                 (if (isinstance (. self
-                                    m/kwargs
-                                    current
-                                    processed
-                                    [(if starter
-                                         "starter"
-                                         "regular")]) list)
-                     (.append (. self
-                                 m/kwargs
-                                 current
-                                 processed
-                                 [(if starter
-                                      "starter"
-                                      "regular")]) command/process-kwargs/value)
-                     (assoc self.m/kwargs.current.processed
-                            (if starter
-                                "starter"
-                                "regular") [command/process-kwargs/value])))))
+                 (if (isinstance (get self.m/kwargs.current.processed srv) list)
+                     (.append (get self.m/kwargs.current.processed srv) command/process-kwargs/value)
+                     (assoc self.m/kwargs.current.processed srv [command/process-kwargs/value]))
+                 (if (isinstance (get self.m/kwargs.current.processed sr) list)
+                     (.append (get self.m/kwargs.current.processed sr) command/process-kwargs/value)
+                     (assoc self.m/kwargs.current.processed sr [command/process-kwargs/value])))))
 
 (defn command/create [self]
       (when self.m/sudo
@@ -863,8 +888,8 @@
                             (when (and peek-value
                                        (not self.m/ignore-stderr)
                                        (not self.m/stdout-stderr))
-                                  (if (or self.m/replace-error self.m/false-error)
-                                      (setv (. output ["stdout"]) (or self.m/replace-error False))
+                                  (if (or self.m/replace-stderr self.m/false-stderr)
+                                      (setv (get output "stdout") (or self.m/replace-stderr False))
                                       (raise (SystemError (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr))))))
                             (for [[std opp] (zip stds (py "stds[::-1]"))]
                                  (setv stdstd (+ "std" std)
@@ -874,14 +899,15 @@
 
 (defn return/model [self]
       (let [ settings [] ]
-           (for [setting self.m/settings.defaults]
+           (for [[setting value] (.items self.m/settings.defaults)]
                 (let [ k (unmangle setting)
                        v (getattr self setting) ]
-                     (.append settings (.Keyword hy.models k))
-                     (.append settings (cond (.cls/any-attrs self.__class__ k #* self.m/return-output-attrs) False
-                                             (isinstance v D) (._dict_wrapper hy.models v)
-                                             (callable v) (.Symbol hy.models v.__name__)
-                                             True v))))
+                     (unless (or (= v value)
+                                 (.cls/any-attrs self.__class__ k #* self.m/return-output-attrs))
+                             (.append settings (.Keyword hy.models k))
+                             (.append settings (cond (isinstance v D) (._dict_wrapper hy.models v)
+                                                     (callable v) (.Symbol hy.models v.__name__)
+                                                     True v)))))
            (return (.as-model hy.models `(bakery :program- ~self.m/program
                                                  :base-program- ~self.m/base-program
                                                  :freezer- ~self.m/freezer
@@ -889,13 +915,14 @@
 
 (defn return/call [self]
       (let [ settings "" ]
-           (for [setting self.m/settings.defaults]
+           (for [[setting value] (.items self.m/settings.defaults)]
                 (let [ k (unmangle setting)
                        v (getattr self setting) ]
-                     (+= settings f" :{k} {(cond (.cls/any-attrs self.__class__ k #* self.m/return-output-attrs) False
-                                                 (and (isinstance v str) (not v)) "''"
-                                                 (callable v) v.__name__
-                                                 True v)}")))
+                     (unless (or (= v value)
+                                 (.cls/any-attrs self.__class__ k #* self.m/return-output-attrs))
+                             (+= settings f" :{k} {(cond (and (isinstance v str) (not v)) "''"
+                                                         (callable v) v.__name__
+                                                         True v)}"))))
            (return f"bakery :program- {(or self.m/program "''")} :base-program- {self.m/base-program} :freezer- {self.m/freezer}{settings}")))
 
 (defn return/process [self]
@@ -918,7 +945,7 @@
                                     (.wait p)
                                     (when (> self.m/verbosity 0)
                                           (setv return/process/return.returns.code p.returncode
-                                                ;; return/process/return.returns.codes p.returncodes
+                                                return/process/return.returns.codes p.returncodes
                                                 return/process/return.command.bakery (.m/command self)
                                                 return/process/return.command.subprocess p.args
                                                 return/process/return.pid p.pid))
@@ -938,7 +965,7 @@
 (defn return/frosting [self]
       (if (setx output (.return/output self))
           (do (when self.m/return-output (return output))
-              (when (or self.m/replace-error self.m/false-error) (return output.stdout))
+              (when (or self.m/replace-stderr self.m/false-stderr) (return output.stdout))
               (setv frosted-output (if (and (isinstance output dict)
                                             (= (len output) 1))
                                        (-> output (.values) (iter) (next))
@@ -973,7 +1000,7 @@
                                (when self.m/split (setv processed-output (split-and-flatten processed-output self.m/split)))
                                (setv processed-output (.ct/convert self processed-output))
                                (when self.m/split-after (setv processed-output (split-and-flatten processed-output self.m/split-after)))
-                               (setv (. frosted-output [stdstd]) processed-output
+                               (setv (get frosted-output stdstd) processed-output
                                      new-frosted-output frosted-output)))
                     True (do (setv new-frosted-output (frosting frosted-output self.m/capture))
                              (when self.m/split (setv new-frosted-output (split-and-flatten new-frosted-output self.m/split)))
@@ -1024,7 +1051,8 @@
                                (split command)))
                        #** kwargs)))
 
-(defn m/spin [self #* args [subcommand- "supercalifragilisticexpialidocious"] #** kwargs]
+(defn m/spin [self #* args [subcommand None] #** kwargs]
+      (setv subcommand (or subcommand self.m/subcommand.default))
       (defn inner [title]
             (setv opts (or self.m/debug (.cls/get-attr self.__class__ kwargs "m/debug" :default self.m/debug))
                   bool-opts {})
@@ -1036,7 +1064,7 @@
                       (.update bool-opts { "title" title })
                       (.inspect- self #** bool-opts))))
       (try (inner "Setup")
-           (.var/setup self #* args :subcommand- subcommand- #** kwargs)
+           (.var/setup self #* args :subcommand subcommand #** kwargs)
 
            (inner "Process")
            (.command/process-all self)
@@ -1074,29 +1102,31 @@
           freezer- (+ (or self.m/freezer (list (.values self.m/command)) [self.m/base-program]) [processed-pr processed-value]))
 
     (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.world))
-    (when is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.world)))
-
+    (.update kwargs (.cls/remove-if-not-attr self.__class__ (get self.m/kwargs.base-program self.m/base-program)))
+    (.update kwargs (.cls/remove-if-not-attr self.__class__ (get self.m/kwargs.program self.m/program)))
+    (.update kwargs (.cls/remove-if-not-attr self.__class__ (get self.m/kwargs.freezer self.m/freezer-hash)))
     (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.instantiated))
-    (when is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.instantiated)))
-
-    (.update kwargs
-             (.cls/remove-if-not-attr self.__class__ (. self m/kwargs baked [(or self.m/subcommand.current.unprocessed self.m/subcommand.default)])))
-    (when is-milcery
-          (.update kwargs (.cls/remove-if-not-attr value.__class__ (. value
-                                                                      m/kwargs
-                                                                      baked
-                                                                      [(or value.m/subcommand.current.unprocessed value.m/subcommand.default)]))))
-
+    (.update kwargs (.cls/remove-if-not-attr self.__class__ (get self.m/kwargs.baked (or self.m/subcommand.current.unprocessed self.m/subcommand.default))))
     (.update kwargs (.cls/remove-if-not-attr self.__class__ self.m/kwargs.called))
-    (when is-milcery (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.called)))
+
+    (when is-milcery
+          (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.world))
+          (.update kwargs (.cls/remove-if-not-attr value.__class__ (get value.m/kwargs.base-program value.m/base-program)))
+          (.update kwargs (.cls/remove-if-not-attr value.__class__ (get value.m/kwargs.program value.m/program)))
+          (.update kwargs (.cls/remove-if-not-attr value.__class__ (get value.m/kwargs.freezer value.m/freezer-hash)))
+          (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.instantiated))
+          (.update kwargs (.cls/remove-if-not-attr value.__class__ (get value.m/kwargs.baked
+                                                                        (or value.m/subcommand.current.unprocessed value.m/subcommand.default))))
+          (.update kwargs (.cls/remove-if-not-attr value.__class__ value.m/kwargs.called)))
 
     (return (.__class__ self :freezer- freezer-
                              :base-program- self.m/base-program
                              #** kwargs)))
 
-(defn deepcopy- [self #* args [subcommand- "supercalifragilisticexpialidocious"] #** kwargs]
-      (setv cls (deepcopy self))
-      (.bake- cls #* args :instantiated- True :m/subcommand subcommand- #** kwargs)
+(defn deepcopy- [self #* args [subcommand None] #** kwargs]
+      (setv subcommand (or subcommand self.m/subcommand.default)
+            cls (deepcopy self))
+      (.bake- cls #* args :instantiated True :m/subcommand subcommand #** kwargs)
       (return cls))
 
 (defn check- [self] (return (check self self.m/program)))
@@ -1105,24 +1135,59 @@
 
 (defn defrost- [self] (setv self.m/frozen self.m/settings.m/frozen))
 
-(defn bake- [self #* args [subcommand- "supercalifragilisticexpialidocious"] [instantiated- False] #** kwargs ]
-      (.extend (if instantiated-
-                   self.m/args.instantiated
-                   (. self m/args baked [subcommand-])) args)
-      (.update (if instantiated-
-                   self.m/kwargs.instantiated
-                   (. self m/kwargs baked [subcommand-])) kwargs))
+(defn bake- [ self
+              #* args
+              [world False]
+              [base-programs False]
+              [programs False]
+              [freezers False]
+              [instantiated False]
+              [baked True]
+              [base-program None]
+              [program None]
+              [freezer-hash None]
+              [subcommand None]
+              #** kwargs ]
+      (setv subcommand (or subcommand self.m/subcommand.default)
 
-(defn bake-all- [self #* args #** kwargs ]
+            base-programs (or base-programs base-program)
+            programs (or programs program)
+            freezers (or freezers freezer-hash)
+
+            base-program (or base-program self.m/base-program)
+            program (or program self.m/program)
+            freezer-hash (or freezer-hash self.m/freezer-hash)
+
+            args (list args))
+      (cond instantiated (do (.extend self.m/args.instantiated args)
+                             (.update self.m/kwargs.instantiated kwargs))
+            world (for [store (.chain- self)]
+                       (if (isinstance store.m/args.world list)
+                           (do (print store.m/base-program store.m/program store.m/args) (.extend store.m/args.world args))
+                           (do (print store.m/base-program store.m/program store.m/args) (setv store.m/args.world args)))
+                       (.update store.m/kwargs.world kwargs))
+            (or (= program "") base-programs) (for [store (.chain- self)]
+                                                   (if (isinstance (setx base-program-args (get store.m/args.base-program base-program)) list)
+                                                       (.extend base-program-args args)
+                                                       (setv base-program-args args))
+                                                   (.update (get store.m/kwargs.base-program base-program) kwargs))
+            programs (for [[index store] (enumerate (.chain- self))]
+                          (if (isinstance (setx program-args (get store.m/args.program program)) list)
+                              (.extend program-args args)
+                              (setv program-args args))
+                          (.update (get store.m/kwargs.program program) kwargs))
+            freezers (for [store (.chain- self)] (.update (get store.m/kwargs.freezer freezer-hash) kwargs))
+            True (do (.extend (get self.m/args.baked subcommand) args)
+                     (.update (get self.m/kwargs.baked subcommand) kwargs))))
+
+(defn splat- [self [set-defaults False] #** kwargs ]
+      (if (any (gfor akc self.m/arg-kwarg-classes (.get kwargs akc False)))
+          (.reset- self :set-defaults set-defaults #** kwargs)
+          (.reset- self :baked True :set-defaults set-defaults #** kwargs)))
+
+(defn oh-no- [self [set-defaults False] #** kwargs]
       (for [store (.chain- self)]
-           (.extend store.m/args.world args)
-           (.update store.m/kwargs.world kwargs)))
-
-(defn splat- [self [set-defaults False] #** kwargs] (.reset- self :baked True :set-defaults set-defaults))
-
-(defn splat-all- [self [set-defaults False] #** kwargs]
-      (for [store (.chain- self)]
-           (.reset- self :set-defaults set-defaults #** kwargs)))
+           (.splat- store :set-defaults set-defaults #** kwargs)))
 
 (defn current-values- [self]
       (setv sd (D { "__slots__" (recursive-unmangle (dfor var
@@ -1137,14 +1202,12 @@
               (setv kwargs self.m/default-inspect-kwargs))
       (inspect self :Hy True #** kwargs))
 
-(defn origin- [self] (return (. (first self.__class__.m/stores) __callback__)))
-
 (defn chain- [self] (return (lfor store self.__class__.m/stores store.__callback__)))
 
 (defn __call__ [
         self
         #* args
-        [args-before-func #()]
+        [before-func #()]
         #** kwargs ]
     (if (and (not self.m/gitea.off)
              (or self.m/gitea.bool
@@ -1158,16 +1221,16 @@
 (defn __setattr__ [self attr value] (.__setattr__ (super) (.cls/process-if-attr self.__class__ attr) value))
 
 (defn __getattr__ [self subcommand]
-    (if (.cls/process-if-attr self.__class__ subcommand :return-bool True)
-        (getattr self __getattr__/attr (raise (AttributeError f"Sorry! `{(unmangle subcommand)}' doesn't exist as an attribute!")))
+    (if (.cls/is-attr self.__class__ subcommand)
+        (raise (AttributeError f"Sorry! `{(unmangle subcommand)}' doesn't exist as an attribute!"))
         (do (defn inner [
                     #* args
-                    [args-before-func #()]
+                    [before-func #()]
                     #** kwargs ]
                   (cond (or (.cls/get-attr self.__class__ kwargs "m/context" False)
                              (.cls/get-attr self.__class__ kwargs "m/c" False))
-                         (return (.deepcopy- self #* args :subcommand- subcommand #** kwargs))
-                        True (return (.m/spin self #* args :subcommand- subcommand #** kwargs))))
+                         (return (.deepcopy- self #* args :subcommand subcommand #** kwargs))
+                        True (return (.m/spin self #* args :subcommand subcommand #** kwargs))))
             (return inner))))
 
 (defn __copy__ [self]
@@ -1203,6 +1266,9 @@
           (for [[k v] (.items self.__dict__)] (setattr result k (deepcopy v memo))))
 
     (setv result.m/frozen result.m/settings.defaults.m/frozen)
+
+    (setv result.m/id (uuid5 (uuid4) (str (uuid4))))
+    (.append result.m/ids result.m/id)
 
     (return result))
 

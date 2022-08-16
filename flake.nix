@@ -12,7 +12,7 @@
     };
     outputs = inputs@{ self, flake-utils, settings, ... }: with builtins; with settings.lib; with flake-utils.lib; settings.mkOutputs {
         inherit inputs;
-        callPackage = { buildPythonPackage, pythonOlder, poetry-core, oreo, pytest-hy, pytest-randomly, pytestCheckHook, py, pname }: let
+        callPackage = { buildPythonPackage, pythonOlder, poetry-core, oreo, pytest-hy, pytest-randomly, pytest-parametrized, pytestCheckHook, py, pname }: let
             owner = "syvlorg";
         in buildPythonPackage rec {
             inherit pname;
@@ -24,8 +24,8 @@
             nativeBuildInputs = buildInputs;
             propagatedBuildInputs = [ oreo py ];
             pythonImportsCheck = [ pname ];
-            checkInputs = [ pytestCheckHook pytest-hy pytest-randomly ];
-            checkPhase = "pytest --tb=native";
+            checkInputs = [ pytestCheckHook pytest-hy pytest-randomly pytest-parametrized ];
+            checkPhase = "pytest";
             postPatch = ''
                 substituteInPlace pyproject.toml --replace "oreo = { git = \"https://github.com/${owner}/oreo.git\", branch = \"main\" }" ""
                 substituteInPlace setup.py --replace "'oreo @ git+https://github.com/${owner}/oreo.git@main'" ""

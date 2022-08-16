@@ -2,10 +2,11 @@
 (import oreo)
 (import oreo [nots?])
 (import pathlib [Path])
+(import pytest [mark])
 (require hyrule [->])
 (setv cookies (/ (.resolve (. (Path __file__) parent parent) :strict True) "cookies"))
 (setv cookies-ls (.ls oreo cookies))
 (setv assorted-cookies (.ls oreo cookies :sort True))
-(defn test-split []
+(defn [mark.split] test-split []
       (setv six-two ["6" "5" "4" "3" "2" "09" "08" "07" "06" "05" "04" "03" "02" "00" "0" "0"])
-      (-> cookies (ls :m/list True :m/split 1 :m/sort True :m/filter (fn [item] (.isnumeric item))) (= six-two) (assert)))
+      (-> cookies (ls :m/list True :m/split 1 :m/sort True :m/filter (fn [item] (.isnumeric item))) (= six-two) assert))

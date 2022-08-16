@@ -5,6 +5,10 @@ define nixShell
 nix-shell -E '(import $(realfileDir)).devShells.$${builtins.currentSystem}.makeshell-$1' --show-trace --run
 endef
 
+define quickShell
+nix-shell -E 'with (import $(realfileDir)).pkgs.$${builtins.currentSystem}; with lib; mkShell { buildInputs = flatten [ $1 ]; }' --show-trace
+endef
+
 mkfilePath := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfileDir := $(dir $(mkfilePath))
 realfileDir := $(realpath $(mkfileDir))
@@ -12,13 +16,13 @@ realfileDir := $(realpath $(mkfileDir))
 preFiles := $(mkfileDir)/nix.org $(mkfileDir)/flake.org $(mkfileDir)/tests.org $(mkfileDir)/README.org
 
 pnCommand := nix eval --show-trace --impure --expr '(import $(realfileDir)).pname'
-projectName := $(subst ",,$(shell $(pnCommand) || (org-tangle -f $(preFiles) && $(pnCommand))))
+projectName := $(subst ",,$(shell (find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null || :) && ($(pnCommand) || ((org-tangle -f $(preFiles) &> /dev/null) && $(pnCommand)))))
 ifndef projectName
 $(error Sorry; unable to get the name of the project)
 endif
 
 typeCommand := nix eval --show-trace --impure --expr '(import $(realfileDir)).type'
-type := $(subst ",,$(shell $(typeCommand) || (org-tangle -f $(preFiles) && $(typeCommand))))
+type := $(subst ",,$(shell (find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null || :) && ($(typeCommand) || ((org-tangle -f $(preFiles) &> /dev/null) && $(typeCommand)))))
 ifndef type
 $(error Sorry; unable to get the type of project)
 endif
@@ -26,7 +30,14 @@ endif
 files := $(preFiles) $(mkfileDir)/$(projectName)
 tangleTask := $(shell [ -e $(mkfileDir)/tests -o -e $(mkfileDir)/tests.org ] && echo test || echo tangle)
 addCommand := git -C $(mkfileDir) add .
-tangleCommand := (($(call nixShell,general) "org-tangle -f $(files)") || org-tangle -f $(files)) && $(addCommand)
+
+define tangleCommand
+(($(call nixShell,general) "org-tangle -f $1") || org-tangle -f $1) && $(addCommand)
+endef
+
+define wildcardValue
+$(shell echo $1 | cut -d "-" -f2-)
+endef
 
 add:
 |$(addCommand)
@@ -46,7 +57,7 @@ endif
 
 update-%: updateInput := nix flake lock $(realfileDir) --update-input
 update-%: add
-|$(eval input := $(shell echo $@ | cut -d "-" -f2-))
+|$(eval input := $(call wildcardValue,$@))
 ifeq ($(input), settings)
 |-[ $(projectName) != "settings" ] && $(updateInput) $(input)
 else ifeq ($(input), all)
@@ -55,28 +66,68 @@ else
 |$(updateInput) $(input)
 endif
 
-tangle: update-settings
-|$(tangleCommand)
+pre-tangle: update-settings
+|-find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null
 
-tangle-%: update-settings
-|$(eval file := $(mkfileDir)/$(shell echo $@ | cut -d "-" -f2-).org)
-|$(tangleCommand)
+tangle: pre-tangle
+|$(call tangleCommand,$(files))
 
-develop: tangle
+tangle-%: pre-tangle
+|$(eval file := $(mkfileDir)/$(call wildcardValue,$@).org)
+|$(call tangleCommand,$(file))
+
+tu: tangle update
+
+tu-%: tangle update-%
+
+ttu: $(tangleTask) update
+
+ttu-%: $(tangleTask) update-%
+
+develop: tu
 |nix develop "$(realfileDir)#makeshell-$(type)"
 
-repl: tangle
+shell: tu
+|$(call quickShell,$(pkgs))
+
+shell-%: tu
+|$(call quickShell,(with $(call wildcardValue,$@); [ $(pkgs) ]))
+
+develop-%: tu
+|nix develop "$(realfileDir)#$(call wildcardValue,$@)"
+
+repl: tu
 |$(call nixShell,$(type)) "$(type)"
+
+build-%: tu
+|nix build "$(realfileDir)#$(call wildcardValue,$@)"
+
+run-%: tu
+|nix run "$(realfileDir)#$(call wildcardValue,$@)"
 
 quick: tangle push
 
-super: $(tangleTask) update push
+super: ttu push
 
-super-%: $(tangleTask) update-% push ;
+super-%: ttu-% push ;
 
-poetry2setup: tangle update
+poetry2setup: tu
 |$(call nixShell,$(type)) "cd $(mkfileDir) && poetry2setup > $(mkfileDir)/setup.py && cd -"
 
-test: tangle update
+touch-tests:
 |find $(mkfileDir)/tests -print | grep -v __pycache__ | xargs touch
-|$(call nixShell,$(type)) "pytest --tb=native"
+
+tut: tu touch-tests
+
+define pytest
+$(call nixShell,$(type)) "pytest $1 $(mkfileDir)"
+endef
+
+test: tut
+|$(call pytest)
+
+test-native: tut
+|$(call pytest,--tb=native)
+
+test-%: tut
+|$(call pytest,-m $(call wildcardValue,$@))

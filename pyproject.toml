@@ -24,3 +24,27 @@ pytest-randomly = "*"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = [
+	"--strict-markers",
+]
+markers = [
+	"bakery",
+	"baking",
+	"context_manager",
+	"error",
+	"exports",
+	"filtered_output",
+	"git_remote",
+	"list_output",
+	"loop",
+	"module_call",
+	"piping",
+	"progress",
+	"sorted_output",
+	"split",
+	"string_output",
+	"trim",
+    "freezing",
+]

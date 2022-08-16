@@ -29,7 +29,7 @@ from oreo import ModuleCaller
 Adapted from [[https://stackoverflow.com/users/799163/remcogerlich][RemcoGerlich's]] answer [[https://stackoverflow.com/a/21139466][here]]:
 
 #+begin_src py
-from bakery.bakery import milcery
+from bakery.bakery import milcery, frosting
 #+end_src
 
 ** ModuleCaller
@@ -45,6 +45,8 @@ class bakery(ModuleCaller):
     def __getattr__(self, program_):
         if program_.startswith("_"):
             raise AttributeError(program_)
+        elif program_ in [ "frosting" ]:
+            return eval(program_)
         else:
             return milcery(program_ = program_)
     bakery = __call__
