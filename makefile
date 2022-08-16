@@ -102,6 +102,9 @@ repl: tu
 build-%: tu
 |nix build "$(realfileDir)#$(call wildcardValue,$@)"
 
+run: tu
+|export PPWD=$$(pwd) && cd $(mkfileDir) && $(call nixShell,$(type)) "$(command)" && cd $PPWD
+
 run-%: tu
 |nix run "$(realfileDir)#$(call wildcardValue,$@)"
 

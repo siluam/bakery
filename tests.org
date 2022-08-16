@@ -191,21 +191,24 @@ Check if temporary baking with a context manager works:
 
 #+begin_src hy
 (import bakery [tail])
-(import hy [mangle] oreo [first-last-n])
-(defn [mark.baking mark.piping] test-bake-freezer-hash []
-      (try (setv tails (| (ls [] :a True cookies) tail))
-           (.bake- ls :freezer-hash tails.m/freezer-hash :m/list True :m/sort None :m/filter nots?)
+(import hy [mangle eval] oreo [first-last-n])
+(setv tails (| (ls [] :a True cookies) tail))
+(defn [mark.baking mark.piping (.parametrize mark "fhash" #(tails.m/freezer-hash (hash (tuple tails.m/freezer))))] test-bake-freezer [fhash]
+      (try (.bake- ls :freezer-hash fhash :m/list True :m/sort None :m/filter nots?)
            (-> assorted-cookies (first-last-n :last True :number 10 :type- list) (= (tails)) assert)
            (-> (ls) (isinstance list) (not) assert)
-           (finally (.splat- ls :freezer-hash tails.m/freezer-hash)
-                    (assert (not (in (mangle "m/sort") tails))))))
-(defn [mark.baking mark.piping] test-bake-freezer []
-      (try (setv tails (| (ls [] :a True cookies) tail))
-           (.bake- ls :freezer-hash (hash (tuple tails.m/freezer)) :m/list True :m/sort None :m/filter nots?)
-           (-> assorted-cookies (first-last-n :last True :number 10 :type- list) (= (tails)) assert)
-           (-> (ls) (isinstance list) (not) assert)
-           (finally (.splat- ls :freezer-hash (hash (tuple tails.m/freezer)))
-                    (assert (not (in (mangle "m/sort") tails))))))
+           (finally (.splat- ls :freezer-hash fhash)
+                    (assert (not (in (mangle "m/sort") (get tails.m/kwargs.freezer fhash)))))))
+(defn [mark.baking mark.piping (.parametrize mark "cls" #(
+      {}
+      { "base-program" "tail" }
+      { "program" "tail" }
+))] test-bake-freezer-failures [cls]
+      (let [ command (tails :m/return-command True) ]
+           (try (.bake- tails cookies :m/list True :help True #** cls)
+                (assert (= command (tails :m/return-command True)))
+                (finally (eval f"(.splat- tails {(if cls f":{(next (iter (.keys cls)))} {(next (iter (.values cls)))}" "")})")
+                         (-> tails.m/kwargs.baked (get tails.m/subcommand.default) (get (mangle "m/type")) (!= list) assert)))))
 #+end_src
 
 ** test-trim.hy

@@ -676,12 +676,13 @@
       (when set-defaults (.var/set-defaults self)))
 
 (defn var/process-all [self #* args #** kwargs]
-      (.var/process-args self #* self.m/args.world)
-      (.var/process-args self #* (get self.m/args.base-program self.m/base-program))
-      (.var/process-args self #* (get self.m/args.program self.m/program))
-      (.var/process-args self #* self.m/args.instantiated)
-      (.var/process-args self #* (get self.m/args.baked self.m/subcommand.current.unprocessed))
-      (.var/process-args self #* args)
+      (unless self.m/freezer
+              (.var/process-args self #* self.m/args.world)
+              (.var/process-args self #* (get self.m/args.base-program self.m/base-program))
+              (.var/process-args self #* (get self.m/args.program self.m/program))
+              (.var/process-args self #* self.m/args.instantiated)
+              (.var/process-args self #* (get self.m/args.baked self.m/subcommand.current.unprocessed))
+              (.var/process-args self #* args))
 
       (.var/process-kwargs self #** self.m/kwargs.world)
       (.var/process-kwargs self #** (get self.m/kwargs.base-program self.m/base-program))
@@ -720,7 +721,8 @@
 
                                 True (when (not (in var/process/key #("m/subcommand")))
                                            (assoc self.m/settings.current key value))))
-                     (unless var/freezer (assoc (get self.m/kwargs.current.unprocessed (if starter "starter" "regular")) key value)))))
+                     (unless (or self.m/freezer var/freezer)
+                             (assoc (get self.m/kwargs.current.unprocessed (if starter "starter" "regular")) key value)))))
       (inner kwargs))
 
 (defn var/apply [self]
@@ -1148,35 +1150,36 @@
               [freezer-hash None]
               [subcommand None]
               #** kwargs ]
-      (setv subcommand (or subcommand self.m/subcommand.default)
+      (setv subcommand (if self.m/freezer self.m/subcommand.default (or subcommand self.m/subcommand.default))
 
-            base-programs (or base-programs base-program)
             programs (or programs program)
+            base-programs (or (and self.m/freezer program) (= program "") base-programs base-program)
             freezers (or freezers freezer-hash)
 
-            base-program (or base-program self.m/base-program)
             program (or program self.m/program)
+            base-program (or (when self.m/freezer program) (when (= program "") base-program) base-program self.m/base-program)
             freezer-hash (or freezer-hash self.m/freezer-hash)
 
             args (list args))
-      (cond instantiated (do (.extend self.m/args.instantiated args)
-                             (.update self.m/kwargs.instantiated kwargs))
-            world (for [store (.chain- self)]
+
+      (cond world (for [store (.chain- self)]
                        (if (isinstance store.m/args.world list)
-                           (do (print store.m/base-program store.m/program store.m/args) (.extend store.m/args.world args))
-                           (do (print store.m/base-program store.m/program store.m/args) (setv store.m/args.world args)))
+                           (.extend store.m/args.world args)
+                           (setv store.m/args.world args))
                        (.update store.m/kwargs.world kwargs))
-            (or (= program "") base-programs) (for [store (.chain- self)]
-                                                   (if (isinstance (setx base-program-args (get store.m/args.base-program base-program)) list)
-                                                       (.extend base-program-args args)
-                                                       (setv base-program-args args))
-                                                   (.update (get store.m/kwargs.base-program base-program) kwargs))
+            base-programs (for [store (.chain- self)]
+                               (if (isinstance (setx base-program-args (get store.m/args.base-program base-program)) list)
+                                   (.extend base-program-args args)
+                                   (setv base-program-args args))
+                               (.update (get store.m/kwargs.base-program base-program) kwargs))
             programs (for [[index store] (enumerate (.chain- self))]
                           (if (isinstance (setx program-args (get store.m/args.program program)) list)
                               (.extend program-args args)
                               (setv program-args args))
                           (.update (get store.m/kwargs.program program) kwargs))
             freezers (for [store (.chain- self)] (.update (get store.m/kwargs.freezer freezer-hash) kwargs))
+            instantiated (do (.extend self.m/args.instantiated args)
+                             (.update self.m/kwargs.instantiated kwargs))
             True (do (.extend (get self.m/args.baked subcommand) args)
                      (.update (get self.m/kwargs.baked subcommand) kwargs))))
 
