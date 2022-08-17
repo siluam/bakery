@@ -196,19 +196,22 @@ Check if temporary baking with a context manager works:
 (defn [mark.baking mark.piping (.parametrize mark "fhash" #(tails.m/freezer-hash (hash (tuple tails.m/freezer))))] test-bake-freezer [fhash]
       (try (.bake- ls :freezer-hash- fhash :m/list True :m/sort None :m/filter nots?)
            (-> assorted-cookies (first-last-n :last True :number 10 :type- list) (= (tails)) assert)
-           (-> (ls) (isinstance list) (not) assert)
+           (-> (ls) (isinstance list) not assert)
            (finally (.splat- ls :freezer-hash- fhash)
                     (assert (not (in (mangle "m/sort") (get tails.m/kwargs.freezer fhash)))))))
+(defn [mark.baking mark.piping] test-bake-freezer-no-args-non-attr-kwargs []
+      (try (.bake- tails cookies :help True :m/list True :m/sort None :m/filter nots?)
+           (-> assorted-cookies (first-last-n :last True :number 10 :type- list) (= (tails)) assert)
+           (finally (.splat- tails)
+                    (-> tails.m/kwargs.baked (get tails.m/subcommand.default) (get (mangle "m/type")) (!= list) assert))))
 (defn [mark.baking mark.piping (.parametrize mark "cls" #(
-      {}
       { "base_program_" "tail" }
       { "program_" "tail" }
 ))] test-bake-freezer-failures [cls]
-      (let [ command (tails :m/return-command True) ]
-           (try (.bake- tails cookies :m/list True :help True #** cls)
-                (assert (= command (tails :m/return-command True)))
-                (finally (.splat- tails #** cls)
-                         (-> tails.m/kwargs.baked (get tails.m/subcommand.default) (get (mangle "m/type")) (!= list) assert)))))
+      (try (.bake- tails cookies :help True :m/list :m/sort None :m/filter nots? True #** cls)
+           (-> assorted-cookies (first-last-n :last True :number 10 :type- list) (= (tails)) not assert)
+           (finally (.splat- tails #** cls)
+                    (-> tails.m/kwargs.baked (get tails.m/subcommand.default) (get (mangle "m/type")) (!= list) assert))))
 #+end_src
 
 ** test-trim.hy
