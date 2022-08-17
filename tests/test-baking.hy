@@ -6,7 +6,7 @@
 (require hyrule [->])
 (setv cookies (/ (.resolve (. (Path __file__) parent parent) :strict True) "cookies"))
 (setv cookies-ls (.ls oreo cookies))
-(setv assorted-cookies (.ls oreo cookies :sort True))
+(setv assorted-cookies (.ls oreo cookies :key True))
 (import bakery [ls :as la ls :as ld find])
 (import hy [mangle] os [sep])
 (defn [mark.baking] test-baking []

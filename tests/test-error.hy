@@ -6,7 +6,7 @@
 (require hyrule [->])
 (setv cookies (/ (.resolve (. (Path __file__) parent parent) :strict True) "cookies"))
 (setv cookies-ls (.ls oreo cookies))
-(setv assorted-cookies (.ls oreo cookies :sort True))
+(setv assorted-cookies (.ls oreo cookies :key True))
 (defn [mark.error] test-ignore-error [] (assert (ls :j True :m/ignore-stderr True)))
 (defn [mark.error] test-stdout-error [] (assert (= (ls :j True :m/stdout-stderr True :m/str True)
                                                    "ls: invalid option -- 'j'\nTry 'ls --help' for more information.")))

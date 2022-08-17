@@ -6,6 +6,6 @@
 (require hyrule [->])
 (setv cookies (/ (.resolve (. (Path __file__) parent parent) :strict True) "cookies"))
 (setv cookies-ls (.ls oreo cookies))
-(setv assorted-cookies (.ls oreo cookies :sort True))
+(setv assorted-cookies (.ls oreo cookies :key True))
 (import bakery [echo])
 (defn [mark.string-output] test-string-output [] (-> "Hello!" (echo :m/str True) (= "Hello!") assert))

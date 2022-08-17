@@ -6,7 +6,7 @@
 (require hyrule [->])
 (setv cookies (/ (.resolve (. (Path __file__) parent parent) :strict True) "cookies"))
 (setv cookies-ls (.ls oreo cookies))
-(setv assorted-cookies (.ls oreo cookies :sort True))
+(setv assorted-cookies (.ls oreo cookies :key True))
 (defn not-zero? [i] (and (.isnumeric i) (not (in "0" i))))
 (setv ones (sorted (gfor i cookies-ls :if (not-zero? i) i)))
 (setv not-ones (sorted (gfor i cookies-ls :if (not (not-zero? i)) i)))

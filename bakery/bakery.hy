@@ -312,7 +312,6 @@
       self.m/args.base-program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/args.base-program))
       (get self.m/args.base-program self.m/base-program) (if self.m/flagship [] (deepcopy (get self.m/origin.m/args.base-program self.m/base-program)))
       self.m/args.program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/args.program))
-      (get self.m/args.program self.m/program) (if self.m/flagship [] (deepcopy (get self.m/origin.m/args.program self.m/program)))
       self.m/args.instantiated (list args)
       self.m/args.baked (D {})
       (get self.m/args.baked self.m/subcommand.default) []
@@ -324,13 +323,13 @@
       self.m/args.current.processed (D {})
       self.m/args.current.unprocessed.starter []
       self.m/args.current.unprocessed.regular [])
+(when self.m/program (assoc self.m/args.program self.m/program (if self.m/flagship [] (deepcopy (get self.m/origin.m/args.program self.m/program)))))
 
 (setv self.m/kwargs (D {})
       self.m/kwargs.world (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.world))
       self.m/kwargs.base-program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.base-program))
       (get self.m/kwargs.base-program self.m/base-program) (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.base-program self.m/base-program)))
       self.m/kwargs.program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.program))
-      (get self.m/kwargs.program self.m/program) (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.program self.m/program)))
       self.m/kwargs.freezer (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.freezer))
       (get self.m/kwargs.freezer self.m/freezer-hash) (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.freezer self.m/freezer-hash)))
       self.m/kwargs.instantiated (D kwargs)
@@ -346,6 +345,7 @@
       self.m/kwargs.current.processed.regular []
       self.m/kwargs.current.processed.starter-values []
       self.m/kwargs.current.processed.regular-values [])
+(when self.m/program (assoc self.m/kwargs.program self.m/program (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.program self.m/program)))))
 
 (setv self.m/return-categories #(
     "stdout"
@@ -624,30 +624,34 @@
                [freezer-hash- None]
                [subcommand- None]
                [set-defaults- True] ]
-      (setv base-programs- (or base-programs- base-program-)
+      (setv self.m/current-settings (D {})
+
             programs- (or programs- program-)
+            base-programs- (or (and self.m/freezer program-) (= program- "") base-programs- base-program-)
             freezers- (or freezers- freezer-hash-)
             baked- (or baked- subcommand-)
+
+            program- (or program- self.m/program)
+            base-program- (or (when self.m/freezer program-) (when (= program- "") base-program-) base-program- self.m/base-program)
+            freezer-hash- (or freezer-hash- self.m/freezer-hash)
+            subcommand- (if self.m/freezer self.m/subcommand.default (or subcommand- self.m/subcommand.default))
+
             and-args-kwargs (and args- kwargs-)
             args-kwargs (or and-args-kwargs (not and-args-kwargs))
             and-all-args-kwargs (and all-args- all-kwargs-)
-            all-args-kwargs (or and-all-args-kwargs (not and-all-args-kwargs))
-            self.m/current-settings (D {})
-            subcommand- (or subcommand- self.m/subcommand.default)
-            base-program- (or base-program- self.m/base-program)
-            program- (or program- self.m/program)
-            freezer-hash- (or freezer-hash- self.m/freezer-hash))
+            all-args-kwargs (or and-all-args-kwargs (not and-all-args-kwargs)))
       (defn inner [store name value [default-value None]]
-            (setv default-value (or default-value (getattr store (mangle (+ "m/" name)))))
+            (setv name (mangle name)
+                  default-value (or default-value (getattr store (mangle (+ "m/" name)))))
             (when (or args- args-kwargs)
                   (if (or all-args- all-args-kwargs)
                       (do (assoc store.m/args name (D {}))
-                          (setv (. store m/args [name] [default-value]) []))
-                      (setv (. store m/args [name] [value]) [])))
+                          (assoc (get store.m/args name) default-value []))
+                      (assoc (get store.m/args name) value [])))
             (when (or kwargs- args-kwargs)
                   (if (or all-kwargs- all-args-kwargs)
                       (assoc store.m/kwargs name (D {}))
-                      (setv (. store m/kwargs [name] [value]) (D {})))))
+                      (assoc (get store.m/kwargs name) value (D {})))))
       (for [m #("settings" "subcommand" "args" "kwargs")]
            (assoc (getattr self (mangle (+ "m/" m))) "current" (D {})))
       (setv self.m/args.called [])

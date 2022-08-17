@@ -6,7 +6,7 @@
 (require hyrule [->])
 (setv cookies (/ (.resolve (. (Path __file__) parent parent) :strict True) "cookies"))
 (setv cookies-ls (.ls oreo cookies))
-(setv assorted-cookies (.ls oreo cookies :sort True))
+(setv assorted-cookies (.ls oreo cookies :key True))
 (import bakery [frosting])
 (defn [mark.sorted-output (.parametrize mark "opts" #({ "m/list" True } { "m/type" frosting } { "m/frosting" True }))] test-sorted-output [opts]
       (assert (= assorted-cookies (ls cookies :m/sort None #** opts))))

@@ -6,7 +6,7 @@
 (require hyrule [->])
 (setv cookies (/ (.resolve (. (Path __file__) parent parent) :strict True) "cookies"))
 (setv cookies-ls (.ls oreo cookies))
-(setv assorted-cookies (.ls oreo cookies :sort True))
+(setv assorted-cookies (.ls oreo cookies :key True))
 (import bakery [cat])
 (setv bulbasaur (sorted #("001: Bulbasaur" "002: Ivysaur" "003: Venusaur" ))
       last-three (sorted #("058: Growlithe" "059: Arcanine" "060: Poliwag" ))

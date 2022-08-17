@@ -6,6 +6,6 @@
 (require hyrule [->])
 (setv cookies (/ (.resolve (. (Path __file__) parent parent) :strict True) "cookies"))
 (setv cookies-ls (.ls oreo cookies))
-(setv assorted-cookies (.ls oreo cookies :sort True))
+(setv assorted-cookies (.ls oreo cookies :key True))
 (defn [mark.list-output] test-list-output-short [] (-> cookies (ls :m/list True) (isinstance list) assert))
 (defn [mark.list-output] test-list-output-long [] (-> cookies (ls :m/type list) (isinstance list) assert))
