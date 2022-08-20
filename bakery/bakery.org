@@ -518,7 +518,7 @@ Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn P
 *** Type Groups
 
 #+begin_src hy
-(setv self.m/type-groups (D {}))
+(setv self.m/type-groups (D))
 #+end_src
 
 **** Acceptable Arguments
@@ -559,9 +559,9 @@ Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn P
 Note that only via ~baking~ can subcommand-specific arguments and keyword arguments be set.
 
 #+begin_src hy
-(setv self.m/subcommand (D {})
+(setv self.m/subcommand (D)
       self.m/subcommand.default "a1454c95-afbf-4c1a-ad12-0b6be7cc9768"
-      self.m/subcommand.current (D {})
+      self.m/subcommand.current (D)
       self.m/subcommand.current.unprocessed self.m/subcommand.default
       self.m/subcommand.current.intact False
       self.m/subcommand.current.processed self.m/subcommand.default)
@@ -597,20 +597,20 @@ Note that only via ~baking~ can subcommand-specific arguments and keyword argume
 *** Arguments
 
 #+begin_src hy
-(setv self.m/args (D {})
+(setv self.m/args (D)
       self.m/args.world (if self.m/flagship [] (deepcopy self.m/origin.m/args.world))
-      self.m/args.base-program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/args.base-program))
+      self.m/args.base-program (if self.m/flagship (D) (deepcopy self.m/origin.m/args.base-program))
       (get self.m/args.base-program self.m/base-program) (if self.m/flagship [] (deepcopy (get self.m/origin.m/args.base-program self.m/base-program)))
-      self.m/args.program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/args.program))
+      self.m/args.program (if self.m/flagship (D) (deepcopy self.m/origin.m/args.program))
       self.m/args.instantiated (list args)
-      self.m/args.baked (D {})
+      self.m/args.baked (D)
       (get self.m/args.baked self.m/subcommand.default) []
       self.m/args.called []
-      self.m/args.current (D {})
-      self.m/args.current.unprocessed (D {})
+      self.m/args.current (D)
+      self.m/args.current.unprocessed (D)
       self.m/args.current.unprocessed.starter []
       self.m/args.current.unprocessed.regular []
-      self.m/args.current.processed (D {})
+      self.m/args.current.processed (D)
       self.m/args.current.unprocessed.starter []
       self.m/args.current.unprocessed.regular [])
 (when self.m/program (assoc self.m/args.program self.m/program (if self.m/flagship [] (deepcopy (get self.m/origin.m/args.program self.m/program)))))
@@ -619,27 +619,27 @@ Note that only via ~baking~ can subcommand-specific arguments and keyword argume
 **** Keyword
 
 #+begin_src hy
-(setv self.m/kwargs (D {})
-      self.m/kwargs.world (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.world))
-      self.m/kwargs.base-program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.base-program))
-      (get self.m/kwargs.base-program self.m/base-program) (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.base-program self.m/base-program)))
-      self.m/kwargs.program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.program))
-      self.m/kwargs.freezer (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.freezer))
-      (get self.m/kwargs.freezer self.m/freezer-hash) (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.freezer self.m/freezer-hash)))
+(setv self.m/kwargs (D)
+      self.m/kwargs.world (if self.m/flagship (D) (deepcopy self.m/origin.m/kwargs.world))
+      self.m/kwargs.base-program (if self.m/flagship (D) (deepcopy self.m/origin.m/kwargs.base-program))
+      (get self.m/kwargs.base-program self.m/base-program) (if self.m/flagship (D) (deepcopy (get self.m/origin.m/kwargs.base-program self.m/base-program)))
+      self.m/kwargs.program (if self.m/flagship (D) (deepcopy self.m/origin.m/kwargs.program))
+      self.m/kwargs.freezer (if self.m/flagship (D) (deepcopy self.m/origin.m/kwargs.freezer))
+      (get self.m/kwargs.freezer self.m/freezer-hash) (if self.m/flagship (D) (deepcopy (get self.m/origin.m/kwargs.freezer self.m/freezer-hash)))
       self.m/kwargs.instantiated (D kwargs)
-      self.m/kwargs.baked (D {})
-      (get self.m/kwargs.baked self.m/subcommand.default) (D {})
-      self.m/kwargs.called (D {})
-      self.m/kwargs.current (D {})
-      self.m/kwargs.current.unprocessed (D {})
-      self.m/kwargs.current.unprocessed.starter (D {})
-      self.m/kwargs.current.unprocessed.regular (D {})
-      self.m/kwargs.current.processed (D {})
+      self.m/kwargs.baked (D)
+      (get self.m/kwargs.baked self.m/subcommand.default) (D)
+      self.m/kwargs.called (D)
+      self.m/kwargs.current (D)
+      self.m/kwargs.current.unprocessed (D)
+      self.m/kwargs.current.unprocessed.starter (D)
+      self.m/kwargs.current.unprocessed.regular (D)
+      self.m/kwargs.current.processed (D)
       self.m/kwargs.current.processed.starter []
       self.m/kwargs.current.processed.regular []
       self.m/kwargs.current.processed.starter-values []
       self.m/kwargs.current.processed.regular-values [])
-(when self.m/program (assoc self.m/kwargs.program self.m/program (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.program self.m/program)))))
+(when self.m/program (assoc self.m/kwargs.program self.m/program (if self.m/flagship (D) (deepcopy (get self.m/origin.m/kwargs.program self.m/program)))))
 #+end_src
 
 *** Return Categories
@@ -689,7 +689,7 @@ and set ~m/gitea.off~ to override and disable both.
 Named after [[https://gitea.io/en-us/][gitea]] and my own [[https://gitlab.com/picotech/nanotech/gensing][gensing]] modules:
 
 #+begin_src hy
-(setv self.m/gitea (D {})
+(setv self.m/gitea (D)
       self.m/gitea.list [ "git" "yadm" "tailapi" ]
       self.m/gitea.bool (or (in self.m/base-program self.m/gitea.list) False)
       self.m/gitea.off False)
@@ -698,9 +698,9 @@ Named after [[https://gitea.io/en-us/][gitea]] and my own [[https://gitlab.com/p
 *** Settings
 
 #+begin_src hy
-(setv self.m/settings (D {})
-      self.m/settings.defaults (D {})
-      self.m/settings.current (D {}))
+(setv self.m/settings (D)
+      self.m/settings.defaults (D)
+      self.m/settings.current (D))
 #+end_src
 
 #+name: m/
@@ -730,16 +730,16 @@ Don't lexically split and join the command to prevent shell-injection attacks:
 Default settings for certain programs and their subcommands:
 
 #+begin_src hy
-(setv self.m/settings.programs (D {})
-      self.m/current-settings (D {})
-      self.m/current-settings.program (D {})
-      self.m/current-settings.subcommand (D {}))
+(setv self.m/settings.programs (D)
+      self.m/current-settings (D)
+      self.m/current-settings.program (D)
+      self.m/current-settings.subcommand (D))
 #+end_src
 
 ***** Zpool
 
 #+begin_src hy
-(setv self.m/settings.programs.zpool (D {}))
+(setv self.m/settings.programs.zpool (D))
 #+end_src
 
 ****** Import
@@ -751,7 +751,7 @@ Default settings for certain programs and their subcommands:
 ***** ZFS
 
 #+begin_src hy
-(setv self.m/settings.programs.zfs (D {}))
+(setv self.m/settings.programs.zfs (D))
 #+end_src
 
 ****** Load Key
@@ -764,7 +764,7 @@ Default settings for certain programs and their subcommands:
 ***** Rich
 
 #+begin_src hy
-(setv self.m/settings.programs.rich (D {}))
+(setv self.m/settings.programs.rich (D))
 #+end_src
 
 ****** Default Subcommand
@@ -779,7 +779,7 @@ Environment variables to be set while running the command,
 passed in as dictionary of variable names and values:
 
 #+begin_src hy
-<<internal/(setting="exports", value="(D {})")>>
+<<internal/(setting="exports", value="(D)")>>
 #+end_src
 
 ***** New Environment Variables
@@ -791,7 +791,7 @@ Environment variables to be set while running the command,
 passed in as dictionary of variable names and values:
 
 #+begin_src hy
-<<internal/(setting="new-exports", value="(D {})")>>
+<<internal/(setting="new-exports", value="(D)")>>
 #+end_src
 
 **** Return Output
@@ -998,7 +998,7 @@ An alternate way to pass arguments to the program as a separate list:
 An alternate way to pass options to the program as a separate dictionary:
 
 #+begin_src hy
-<<m/(setting="regular-kwargs", value="(D {})")>>
+<<m/(setting="regular-kwargs", value="(D)")>>
 #+end_src
 
 **** Context Manager
@@ -1103,7 +1103,7 @@ Use a single forward slash instead of a dash for options, as ~DOS~ expects:
 A dictionary used to pass options to the ~subprocess Popen~ class:
 
 #+begin_src hy
-<<m/(setting="popen", value="(D {})")>>
+<<m/(setting="popen", value="(D)")>>
 #+end_src
 
 **** Sudo
@@ -1230,7 +1230,7 @@ Sort then filter the output, if both settings are enabled:
            (setattr self key (deepcopy value)))
       (setv self.m/current-settings.program (get-un-mangled self.m/settings.programs
                                                             self.m/base-program
-                                                            :default (D {})))
+                                                            :default (D)))
       (for [[key value] (.items (get self.m/current-settings.program self.m/subcommand.default))]
            (setattr self key (deepcopy value))))
 #+end_src
@@ -1258,7 +1258,7 @@ Sort then filter the output, if both settings are enabled:
 
       (setv self.m/current-settings.subcommand (get-un-mangled self.m/current-settings.program
                                                                self.m/subcommand.current.processed
-                                                               :default (D {})))
+                                                               :default (D)))
       (for [[key value] (.items self.m/current-settings.subcommand)]
            (setattr self key (deepcopy value)))
 
@@ -1292,7 +1292,7 @@ Note that ~subcommand~ is only really needed here to help reset the baked argume
                [freezer-hash- None]
                [subcommand- None]
                [set-defaults- True] ]
-      (setv self.m/current-settings (D {})
+      (setv self.m/current-settings (D)
 #+end_src
 
 CAREFUL! These variables need to be before the variables in the block below, and in these orders!
@@ -1321,21 +1321,21 @@ CAREFUL! These variables need to be before the variables in the block below, and
                   default-value (or default-value (getattr store (mangle (+ "m/" name)))))
             (when (or args- args-kwargs)
                   (if (or all-args- all-args-kwargs)
-                      (do (assoc store.m/args name (D {}))
+                      (do (assoc store.m/args name (D))
                           (assoc (get store.m/args name) default-value []))
                       (assoc (get store.m/args name) value [])))
             (when (or kwargs- args-kwargs)
                   (if (or all-kwargs- all-args-kwargs)
-                      (assoc store.m/kwargs name (D {}))
-                      (assoc (get store.m/kwargs name) value (D {})))))
+                      (assoc store.m/kwargs name (D))
+                      (assoc (get store.m/kwargs name) value (D)))))
       (for [m #("settings" "subcommand" "args" "kwargs")]
-           (assoc (getattr self (mangle (+ "m/" m))) "current" (D {})))
+           (assoc (getattr self (mangle (+ "m/" m))) "current" (D)))
       (setv self.m/args.called [])
-            self.m/kwargs.called (D {})
+            self.m/kwargs.called (D)
       (when (or world- all-classes-)
             (for [store (.chain- self)]
                  (when (or args- args-kwargs) (setv store.m/args.world []))
-                 (when (or kwargs- args-kwargs) (setv store.m/kwargs.world (D {})))))
+                 (when (or kwargs- args-kwargs) (setv store.m/kwargs.world (D)))))
       (when (or base-programs- all-classes-)
             (for [store (.chain- self)]
                  (inner store "base-program" base-program-)))
@@ -1346,11 +1346,11 @@ CAREFUL! These variables need to be before the variables in the block below, and
             (for [store (.chain- self)]
                  (when (or kwargs- args-kwargs)
                        (if (or all-kwargs- all-args-kwargs)
-                           (setv store.m/kwargs.freezer (D {}))
-                           (assoc store.m/kwargs.freezer freezer-hash (D {}))))))
+                           (setv store.m/kwargs.freezer (D))
+                           (assoc store.m/kwargs.freezer freezer-hash (D))))))
       (when instantiated-
             (when (or args- args-kwargs) (setv self.m/args.instantiated []))
-            (when (or kwargs- args-kwargs) (setv self.m/args.instantiated (D {}))))
+            (when (or kwargs- args-kwargs) (setv self.m/args.instantiated (D))))
       (when (or baked- all-classes-)
             (inner self "baked" subcommand- :default-value self.m/subcommand.default))
       (when set-defaults- (.var/set-defaults self)))
@@ -1709,7 +1709,7 @@ otherwise ~(isinstance value int)~ will catch both cases.
         (do (setv process (.m/popen-partial self))
             (cond (is self.m/wait None) (with [p (process :stdout DEVNULL :stderr DEVNULL)] (return None))
                   self.m/wait (with [p (process)]
-                                    (setv return/process/return (D {}))
+                                    (setv return/process/return (D))
                                     (for [std #("out" "err")]
                                          (setv chained []
                                                stdstd (+ "std" std))

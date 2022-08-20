@@ -25,7 +25,6 @@
             propagatedBuildInputs = [ oreo py ];
             pythonImportsCheck = [ pname ];
             checkInputs = [ pytestCheckHook pytest-hy pytest-randomly pytest-parametrized ];
-            checkPhase = "pytest";
             postPatch = ''
                 substituteInPlace pyproject.toml --replace "oreo = { git = \"https://github.com/${owner}/oreo.git\", branch = \"main\" }" ""
                 substituteInPlace setup.py --replace "'oreo @ git+https://github.com/${owner}/oreo.git@main'" ""

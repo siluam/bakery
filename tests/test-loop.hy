@@ -9,4 +9,4 @@
 (setv assorted-cookies (.ls oreo cookies :key True))
 (import os [chdir])
 (require oreo [with-cwd])
-#_(defn [mark.loop] test-loop [] (with-cwd cookies (for [item ls] (assert (in item cookies-ls)))))
+(defn [mark.loop] test-loop [] (with-cwd cookies (for [item ls] (assert (in item cookies-ls)))))

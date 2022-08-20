@@ -270,7 +270,7 @@
 (setv self.m/flagship (= (len self.__class__.m/stores) 1)
       self.m/origin (if self.m/flagship self (getattr (first self.__class__.m/stores) "__callback__")))
 
-(setv self.m/type-groups (D {}))
+(setv self.m/type-groups (D))
 
 (setv self.m/type-groups.acceptable-args [str int Path py._path.local.LocalPath])
 
@@ -285,9 +285,9 @@
 
 (setv self.m/type-groups.excluded-classes #("type" "filter"))
 
-(setv self.m/subcommand (D {})
+(setv self.m/subcommand (D)
       self.m/subcommand.default "a1454c95-afbf-4c1a-ad12-0b6be7cc9768"
-      self.m/subcommand.current (D {})
+      self.m/subcommand.current (D)
       self.m/subcommand.current.unprocessed self.m/subcommand.default
       self.m/subcommand.current.intact False
       self.m/subcommand.current.processed self.m/subcommand.default)
@@ -307,45 +307,45 @@
 
 (setv self.m/arg-kwarg-classes #("world" "base-programs" "base-program" "programs" "program" "freezers" "freezer-hash" "instantiated" "baked" "subcommand"))
 
-(setv self.m/args (D {})
+(setv self.m/args (D)
       self.m/args.world (if self.m/flagship [] (deepcopy self.m/origin.m/args.world))
-      self.m/args.base-program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/args.base-program))
+      self.m/args.base-program (if self.m/flagship (D) (deepcopy self.m/origin.m/args.base-program))
       (get self.m/args.base-program self.m/base-program) (if self.m/flagship [] (deepcopy (get self.m/origin.m/args.base-program self.m/base-program)))
-      self.m/args.program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/args.program))
+      self.m/args.program (if self.m/flagship (D) (deepcopy self.m/origin.m/args.program))
       self.m/args.instantiated (list args)
-      self.m/args.baked (D {})
+      self.m/args.baked (D)
       (get self.m/args.baked self.m/subcommand.default) []
       self.m/args.called []
-      self.m/args.current (D {})
-      self.m/args.current.unprocessed (D {})
+      self.m/args.current (D)
+      self.m/args.current.unprocessed (D)
       self.m/args.current.unprocessed.starter []
       self.m/args.current.unprocessed.regular []
-      self.m/args.current.processed (D {})
+      self.m/args.current.processed (D)
       self.m/args.current.unprocessed.starter []
       self.m/args.current.unprocessed.regular [])
 (when self.m/program (assoc self.m/args.program self.m/program (if self.m/flagship [] (deepcopy (get self.m/origin.m/args.program self.m/program)))))
 
-(setv self.m/kwargs (D {})
-      self.m/kwargs.world (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.world))
-      self.m/kwargs.base-program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.base-program))
-      (get self.m/kwargs.base-program self.m/base-program) (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.base-program self.m/base-program)))
-      self.m/kwargs.program (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.program))
-      self.m/kwargs.freezer (if self.m/flagship (D {}) (deepcopy self.m/origin.m/kwargs.freezer))
-      (get self.m/kwargs.freezer self.m/freezer-hash) (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.freezer self.m/freezer-hash)))
+(setv self.m/kwargs (D)
+      self.m/kwargs.world (if self.m/flagship (D) (deepcopy self.m/origin.m/kwargs.world))
+      self.m/kwargs.base-program (if self.m/flagship (D) (deepcopy self.m/origin.m/kwargs.base-program))
+      (get self.m/kwargs.base-program self.m/base-program) (if self.m/flagship (D) (deepcopy (get self.m/origin.m/kwargs.base-program self.m/base-program)))
+      self.m/kwargs.program (if self.m/flagship (D) (deepcopy self.m/origin.m/kwargs.program))
+      self.m/kwargs.freezer (if self.m/flagship (D) (deepcopy self.m/origin.m/kwargs.freezer))
+      (get self.m/kwargs.freezer self.m/freezer-hash) (if self.m/flagship (D) (deepcopy (get self.m/origin.m/kwargs.freezer self.m/freezer-hash)))
       self.m/kwargs.instantiated (D kwargs)
-      self.m/kwargs.baked (D {})
-      (get self.m/kwargs.baked self.m/subcommand.default) (D {})
-      self.m/kwargs.called (D {})
-      self.m/kwargs.current (D {})
-      self.m/kwargs.current.unprocessed (D {})
-      self.m/kwargs.current.unprocessed.starter (D {})
-      self.m/kwargs.current.unprocessed.regular (D {})
-      self.m/kwargs.current.processed (D {})
+      self.m/kwargs.baked (D)
+      (get self.m/kwargs.baked self.m/subcommand.default) (D)
+      self.m/kwargs.called (D)
+      self.m/kwargs.current (D)
+      self.m/kwargs.current.unprocessed (D)
+      self.m/kwargs.current.unprocessed.starter (D)
+      self.m/kwargs.current.unprocessed.regular (D)
+      self.m/kwargs.current.processed (D)
       self.m/kwargs.current.processed.starter []
       self.m/kwargs.current.processed.regular []
       self.m/kwargs.current.processed.starter-values []
       self.m/kwargs.current.processed.regular-values [])
-(when self.m/program (assoc self.m/kwargs.program self.m/program (if self.m/flagship (D {}) (deepcopy (get self.m/origin.m/kwargs.program self.m/program)))))
+(when self.m/program (assoc self.m/kwargs.program self.m/program (if self.m/flagship (D) (deepcopy (get self.m/origin.m/kwargs.program self.m/program)))))
 
 (setv self.m/return-categories #(
     "stdout"
@@ -358,40 +358,40 @@
 
 (setv self.m/command (tea))
 
-(setv self.m/gitea (D {})
+(setv self.m/gitea (D)
       self.m/gitea.list [ "git" "yadm" "tailapi" ]
       self.m/gitea.bool (or (in self.m/base-program self.m/gitea.list) False)
       self.m/gitea.off False)
 
-(setv self.m/settings (D {})
-      self.m/settings.defaults (D {})
-      self.m/settings.current (D {}))
+(setv self.m/settings (D)
+      self.m/settings.defaults (D)
+      self.m/settings.current (D))
 
 (setv self.m/intact-command (bool self.m/freezer))
 (setv self.m/settings.defaults.m/intact-command (deepcopy self.m/intact-command))
 
-(setv self.m/settings.programs (D {})
-      self.m/current-settings (D {})
-      self.m/current-settings.program (D {})
-      self.m/current-settings.subcommand (D {}))
+(setv self.m/settings.programs (D)
+      self.m/current-settings (D)
+      self.m/current-settings.program (D)
+      self.m/current-settings.subcommand (D))
 
-(setv self.m/settings.programs.zpool (D {}))
+(setv self.m/settings.programs.zpool (D))
 
 (setv self.m/settings.programs.zpool.import (D { "m/sudo" True }))
 
-(setv self.m/settings.programs.zfs (D {}))
+(setv self.m/settings.programs.zfs (D))
 
 (setv self.m/settings.programs.zfs.load-key (D { "m/run" True
                                                  "m/sudo" True }))
 
-(setv self.m/settings.programs.rich (D {}))
+(setv self.m/settings.programs.rich (D))
 
 (assoc (get self.m/settings.programs.rich self.m/subcommand.default) "m/run" True)
 
-(setv self.internal/exports (D {}))
+(setv self.internal/exports (D))
 (setv self.m/settings.defaults.m/exports (deepcopy self.internal/exports))
 
-(setv self.internal/new-exports (D {}))
+(setv self.internal/new-exports (D))
 (setv self.m/settings.defaults.m/new-exports (deepcopy self.internal/new-exports))
 
 (setv self.m/return-output-attrs #("call" "model" "frozen" "return-output"))
@@ -468,7 +468,7 @@
 (setv self.m/regular-args #())
 (setv self.m/settings.defaults.m/regular-args (deepcopy self.m/regular-args))
 
-(setv self.m/regular-kwargs (D {}))
+(setv self.m/regular-kwargs (D))
 (setv self.m/settings.defaults.m/regular-kwargs (deepcopy self.m/regular-kwargs))
 
 (setv self.m/context False)
@@ -501,7 +501,7 @@
 (setv self.m/wait True)
 (setv self.m/settings.defaults.m/wait (deepcopy self.m/wait))
 
-(setv self.m/popen (D {}))
+(setv self.m/popen (D))
 (setv self.m/settings.defaults.m/popen (deepcopy self.m/popen))
 
 (setv self.internal/sudo False)
@@ -572,7 +572,7 @@
            (setattr self key (deepcopy value)))
       (setv self.m/current-settings.program (get-un-mangled self.m/settings.programs
                                                             self.m/base-program
-                                                            :default (D {})))
+                                                            :default (D)))
       (for [[key value] (.items (get self.m/current-settings.program self.m/subcommand.default))]
            (setattr self key (deepcopy value))))
 
@@ -596,7 +596,7 @@
 
       (setv self.m/current-settings.subcommand (get-un-mangled self.m/current-settings.program
                                                                self.m/subcommand.current.processed
-                                                               :default (D {})))
+                                                               :default (D)))
       (for [[key value] (.items self.m/current-settings.subcommand)]
            (setattr self key (deepcopy value)))
 
@@ -624,7 +624,7 @@
                [freezer-hash- None]
                [subcommand- None]
                [set-defaults- True] ]
-      (setv self.m/current-settings (D {})
+      (setv self.m/current-settings (D)
 
             programs- (or programs- program-)
             base-programs- (or (and self.m/freezer program-) (= program- "") base-programs- base-program-)
@@ -645,21 +645,21 @@
                   default-value (or default-value (getattr store (mangle (+ "m/" name)))))
             (when (or args- args-kwargs)
                   (if (or all-args- all-args-kwargs)
-                      (do (assoc store.m/args name (D {}))
+                      (do (assoc store.m/args name (D))
                           (assoc (get store.m/args name) default-value []))
                       (assoc (get store.m/args name) value [])))
             (when (or kwargs- args-kwargs)
                   (if (or all-kwargs- all-args-kwargs)
-                      (assoc store.m/kwargs name (D {}))
-                      (assoc (get store.m/kwargs name) value (D {})))))
+                      (assoc store.m/kwargs name (D))
+                      (assoc (get store.m/kwargs name) value (D)))))
       (for [m #("settings" "subcommand" "args" "kwargs")]
-           (assoc (getattr self (mangle (+ "m/" m))) "current" (D {})))
+           (assoc (getattr self (mangle (+ "m/" m))) "current" (D)))
       (setv self.m/args.called [])
-            self.m/kwargs.called (D {})
+            self.m/kwargs.called (D)
       (when (or world- all-classes-)
             (for [store (.chain- self)]
                  (when (or args- args-kwargs) (setv store.m/args.world []))
-                 (when (or kwargs- args-kwargs) (setv store.m/kwargs.world (D {})))))
+                 (when (or kwargs- args-kwargs) (setv store.m/kwargs.world (D)))))
       (when (or base-programs- all-classes-)
             (for [store (.chain- self)]
                  (inner store "base-program" base-program-)))
@@ -670,11 +670,11 @@
             (for [store (.chain- self)]
                  (when (or kwargs- args-kwargs)
                        (if (or all-kwargs- all-args-kwargs)
-                           (setv store.m/kwargs.freezer (D {}))
-                           (assoc store.m/kwargs.freezer freezer-hash (D {}))))))
+                           (setv store.m/kwargs.freezer (D))
+                           (assoc store.m/kwargs.freezer freezer-hash (D))))))
       (when instantiated-
             (when (or args- args-kwargs) (setv self.m/args.instantiated []))
-            (when (or kwargs- args-kwargs) (setv self.m/args.instantiated (D {}))))
+            (when (or kwargs- args-kwargs) (setv self.m/args.instantiated (D))))
       (when (or baked- all-classes-)
             (inner self "baked" subcommand- :default-value self.m/subcommand.default))
       (when set-defaults- (.var/set-defaults self)))
@@ -936,7 +936,7 @@
         (do (setv process (.m/popen-partial self))
             (cond (is self.m/wait None) (with [p (process :stdout DEVNULL :stderr DEVNULL)] (return None))
                   self.m/wait (with [p (process)]
-                                    (setv return/process/return (D {}))
+                                    (setv return/process/return (D))
                                     (for [std #("out" "err")]
                                          (setv chained []
                                                stdstd (+ "std" std))

@@ -77,7 +77,7 @@ Check if temporary baking with a context manager works:
 #+begin_src hy
 (import os [chdir])
 (require oreo [with-cwd])
-#_(defn [mark.loop] test-loop [] (with-cwd cookies (for [item ls] (assert (in item cookies-ls)))))
+(defn [mark.loop] test-loop [] (with-cwd cookies (for [item ls] (assert (in item cookies-ls)))))
 #+end_src
 
 ** test-progress.hy
