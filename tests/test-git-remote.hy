@@ -8,4 +8,6 @@
 (setv cookies-ls (.ls oreo cookies))
 (setv assorted-cookies (.ls oreo cookies :key True))
 (import bakery [git])
-(defn [mark.git-remote] test-git-status [request] (-> (git :C request.config.rootdir) (.remote :m/str True) (= "origin") assert))
+(import shutil [which])
+(defn [mark.git-remote (.skipif mark (not (which "git")) :reason "Git may not be available on some systems")]
+      test-git-status [request] (-> (git :C request.config.rootdir) (.remote :m/str True) (= "origin") assert))
