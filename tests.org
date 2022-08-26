@@ -136,9 +136,9 @@ Check if temporary baking with a context manager works:
 ** test-git-remote.hy
 
 #+begin_src hy
-(import bakery [git])
 (import shutil [which])
-(defn [mark.git-remote mark.xfail]
+(setv no-git (if (which "git") (import bakery [git]) True))
+(defn [mark.git-remote (.xfail mark :condition no-git :reason "Git may not be available on some systems.")]
       test-git-status [request] (-> (git :C request.config.rootdir) (.remote :m/str True) (= "origin") assert))
 #+end_src
 
