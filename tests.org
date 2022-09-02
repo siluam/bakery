@@ -129,8 +129,7 @@ Check if temporary baking with a context manager works:
 
 #+begin_src hy
 (import bakery)
-(import oreo [either?])
-(defn [mark.freezing] test-freezing [] (-> [] (ls) (either? bakery) assert))
+(defn [mark.freezing] test-freezing [] (-> [] ls (isinstance (bakery)) assert))
 #+end_src
 
 ** test-git-remote.hy
@@ -160,8 +159,10 @@ Check if temporary baking with a context manager works:
 ** test-error.hy
 
 #+begin_src hy
+(defn [mark.error mark.xfail] test-error [] (ls :j True))
 (defn [mark.error] test-ignore-error [] (assert (ls :j True :m/ignore-stderr True)))
-(defn [mark.error] test-stdout-error [] (assert (= (ls :j True :m/stdout-stderr True :m/str True)
+(defn [mark.error] test-accepted-errors [] (assert (ls :j True :m/returncodes #(2))))
+(defn [mark.error] test-stdout-error [] (assert (= (ls :j True :m/stdout-stderr True :m/ignore-stderr True :m/str True)
                                                    "ls: invalid option -- 'j'\nTry 'ls --help' for more information.")))
 (defn [mark.error] test-false-error [] (assert (= (ls :j True :m/false-stderr True) False)))
 (defn [mark.error] test-replace-error []

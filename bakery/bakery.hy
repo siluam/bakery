@@ -15,6 +15,7 @@
 (import functools [partial wraps])
 (import hy [mangle unmangle])
 (import inspect [isclass :as class? stack])
+(import io [TextIOWrapper])
 (import itertools [chain filterfalse tee])
 (import more-itertools [peekable])
 (import oreo [coll? eclair either? flatten get-un-mangled int? recursive-unmangle tea first-last-n])
@@ -46,10 +47,9 @@
                    (.split j (str delim))))))
 
 (defn check [self program] (-> program
-                               (which)
+                               which
                                (is None)
-                               (if None self)
-                               (return)))
+                               (if None self)))
 
 (defclass frosting [tea Slots]
 
@@ -241,7 +241,7 @@
                                    (if (or (isinstance value bool) (= (len value) 1))
                                        (cond (isinstance value str) (if (in value #("i" "s")) { value "root" } (raise (ValueError error-message)))
                                              (isinstance value bool) value
-                                             (isinstance value dict) (if (-> value (.keys) (iter) (next) (in #("i" "s"))) value (raise (ValueError error-message))))
+                                             (isinstance value dict) (if (-> value .keys iter next (in #("i" "s"))) value (raise (ValueError error-message))))
                                        (raise (ValueError error-message)))
                                    False)))
 
@@ -434,6 +434,9 @@
 
 (setv self.m/replace-stderr False)
 (setv self.m/settings.defaults.m/replace-stderr (deepcopy self.m/replace-stderr))
+
+(setv self.m/returncodes [])
+(setv self.m/settings.defaults.m/returncodes (deepcopy self.m/returncodes))
 
 (setv self.m/verbosity 0)
 (setv self.m/settings.defaults.m/verbosity (deepcopy self.m/verbosity))
@@ -840,7 +843,7 @@
       (when self.m/sudo
             (if (isinstance self.m/sudo bool)
                 (.append self.m/command "sudo")
-                (.append self.m/command f"sudo -{(-> self.m/sudo (.keys) (iter) (next))} -u {(-> self.m/sudo (.values) (iter) (next))}")))
+                (.append self.m/command f"sudo -{(-> self.m/sudo .keys iter next)} -u {(-> self.m/sudo .values iter next)}")))
 
       (if (and self.m/shell (not self.m/freezer))
           (do (.extend self.m/command self.m/shell "-c" "'")
@@ -888,19 +891,20 @@
                       (when (isinstance output dict)
                             (setv output.stderr (peekable output.stderr)
                                   stds #("out" "err"))
-                            (try (setv peek-value (.peek output.stderr))
-                                 (except [StopIteration]
-                                         (setv peek-value None)))
-                            (when (and peek-value
-                                       (not self.m/ignore-stderr)
-                                       (not self.m/stdout-stderr))
+
+                            (when (and output.returncode
+                                       (not (or (in output.returncode self.m/returncodes)
+                                                self.m/ignore-stderr)))
                                   (if (or self.m/replace-stderr self.m/false-stderr)
                                       (setv (get output "stdout") (or self.m/replace-stderr False))
-                                      (raise (SystemError (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr))))))
-                            (for [[std opp] (zip stds (py "stds[::-1]"))]
+                                      (raise (SystemError (if (or (= self.m/capture "run") self.m/stdout-stderr)
+                                                              f"Something happened in trying to run `{(.m/command self)}'; check your output."
+                                                              (+ f"In trying to run `{(.m/command self)}':\n\n" (.join "\n" output.stderr)))))))
+                            (for [[std opp] (zip stds (cut stds None None -1))]
                                  (setv stdstd (+ "std" std)
                                        stdopp (+ "std" opp))
-                                 (when (and (< self.m/verbosity 1) (= self.m/capture stdstd)) (del (get output stdopp)))))
+                                 (when (and (< self.m/verbosity 1) (= self.m/capture stdstd)) (del (get output stdopp))))
+                            (when (< self.m/verbosity 1) (del (get output "returncode"))))
                       (return output))))
 
 (defn return/model [self]
@@ -938,21 +942,28 @@
                   self.m/wait (with [p (process)]
                                     (setv return/process/return (D))
                                     (for [std #("out" "err")]
-                                         (setv chained []
-                                               stdstd (+ "std" std))
-                                         (when (setx output (getattr p stdstd))
-                                               (for [line output]
-                                                    (setv line (if (isinstance line #(bytes bytearray))
-                                                                   (.strip (.decode line "utf-8"))
-                                                                   (.strip line))
-                                                          chained (chain chained [line]))
-                                                    (when (and (= std "out") self.m/dazzling) (print line))))
-                                         (assoc return/process/return stdstd (iter chained)))
+                                         (let [ stdstd (+ "std" std)
+                                                output (getattr p stdstd) ]
+                                              (when output
+                                                    (if (and (= std "out") self.m/dazzling)
+                                                        (let [ chained [] ]
+                                                             (for [line output]
+                                                                  (setv line (if (isinstance line #(bytes bytearray))
+                                                                                 (.strip (.decode line "utf-8"))
+                                                                                 (.strip line))
+                                                                        chained (chain chained [line]))
+                                                                  (print line))
+                                                             (assoc return/process/return stdstd (iter chained)))
+                                                        (assoc return/process/return stdstd (-> output
+                                                                                                TextIOWrapper
+                                                                                                .read
+                                                                                                .strip
+                                                                                                (.split "\n")
+                                                                                                iter))))))
                                     (.wait p)
+                                    (setv return/process/return.returncode p.returncode)
                                     (when (> self.m/verbosity 0)
-                                          (setv return/process/return.returns.code p.returncode
-                                                return/process/return.returns.codes p.returncodes
-                                                return/process/return.command.bakery (.m/command self)
+                                          (setv return/process/return.command.bakery (.m/command self)
                                                 return/process/return.command.subprocess p.args
                                                 return/process/return.pid p.pid))
                                     (when (> self.m/verbosity 1)
@@ -974,7 +985,7 @@
               (when (or self.m/replace-stderr self.m/false-stderr) (return output.stdout))
               (setv frosted-output (if (and (isinstance output dict)
                                             (= (len output) 1))
-                                       (-> output (.values) (iter) (next))
+                                       (-> output .values iter next)
                                        output)
                     dict-like-frosted-output (isinstance frosted-output dict)
                     frosted-output (if self.m/dazzle
@@ -1023,7 +1034,7 @@
                                      (.get self.m/popen "stdout" DEVNULL)
                                      (.get self.m/popen "stdout" PIPE)))
             pp-stderr (or stderr (if (= self.m/capture "run")
-                                     (.get self.m/popen "stderr" None)
+                                     (.get self.m/popen "stderr" STDOUT)
                                      (cond self.m/stdout-stderr (.get self.m/popen "stderr" STDOUT)
                                            self.m/ignore-stderr (.get self.m/popen "stderr" DEVNULL)
                                            True (.get self.m/popen "stderr" PIPE))))

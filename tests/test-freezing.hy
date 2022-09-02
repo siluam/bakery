@@ -8,5 +8,4 @@
 (setv cookies-ls (.ls oreo cookies))
 (setv assorted-cookies (.ls oreo cookies :key True))
 (import bakery)
-(import oreo [either?])
-(defn [mark.freezing] test-freezing [] (-> [] (ls) (either? bakery) assert))
+(defn [mark.freezing] test-freezing [] (-> [] ls (isinstance (bakery)) assert))

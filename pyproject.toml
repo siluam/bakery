@@ -18,8 +18,10 @@ py = "*"
 pytest = "^3.0"
 poetry = "*"
 poetry2setup = "*"
-pytest-hylang = "*"
+pytest-hy = "*"
 pytest-randomly = "*"
+pytest-parametrized = "*"
+pytest-sugar = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -294,7 +294,7 @@ Use sudo:
         (raise (ValueError "Sorry! The '_sudo' object can only have a single key-value item!")))
     (if (and
             value
-            (-> (.keys value) (next) (iter) (in (, "i" "s")) (not)))
+            (-> (.keys value) next iter (in (, "i" "s")) not))
         (raise (ValueError "Sorry! The '_sudo' object can only take `i' or `s' as a key!")))
     (setv self.__sudo value)))
 #+end_src
@@ -638,7 +638,7 @@ Get the length of the current freezer, then the index of the pr will be plus 1 o
           _command (tea))
 
     (if self._cls._sudo
-        (.append _command f"sudo -{(-> self._cls._sudo (.keys) (iter) (next))} -u {(-> self._cls._sudo (.values) (iter) (next))}"))
+        (.append _command f"sudo -{(-> self._cls._sudo .keys iter next)} -u {(-> self._cls._sudo .values iter next)}"))
 
     (if self._cls._shell
         (do (.extend _command self._cls._shell "-c" "'")
@@ -805,7 +805,7 @@ To reset the command function, use the "splat_" function as necessary.
                                                         (for [line outcat] (print line))))))])
     (if (and (isinstance output (, dict tea frosting))
              (= (len output) 1))
-        (return (-> output (.values) (iter) (next)))
+        (return (-> output .values iter next))
         (return output)))
 #+end_src
 
@@ -853,7 +853,7 @@ To reset the command function, use the "splat_" function as necessary.
               "called" self.__calling
               "final" self.__final
           })
-          c_count (-> self.__categories (.values) (tuple) (.count True)))
+          c_count (-> self.__categories .values tuple (.count True)))
     (if (not (= c_count 1)) (let [keystring (.join ", " (.keys self.__categories))]
         (raise (TypeError f"Sorry! No combination of {keystring} may be used! Please choose only a single category!"))))
     (for [[key value] (py "tuple(self.__categories.items())[:-1]")]
@@ -1206,7 +1206,7 @@ Eg: git.splat_(_subcommands = ["<<20220111111603650875845>>"])
           _pb (if _global "planetary" "baked"))
     (defn inner [cat]
         (cond [_all (assoc (getattr _cls cat) _pb (D {}))]
-              [_all_subcommands (for [key (-> _cls (getattr cat) (get _pb) (.keys))]
+              [_all_subcommands (for [key (-> _cls (getattr cat) (get _pb) .keys)]
                                      (if (not (= key self._subcommand)) (assoc (. (getattr _cls cat) [_pb]) key (D {}))))]
               [True (for [sub _subcommands] (assoc (. (getattr _cls cat) [_pb]) sub (D {})))]))
     (if (and _settings _args_kwargs) (for [cat (, "_settings" "_command")] (inner cat))
