@@ -2,6 +2,7 @@
     description = "An \"sh\" alternative!";
     inputs = rec {
         settings.url = github:sylvorg/settings;
+        titan.url = github:syvlorg/titan;
         py3pkg-oreo.url = github:syvlorg/oreo;
         py3pkg-pytest-hy.url = github:syvlorg/pytest-hy;
         flake-utils.url = github:numtide/flake-utils;
