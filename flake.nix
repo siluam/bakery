@@ -13,7 +13,7 @@
     };
     outputs = inputs@{ self, flake-utils, settings, ... }: with builtins; with settings.lib; with flake-utils.lib; settings.mkOutputs {
         inherit inputs;
-        callPackage = { stdenv, oreo, py, pname }: j.mkPythonPackage self.pkgs.${stdenv.targetPlatform.system}.Pythons.${self.type}.pkgs (rec {
+        callPackage = { stdenv, oreo, py, pname }: j.mkPythonPackage self stdenv [] (rec {
             owner = "syvlorg";
             inherit pname;
             src = ./.;
