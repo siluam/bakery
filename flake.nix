@@ -20,7 +20,7 @@
             propagatedBuildInputs = [ oreo py ];
             postPatch = ''
                 substituteInPlace pyproject.toml --replace "oreo = { git = \"https://github.com/${owner}/oreo.git\", branch = \"main\" }" ""
-                substituteInPlace setup.py --replace "'oreo @ git+https://github.com/${owner}/oreo.git@main'" ""
+                substituteInPlace setup.py --replace "'oreo @ git+https://github.com/${owner}/oreo.git@main'" "" || :
             '';
         });
         pname = "bakery";

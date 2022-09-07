@@ -48,5 +48,5 @@ markers = [
 	"split",
 	"string_output",
 	"trim",
-    "freezing",
+	"freezing",
 ]
