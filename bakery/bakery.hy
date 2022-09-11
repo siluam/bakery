@@ -21,13 +21,14 @@
 (import oreo [coll? eclair either? flatten get-un-mangled int? recursive-unmangle tea first-last-n])
 (import os [environ path :as osPath getcwd])
 (import pathlib [Path])
+(import queue [Queue])
 (import rich [print inspect])
 (import rich.pretty [pretty-repr pprint])
 (import rich.progress [Progress])
 (import shlex [join split])
 (import shutil [which])
 (import subprocess [DEVNULL PIPE Popen STDOUT])
-(import textwrap [TextWrapper])
+(import threading [Thread])
 (import types [MethodType])
 (import uuid [uuid4 uuid5])
 
@@ -548,7 +549,8 @@
       (if input
           (do (when (isinstance input self.m/type-groups.genstrings)
                     (let [frosted-input (input)]
-                         (cond (isinstance frosted-input str) (setv input [(.fill (TextWrapper :break-long-words False :break-on-hyphens False) frosted-input)])
+                         (cond (or self.m/return-command self.m/print-command) None
+                               (isinstance frosted-input str) (setv input (.wrap (TextWrapper :break-long-words False :break-on-hyphens False) frosted-input))
                                (isinstance frosted-input int) (if (.misc/type-name-is-string self :type/type type/type/type)
                                                                   (return (pretty-repr frosted-input))
                                                                   (return frosted-input)))))
@@ -936,48 +938,51 @@
            (return f"bakery :program- {(or self.m/program "''")} :base-program- {self.m/base-program} :freezer- {self.m/freezer}{settings}")))
 
 (defn return/process [self]
-    (if (.m/command self)
-        (do (setv process (.m/popen-partial self))
-            (cond (is self.m/wait None) (with [p (process :stdout DEVNULL :stderr DEVNULL)] (return None))
-                  self.m/wait (with [p (process)]
-                                    (setv return/process/return (D))
-                                    (for [std #("out" "err")]
-                                         (let [ stdstd (+ "std" std)
-                                                output (getattr p stdstd) ]
-                                              (when output
-                                                    (if (and (= std "out") self.m/dazzling)
-                                                        (let [ chained [] ]
-                                                             (for [line output]
-                                                                  (setv line (if (isinstance line #(bytes bytearray))
-                                                                                 (.strip (.decode line "utf-8"))
-                                                                                 (.strip line))
-                                                                        chained (chain chained [line]))
-                                                                  (print line))
-                                                             (assoc return/process/return stdstd (iter chained)))
-                                                        (assoc return/process/return stdstd (-> output
-                                                                                                TextIOWrapper
-                                                                                                .read
-                                                                                                .strip
-                                                                                                (.split "\n")
-                                                                                                iter))))))
-                                    (.wait p)
-                                    (setv return/process/return.returncode p.returncode)
-                                    (when (> self.m/verbosity 0)
-                                          (setv return/process/return.command.bakery (.m/command self)
-                                                return/process/return.command.subprocess p.args
-                                                return/process/return.pid p.pid))
-                                    (when (> self.m/verbosity 1)
-                                          (setv return/process/return.tea self.m/command
-                                                return/process/return.subcommand self.m/subcommand))
-                                    (let [first-last-n-part (partial first-last-n :last self.m/n-lines.last
-                                                                                  :number self.m/n-lines.number)]
-                                         (when (in self.m/n-lines.std #("stdout" "both"))
-                                               (setv return/process/return.stdout (first-last-n-part :iterable return/process/return.stdout)))
-                                         (when (in self.m/n-lines.std #("stderr" "both"))
-                                               (setv return/process/return.stderr (first-last-n-part :iterable return/process/return.stderr))))
-                                    (return return/process/return))
-                  True (return (process))))
-        (return None)))
+    (when (.m/command self)
+          (setv process (.m/popen-partial self))
+          (cond (is self.m/wait None) (with [p (process :stdout DEVNULL :stderr DEVNULL)] (return None))
+
+                self.m/wait (with [p (process)]
+                                  (let [ return/process/return (D)
+                                         q (Queue) ]
+                                       (defn inner [output stdstd]
+                                             (when output
+                                                   (let [ chained [] ]
+                                                        (for [line output]
+                                                             (setv line (if (isinstance line #(bytes bytearray))
+                                                                            (.strip (.decode line "utf-8"))
+                                                                            (.strip line))
+                                                                   chained (chain chained [line]))
+                                                             (when self.m/dazzling (.put q line)))
+                                                        (assoc return/process/return stdstd (iter chained)))))
+                                       (for [std #("out" "err")]
+                                            (let [ stdstd (+ "std" std)
+                                                   t (Thread :target inner :args #((getattr p stdstd) stdstd)) ]
+                                                 (setv t.daemon True)
+                                                 (.start t)))
+                                       (if self.m/dazzling
+                                           (while (is (.poll p) None)
+                                                  (try (.get-nowait q)
+                                                       (except [Empty] None)
+                                                       (else (print line))))
+                                           (.wait p))
+                                       (setv return/process/return.returncode p.returncode)
+                                       (when (> self.m/verbosity 0)
+                                             (setv return/process/return.command.bakery (.m/command self)
+                                                   return/process/return.command.subprocess p.args
+                                                   return/process/return.pid p.pid))
+                                       (when (> self.m/verbosity 1)
+                                             (setv return/process/return.tea self.m/command
+                                                   return/process/return.subcommand self.m/subcommand))
+                                       (let [first-last-n-part (partial first-last-n :last self.m/n-lines.last
+                                                                                     :number self.m/n-lines.number)]
+                                            (when (in self.m/n-lines.std #("stdout" "both"))
+                                                  (setv return/process/return.stdout (first-last-n-part :iterable return/process/return.stdout)))
+                                            (when (in self.m/n-lines.std #("stderr" "both"))
+                                                  (setv return/process/return.stderr (first-last-n-part :iterable return/process/return.stderr))))
+                                       (return return/process/return)))
+
+                True (return (process)))))
 
 (defn return/frosting [self]
       (if (setx output (.return/output self))
@@ -1036,17 +1041,19 @@
             pp-stderr (or stderr (if (= self.m/capture "run")
                                      (.get self.m/popen "stderr" STDOUT)
                                      (cond self.m/stdout-stderr (.get self.m/popen "stderr" STDOUT)
-                                           self.m/ignore-stderr (.get self.m/popen "stderr" DEVNULL)
+                                           (or (= self.m/capture "stdout") self.m/ignore-stderr) (.get self.m/popen "stderr" DEVNULL)
                                            True (.get self.m/popen "stderr" PIPE))))
 
             bufsize (.get self.m/popen "bufsize" (when self.m/dazzling 1 -1))
-            universal-newlines (.get self.m/popen "universal-newlines" self.m/dazzling)
+            universal-newlines (.get self.m/popen "universal-newlines" (.get self.m/popen "universal_newlines" self.m/dazzling))
 
-            universal-text (if (= bufsize 1) True universal-newlines)
+            universal-text (.get self.m/popen "universal-text" (.get self.m/popen "universal_text" (if (= bufsize 1) True universal-newlines)))
             shell (.get self.m/popen "shell" self.m/intact-command)
             command (.m/command self)
 
             env (or (dict self.m/new-exports) (.copy environ))
+
+            close-fds (.get self.m/popen "close-fds" (.get self.m/popen "close_fds" (in "posix" sys.builtin-module-names)))
 
             executable (.get self.m/popen "executable" None)
             kwargs { "bufsize" bufsize
@@ -1241,10 +1248,7 @@
 (defn __getattr__ [self subcommand]
     (if (.cls/is-attr self.__class__ subcommand)
         (raise (AttributeError f"Sorry! `{(unmangle subcommand)}' doesn't exist as an attribute!"))
-        (do (defn inner [
-                    #* args
-                    [before-func #()]
-                    #** kwargs ]
+        (do (defn inner [ #* args [before-func #()] #** kwargs ]
                   (cond (or (.cls/get-attr self.__class__ kwargs "m/context" False)
                              (.cls/get-attr self.__class__ kwargs "m/c" False))
                          (return (.deepcopy- self #* args :subcommand- subcommand #** kwargs))
