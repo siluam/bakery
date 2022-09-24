@@ -13,7 +13,7 @@ install_requires = \
 setup_kwargs = {
     'name': 'bakery',
     'version': '2.0.0.0',
-    'description': 'An "sh" alternative',
+    'description': 'An "sh" alternative!',
     'long_description': None,
     'author': 'sylvorg',
     'author_email': 'jeet.ray@syvl.org',

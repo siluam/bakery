@@ -18,6 +18,7 @@
             inherit pname;
             src = ./.;
             propagatedBuildInputs = [ oreo py ];
+            pytestFlagsArray = [ "--randomly-seed=1795500577" ];
             postPatch = ''
                 substituteInPlace pyproject.toml --replace "oreo = { git = \"https://github.com/${owner}/oreo.git\", branch = \"main\" }" ""
                 substituteInPlace setup.py --replace "'oreo @ git+https://github.com/${owner}/oreo.git@main'" "" || :
