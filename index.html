@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-09-04 Mon 14:08 -->
+<!-- 2023-09-04 Mon 14:54 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>&lrm;</title>
@@ -31,30 +31,30 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org2354759">Welcome to the <code>bakery</code>! May I wrap your program?</a>
+<li><a href="#orga3f6855">Welcome to the <code>bakery</code>! May I wrap your program?</a>
 <ul>
-<li><a href="#orgd4c0763">Program options can be directly set without baking them in first (heresy, I know!)</a></li>
-<li><a href="#org9e43c2e">The general command string will end up like this</a></li>
-<li><a href="#orga29e373">While I'm not sure how different the following behavious is, you can iterate over the <code>bakery</code> object itself to get its output</a></li>
-<li><a href="#org0bbb793">You can use specific shells to run commands as well</a></li>
-<li><a href="#orge029894">Want to get the command you're about to run?</a></li>
-<li><a href="#org40bd4d2">Want to <i>see</i> the command you're about to run?</a></li>
-<li><a href="#org79a87e8">Want some more details?</a></li>
-<li><a href="#org5974a9a">Here's how to use <code>sudo</code></a></li>
-<li><a href="#orga05d582">If you want visible prompts, set <code>:m/capture</code> to <code>run</code>, or <code>:m/run</code> to <code>True</code></a></li>
+<li><a href="#orgf7ce8a7">Program options can be directly set without baking them in first (heresy, I know!)</a></li>
+<li><a href="#org1b64847">The general command string will end up like this</a></li>
+<li><a href="#orgb390db0">While I'm not sure how different the following behavious is, you can iterate over the <code>bakery</code> object itself to get its output</a></li>
+<li><a href="#orgb6f2796">You can use specific shells to run commands as well</a></li>
+<li><a href="#orge6a4138">Want to get the command you're about to run?</a></li>
+<li><a href="#org66a6070">Want to <i>see</i> the command you're about to run?</a></li>
+<li><a href="#org99f7996">Want some more details?</a></li>
+<li><a href="#orgae2432e">Here's how to use <code>sudo</code></a></li>
+<li><a href="#org7d255c6">If you want visible prompts, set <code>:m/capture</code> to <code>run</code>, or <code>:m/run</code> to <code>True</code></a></li>
 <li><a href="#6e879d2f-2dd0-447d-8cd0-5e4b680868d7">Freeze <code>bakery</code> objects, allowing other <code>bakery</code> objects to act on them</a></li>
-<li><a href="#org68b6f19">Piping and Redirection is implemented through the use of frozen <code>bakery</code> objects and strings&#x2026;</a></li>
-<li><a href="#org166a3c8">Use a <code>bakery</code> object with a context manager</a></li>
-<li><a href="#org9bf163e">Ignore Stderr</a></li>
-<li><a href="#org8c1d837">Pipe Stderr to Stdout</a></li>
+<li><a href="#orgda0bf41">Piping and Redirection is implemented through the use of frozen <code>bakery</code> objects and strings&#x2026;</a></li>
+<li><a href="#orgfb2f481">Use a <code>bakery</code> object with a context manager</a></li>
+<li><a href="#orgb4dc2e9">Ignore Stderr</a></li>
+<li><a href="#orgd7a1d3e">Pipe Stderr to Stdout</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org2354759" class="outline-2">
-<h2 id="org2354759">Welcome to the <code>bakery</code>! May I wrap your program?</h2>
-<div class="outline-text-2" id="text-org2354759">
+<div id="outline-container-orga3f6855" class="outline-2">
+<h2 id="orga3f6855">Welcome to the <code>bakery</code>! May I wrap your program?</h2>
+<div class="outline-text-2" id="text-orga3f6855">
 <p>
 <code>bakery</code> is a <a href="https://docs.hylang.org/en/alpha/">hylang</a> module heavily inspired by <a href="https://amoffat.github.io/sh/">sh</a>,
 written by <a href="https://github.com/amoffat">Andrew Moffat / amoffat</a>;
@@ -67,9 +67,9 @@ Here are a few more differences (note that in python, <code>m/option</code> beco
 </p>
 </div>
 
-<div id="outline-container-orgd4c0763" class="outline-3">
-<h3 id="orgd4c0763">Program options can be directly set without baking them in first (heresy, I know!)</h3>
-<div class="outline-text-3" id="text-orgd4c0763">
+<div id="outline-container-orgf7ce8a7" class="outline-3">
+<h3 id="orgf7ce8a7">Program options can be directly set without baking them in first (heresy, I know!)</h3>
+<div class="outline-text-3" id="text-orgf7ce8a7">
 <p>
 <code>Python:</code>
 </p>
@@ -103,9 +103,9 @@ while setting <code>program.m/gitea.off</code> to <code>False</code> will overri
 </div>
 </div>
 
-<div id="outline-container-org9e43c2e" class="outline-3">
-<h3 id="org9e43c2e">The general command string will end up like this</h3>
-<div class="outline-text-3" id="text-org9e43c2e">
+<div id="outline-container-org1b64847" class="outline-3">
+<h3 id="org1b64847">The general command string will end up like this</h3>
+<div class="outline-text-3" id="text-org1b64847">
 <div class="org-src-container">
 <pre><code class="language-hy match-braces rainbow-braces">f"{m/shell} -c {m/program}
                {m/starter-kwargs}
@@ -159,9 +159,9 @@ find(
 </div>
 </div>
 
-<div id="outline-container-orga29e373" class="outline-3">
-<h3 id="orga29e373">While I'm not sure how different the following behavious is, you can iterate over the <code>bakery</code> object itself to get its output</h3>
-<div class="outline-text-3" id="text-orga29e373">
+<div id="outline-container-orgb390db0" class="outline-3">
+<h3 id="orgb390db0">While I'm not sure how different the following behavious is, you can iterate over the <code>bakery</code> object itself to get its output</h3>
+<div class="outline-text-3" id="text-orgb390db0">
 <p>
 <code>Python:</code>
 </p>
@@ -194,9 +194,9 @@ find(
 </div>
 </div>
 
-<div id="outline-container-org0bbb793" class="outline-3">
-<h3 id="org0bbb793">You can use specific shells to run commands as well</h3>
-<div class="outline-text-3" id="text-org0bbb793">
+<div id="outline-container-orgb6f2796" class="outline-3">
+<h3 id="orgb6f2796">You can use specific shells to run commands as well</h3>
+<div class="outline-text-3" id="text-orgb6f2796">
 <p>
 <code>Python:</code>
 </p>
@@ -224,9 +224,9 @@ ls(:m/shell "bash")
 </div>
 </div>
 
-<div id="outline-container-orge029894" class="outline-3">
-<h3 id="orge029894">Want to get the command you're about to run?</h3>
-<div class="outline-text-3" id="text-orge029894">
+<div id="outline-container-orge6a4138" class="outline-3">
+<h3 id="orge6a4138">Want to get the command you're about to run?</h3>
+<div class="outline-text-3" id="text-orge6a4138">
 <p>
 <code>Python:</code>
 </p>
@@ -254,9 +254,9 @@ ls(:m/shell "bash" :m/return-command True)
 </div>
 </div>
 
-<div id="outline-container-org40bd4d2" class="outline-3">
-<h3 id="org40bd4d2">Want to <i>see</i> the command you're about to run?</h3>
-<div class="outline-text-3" id="text-org40bd4d2">
+<div id="outline-container-org66a6070" class="outline-3">
+<h3 id="org66a6070">Want to <i>see</i> the command you're about to run?</h3>
+<div class="outline-text-3" id="text-org66a6070">
 <p>
 <code>Python:</code>
 </p>
@@ -284,9 +284,9 @@ ls(:m/shell "bash" :m/print-command True)
 </div>
 </div>
 
-<div id="outline-container-org79a87e8" class="outline-3">
-<h3 id="org79a87e8">Want some more details?</h3>
-<div class="outline-text-3" id="text-org79a87e8">
+<div id="outline-container-org99f7996" class="outline-3">
+<h3 id="org99f7996">Want some more details?</h3>
+<div class="outline-text-3" id="text-org99f7996">
 <p>
 <code>Python:</code>
 </p>
@@ -318,9 +318,9 @@ ls.inspect_()
 </div>
 </div>
 
-<div id="outline-container-org5974a9a" class="outline-3">
-<h3 id="org5974a9a">Here's how to use <code>sudo</code></h3>
-<div class="outline-text-3" id="text-org5974a9a">
+<div id="outline-container-orgae2432e" class="outline-3">
+<h3 id="orgae2432e">Here's how to use <code>sudo</code></h3>
+<div class="outline-text-3" id="text-orgae2432e">
 <p>
 <code>Python:</code>
 </p>
@@ -363,9 +363,9 @@ ls(<span style="font-style: italic;">"/"</span>, _sudo = <span style="font-weigh
 </div>
 </div>
 
-<div id="outline-container-orga05d582" class="outline-3">
-<h3 id="orga05d582">If you want visible prompts, set <code>:m/capture</code> to <code>run</code>, or <code>:m/run</code> to <code>True</code></h3>
-<div class="outline-text-3" id="text-orga05d582">
+<div id="outline-container-org7d255c6" class="outline-3">
+<h3 id="org7d255c6">If you want visible prompts, set <code>:m/capture</code> to <code>run</code>, or <code>:m/run</code> to <code>True</code></h3>
+<div class="outline-text-3" id="text-org7d255c6">
 <p>
 Otherwise, prompts will be captured in the output, while the process still halts for input.
 </p>
@@ -483,9 +483,9 @@ ls
 </div>
 </div>
 
-<div id="outline-container-org68b6f19" class="outline-3">
-<h3 id="org68b6f19">Piping and Redirection is implemented through the use of frozen <code>bakery</code> objects and strings&#x2026;</h3>
-<div class="outline-text-3" id="text-org68b6f19">
+<div id="outline-container-orgda0bf41" class="outline-3">
+<h3 id="orgda0bf41">Piping and Redirection is implemented through the use of frozen <code>bakery</code> objects and strings&#x2026;</h3>
+<div class="outline-text-3" id="text-orgda0bf41">
 <p>
 &#x2026; or <a href="https://gitlab.com/picotech/nanotech/gensing">tea or frosting objects</a>.
 </p>
@@ -624,9 +624,9 @@ nulls()
 </div>
 </div>
 
-<div id="outline-container-org166a3c8" class="outline-3">
-<h3 id="org166a3c8">Use a <code>bakery</code> object with a context manager</h3>
-<div class="outline-text-3" id="text-org166a3c8">
+<div id="outline-container-orgfb2f481" class="outline-3">
+<h3 id="orgfb2f481">Use a <code>bakery</code> object with a context manager</h3>
+<div class="outline-text-3" id="text-orgfb2f481">
 <p>
 <code>Python:</code>
 </p>
@@ -664,9 +664,9 @@ nulls()
 </div>
 </div>
 
-<div id="outline-container-org9bf163e" class="outline-3">
-<h3 id="org9bf163e">Ignore Stderr</h3>
-<div class="outline-text-3" id="text-org9bf163e">
+<div id="outline-container-orgb4dc2e9" class="outline-3">
+<h3 id="orgb4dc2e9">Ignore Stderr</h3>
+<div class="outline-text-3" id="text-orgb4dc2e9">
 <p>
 <code>Python:</code>
 </p>
@@ -713,9 +713,9 @@ ls(j = <span style="font-weight: bold; text-decoration: underline;">True</span>,
 </div>
 </div>
 
-<div id="outline-container-org8c1d837" class="outline-3">
-<h3 id="org8c1d837">Pipe Stderr to Stdout</h3>
-<div class="outline-text-3" id="text-org8c1d837">
+<div id="outline-container-orgd7a1d3e" class="outline-3">
+<h3 id="orgd7a1d3e">Pipe Stderr to Stdout</h3>
+<div class="outline-text-3" id="text-orgd7a1d3e">
 <p>
 <code>Python:</code>
 </p>
@@ -767,7 +767,7 @@ ls(j = <span style="font-weight: bold; text-decoration: underline;">True</span>,
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Jeet Ray</p>
-<p class="date">Created: 2023-09-04 Mon 14:08</p>
+<p class="date">Created: 2023-09-04 Mon 14:54</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
