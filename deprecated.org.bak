@@ -1,5 +1,3 @@
-#+setupfile: ../settings/README.org
-#+include: ../settings/README.org
 #+property: header-args:hy :tangle yes :comments both
 
 Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffat][Andrew Moffat]].
@@ -688,7 +686,7 @@ To reset the command function, use the "splat_" function as necessary.
 ** Return Output
 
 #+begin_src hy
-(defn _return_output [self [_cls None] [_subcommand "<<20220111111603650875845>>"]]
+(defn return_output [self [_cls None] [_subcommand "<<20220111111603650875845>>"]]
     (setv self._cls _cls
           self.__subcommand _subcommand
           self.__command (._create_command self :_cls self._cls :_subcommand self.__subcommand))
@@ -713,7 +711,7 @@ To reset the command function, use the "splat_" function as necessary.
 
 #+begin_src hy
 (defn __return [self]
-    (setv process (.__set_popen_partial self))
+    (setv process (.__setpopen_partial self))
     (cond [(is self._cls._wait None) (with [p (process :stdout DEVNULL :stderr DEVNULL)]
                                            (return (if (in self._cls._type.__name__ (, "str" "repr")) "None" None)))]
           [self._cls._wait (with [p (process)]
@@ -754,7 +752,7 @@ To reset the command function, use the "splat_" function as necessary.
 *** Set Popen Partial
 
 #+begin_src hy
-(defn __set_popen_partial [self]
+(defn __setpopen_partial [self]
     (setv stdin (if (is self._cls._input None) (.get self._cls._popen "stdin" None) self._cls._input)
           stdout (cond [(= self._cls._capture "stderr") (.get self._cls._popen "stdout" DEVNULL)]
                        [(= self._cls._capture "run") (.get self._cls._popen "stdout" None)]
@@ -792,7 +790,7 @@ To reset the command function, use the "splat_" function as necessary.
 #+begin_src hy
 (defn _run_frosting [self [_cls None] [_subcommand "<<20220111111603650875845>>"]]
     (setv _cls (._cls_check self _cls)
-          output (._return_output _cls :_cls _cls :_subcommand _subcommand))
+          output (.return_output _cls :_cls _cls :_subcommand _subcommand))
     (cond [self._cls._frozen (return output)]
           [_cls._print (print output)]
           [_cls._frosting (for [cat output] (setv outcat (get output cat))

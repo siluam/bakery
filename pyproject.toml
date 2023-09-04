@@ -10,15 +10,14 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.11"
+python = "^3.10"
 oreo = { git = "https://github.com/syvlorg/oreo.git", branch = "main" }
-py = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
 poetry = "*"
 poetry2setup = "*"
-pytest-hy = "*"
+pytest-hy = { git = "https://github.com/syvlorg/pytest-hy.git", branch = "master" }
 pytest-randomly = "*"
 pytest-parametrized = "*"
 pytest-sugar = "*"
@@ -34,6 +33,7 @@ addopts = [
 markers = [
 	"bakery",
 	"baking",
+	"capture",
 	"context_manager",
 	"error",
 	"exports",

@@ -14,7 +14,6 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 #+begin_src hy
 (import builtins)
 (import hy)
-(import py)
 (import sys)
 (import weakref)
 #+end_src
@@ -36,7 +35,7 @@ Inspired by [[https://amoffat.github.io/sh/][sh]] by [[https://github.com/amoffa
 (import oreo [coll? eclair either? flatten get-un-mangled int? recursive-unmangle tea first-last-n])
 (import os [environ path :as osPath getcwd])
 (import pathlib [Path])
-(import queue [Queue])
+(import queue [Queue Empty])
 (import rich [print inspect])
 (import rich.pretty [pretty-repr pprint])
 (import rich.progress [Progress])
@@ -160,16 +159,16 @@ while the latter uses ~__getattr__~.
 
 Adapted from [[https://stackoverflow.com/users/36433/a-coady][A. Coady's]] answer [[https://stackoverflow.com/a/1800999/10827766][here]], as well as [[https://stackoverflow.com/users/302343/timur][Timur's]] answer [[https://stackoverflow.com/a/31537249/10827766][here]].
 
-Remember that ~metaclasses~ use ~cls~ instead of ~self~!
-
 #+begin_src hy
 (defclass melcery [SlotsMeta]
 #+end_src
 
-** __init__
+** __new__
 
 #+begin_src hy
-(defn __init__ [cls #* args #** kwargs] (setv cls.m/stores [])))
+(defn __new__ [cls #* args #** kwargs]
+      (setv cls.m/stores [])
+      (.__new__ (super) cls #* args #** kwargs)))
 #+end_src
 
 * The Milcery Class
@@ -228,6 +227,13 @@ as well as from the [[https://github.com/cjrh/autoslot][autoslot]] documentation
             True (return False)))
 #+end_src
 
+*** Convert To Attribute
+
+#+begin_src hy
+(defn [classmethod] cls/convert-to-attr [cls attr]
+      (mangle (.cls/process-attr cls attr (.cls/is-attr cls attr))))
+#+end_src
+
 *** Process If Attribute
 
 #+begin_src hy
@@ -241,7 +247,7 @@ as well as from the [[https://github.com/cjrh/autoslot][autoslot]] documentation
 *** Remove If Not Attribute
 
 #+begin_src hy
-(defn [classmethod] cls/remove-if-not-attr [cls dct] (return (dfor [key value] (.items dct) :if (.cls/is-attr cls key) [ key value ])))
+(defn [classmethod] cls/remove-if-not-attr [cls dct] (return (dfor [key value] (.items dct) :if (.cls/is-attr cls key) key value)))
 #+end_src
 
 *** Trim Attribute Prefix
@@ -525,7 +531,7 @@ Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn P
 **** Acceptable Arguments
 
 #+begin_src hy
-(setv self.m/type-groups.acceptable-args [str int Path py._path.local.LocalPath])
+(setv self.m/type-groups.acceptable-args [str int Path])
 #+end_src
 
 **** Reprs
@@ -612,8 +618,8 @@ Note that only via ~baking~ can subcommand-specific arguments and keyword argume
       self.m/args.current.unprocessed.starter []
       self.m/args.current.unprocessed.regular []
       self.m/args.current.processed (D)
-      self.m/args.current.unprocessed.starter []
-      self.m/args.current.unprocessed.regular [])
+      self.m/args.current.processed.starter []
+      self.m/args.current.processed.regular [])
 (when self.m/program (assoc self.m/args.program self.m/program (if self.m/flagship [] (deepcopy (get self.m/origin.m/args.program self.m/program)))))
 #+end_src
 
@@ -692,7 +698,7 @@ Named after [[https://gitea.io/en-us/][gitea]] and my own [[https://gitlab.com/p
 #+begin_src hy
 (setv self.m/gitea (D)
       self.m/gitea.list [ "git" "yadm" "tailapi" ]
-      self.m/gitea.bool (or (in self.m/base-program self.m/gitea.list) False)
+      self.m/gitea.bool (in self.m/base-program self.m/gitea.list)
       self.m/gitea.off False)
 #+end_src
 
@@ -882,7 +888,7 @@ Ignore standard error:
 <<m/(setting="stdout-stderr", value="False")>>
 #+end_src
 
-**** Return `False' iInstead of Raising `SystemError'
+**** Return `False' Instead of Raising `SystemError'
 
 Instead of raising a ~SystemError~, return ~False~:
 
@@ -1338,8 +1344,8 @@ CAREFUL! These variables need to be before the variables in the block below, and
                       (assoc (get store.m/kwargs name) value (D)))))
       (for [m #("settings" "subcommand" "args" "kwargs")]
            (assoc (getattr self (mangle (+ "m/" m))) "current" (D)))
-      (setv self.m/args.called [])
-            self.m/kwargs.called (D)
+      (setv self.m/args.called []
+            self.m/kwargs.called (D))
       (when (or world- all-classes-)
             (for [store (.chain- self)]
                  (when (or args- args-kwargs) (setv store.m/args.world []))
@@ -1355,7 +1361,7 @@ CAREFUL! These variables need to be before the variables in the block below, and
                  (when (or kwargs- args-kwargs)
                        (if (or all-kwargs- all-args-kwargs)
                            (setv store.m/kwargs.freezer (D))
-                           (assoc store.m/kwargs.freezer freezer-hash (D))))))
+                           (assoc store.m/kwargs.freezer freezer-hash- (D))))))
       (when instantiated-
             (when (or args- args-kwargs) (setv self.m/args.instantiated []))
             (when (or kwargs- args-kwargs) (setv self.m/args.instantiated (D))))
@@ -1740,7 +1746,8 @@ Adapted from [[https://stackoverflow.com/users/4279/jfs][jfs's]] answer [[https:
 #+begin_src hy
                 self.m/wait (with [p (process)]
                                   (let [ return/process/return (D)
-                                         q (Queue) ]
+                                         q (Queue)
+                                         threads [] ]
                                        (defn inner [output stdstd]
                                              (when output
                                                    (let [ chained [] ]
@@ -1755,13 +1762,15 @@ Adapted from [[https://stackoverflow.com/users/4279/jfs][jfs's]] answer [[https:
                                             (let [ stdstd (+ "std" std)
                                                    t (Thread :target inner :args #((getattr p stdstd) stdstd)) ]
                                                  (setv t.daemon True)
-                                                 (.start t)))
+                                                 (.start t)
+                                                 (.append threads t)))
                                        (if self.m/dazzling
                                            (while (is (.poll p) None)
-                                                  (try (.get-nowait q)
+                                                  (try (setv line (.get-nowait q))
                                                        (except [Empty] None)
                                                        (else (print line))))
                                            (.wait p))
+                                       (for [thread threads] (.join thread))
                                        (setv return/process/return.returncode p.returncode)
                                        (when (> self.m/verbosity 0)
                                              (setv return/process/return.command.bakery (.m/command self)
@@ -1787,51 +1796,50 @@ Adapted from [[https://stackoverflow.com/users/4279/jfs][jfs's]] answer [[https:
 
 #+begin_src hy
 (defn return/frosting [self]
-      (if (setx output (.return/output self))
-          (do (when self.m/return-output (return output))
-              (when (or self.m/replace-stderr self.m/false-stderr) (return output.stdout))
-              (setv frosted-output (if (and (isinstance output dict)
-                                            (= (len output) 1))
-                                       (-> output .values iter next)
-                                       output)
-                    dict-like-frosted-output (isinstance frosted-output dict)
-                    frosted-output (if self.m/dazzle
-                                       (cond dict-like-frosted-output frosted-output
-                                             (coll? frosted-output) (tuple frosted-output)
-                                             True #(frosted-output))
-                                       frosted-output))
-              (when self.m/print-command-and-run (print (.m/command self)))
-              (cond self.m/print-command (print frosted-output)
-                    self.m/dazzle (if dict-like-frosted-output
-                                      (for [cat frosted-output]
-                                           (setv outcat (get output cat))
-                                           (if (or (isinstance outcat int)
-                                                   (isinstance outcat str))
-                                               (print f"{cat}: {outcat}")
-                                               (do (unless (in cat self.m/captures)
-                                                           (print (+ cat ": ")))
-                                                   (if (= cat "return-codes")
-                                                       (print outcat)
-                                                       (for [line outcat]
-                                                            (print line))))))
-                                      (for [line frosted-output]
-                                           (print line))))
-              (cond dict-like-frosted-output
-                    (for [std #("out" "err")]
-                         (setv stdstd (+ "std" std))
-                         (when (hasattr frosted-output stdstd)
-                               (setv processed-output (get frosted-output stdstd))
-                               (when self.m/split (setv processed-output (split-and-flatten processed-output self.m/split)))
-                               (setv processed-output (.ct/convert self processed-output))
-                               (when self.m/split-after (setv processed-output (split-and-flatten processed-output self.m/split-after)))
-                               (setv (get frosted-output stdstd) processed-output
-                                     new-frosted-output frosted-output)))
-                    True (do (setv new-frosted-output (frosting frosted-output self.m/capture))
-                             (when self.m/split (setv new-frosted-output (split-and-flatten new-frosted-output self.m/split)))
-                             (setv new-frosted-output (.ct/convert self new-frosted-output))
-                             (when self.m/split-after (setv new-frosted-output (split-and-flatten new-frosted-output self.m/split-after)))))
-              (return new-frosted-output))
-          (return None)))
+      (when (setx output (.return/output self))
+            (when self.m/return-output (return output))
+            (when (or self.m/replace-stderr self.m/false-stderr) (return output.stdout))
+            (setv frosted-output (if (and (isinstance output dict)
+                                          (= (len output) 1))
+                                     (-> output (.values) iter next)
+                                     output)
+                  dict-like-frosted-output (isinstance frosted-output dict)
+                  frosted-output (if self.m/dazzle
+                                     (cond dict-like-frosted-output frosted-output
+                                           (coll? frosted-output) (tuple frosted-output)
+                                           True #(frosted-output))
+                                     frosted-output))
+            (when self.m/print-command-and-run (print (.m/command self)))
+            (cond self.m/print-command (print frosted-output)
+                  self.m/dazzle (if dict-like-frosted-output
+                                    (for [cat frosted-output]
+                                         (setv outcat (get output cat))
+                                         (if (or (isinstance outcat int)
+                                                 (isinstance outcat str))
+                                             (print f"{cat}: {outcat}")
+                                             (do (unless (in cat self.m/captures)
+                                                         (print (+ cat ": ")))
+                                                 (if (= cat "return-codes")
+                                                     (print outcat)
+                                                     (for [line outcat]
+                                                          (print line))))))
+                                    (for [line frosted-output]
+                                         (print line))))
+            (cond dict-like-frosted-output
+                  (for [std #("out" "err")]
+                       (setv stdstd (+ "std" std))
+                       (when (hasattr frosted-output stdstd)
+                             (setv processed-output (get frosted-output stdstd))
+                             (when self.m/split (setv processed-output (split-and-flatten processed-output self.m/split)))
+                             (setv processed-output (.ct/convert self processed-output))
+                             (when self.m/split-after (setv processed-output (split-and-flatten processed-output self.m/split-after)))
+                             (setv (get frosted-output stdstd) processed-output
+                                   new-frosted-output frosted-output)))
+                  True (do (setv new-frosted-output (frosting frosted-output self.m/capture))
+                           (when self.m/split (setv new-frosted-output (split-and-flatten new-frosted-output self.m/split)))
+                           (setv new-frosted-output (.ct/convert self new-frosted-output))
+                           (when self.m/split-after (setv new-frosted-output (split-and-flatten new-frosted-output self.m/split-after)))))
+            (return new-frosted-output)))
 #+end_src
 
 *** Popen Partial
@@ -1854,7 +1862,7 @@ Adapted from [[https://stackoverflow.com/users/4279/jfs][jfs's]] answer [[https:
 Adapted from [[https://stackoverflow.com/users/4279/jfs][jfs's]] answer [[https://stackoverflow.com/a/28319191/10827766][here]]:
 
 #+begin_src hy
-            bufsize (.get self.m/popen "bufsize" (when self.m/dazzling 1 -1))
+            bufsize (.get self.m/popen "bufsize" (if self.m/dazzling 1 -1))
             universal-newlines (.get self.m/popen "universal-newlines" (.get self.m/popen "universal_newlines" self.m/dazzling))
 #+end_src
 
@@ -1867,7 +1875,7 @@ Adapted from [[https://stackoverflow.com/users/4279/jfs][jfs's]] answer [[https:
 For some reason, ~Popen's env~ keyword doesn't like [[https://github.com/mewwts/addict][addicts]]:
 
 #+begin_src hy
-            env (or (dict self.m/new-exports) (.copy environ))
+            env (or (.to_dict self.m/new-exports) (.copy environ))
 #+end_src
 
 Adapted from [[https://stackoverflow.com/users/4279/jfs][jfs's]] answer [[https://stackoverflow.com/a/4896288/10827766][here]]:
@@ -1999,8 +2007,7 @@ Note that ~freezer-~ will always use the ~m/freezer~ value from the bakery on th
 (defn deepcopy- [self #* args [subcommand- None] #** kwargs]
       (setv subcommand- (or subcommand- self.m/subcommand.default)
             cls (deepcopy self))
-      (.bake- cls #* args :instantiated- True :m/subcommand subcommand- #** kwargs)
-      (return cls))
+      (return (.bake- cls #* args :instantiated- True :m/subcommand subcommand- #** kwargs)))
 #+end_src
 
 **** Check Program
@@ -2082,7 +2089,11 @@ CAREFUL! The order is important here; it is meant to conflict with similar block
             instantiated- (do (.extend self.m/args.instantiated args)
                               (.update self.m/kwargs.instantiated kwargs))
             True (do (.extend (get self.m/args.baked subcommand-) args)
-                     (.update (get self.m/kwargs.baked subcommand-) kwargs))))
+                     (.update (get self.m/kwargs.baked subcommand-) kwargs)))
+#+end_src
+
+#+begin_src hy
+      (return self))
 #+end_src
 
 **** Unbake
@@ -2117,7 +2128,7 @@ can be used for debugging purposes or otherwise.
       (setv sd (D { "__slots__" (recursive-unmangle (dfor var
                                                          self.__slots__
                                                          :if (!= var "__dict__")
-                                                         [var (getattr self var)])) }))
+                                                         var (getattr self var))) }))
       (when (hasattr self "__dict__") (setv sd.__dict__ (recursive-unmangle self.__dict__)))
       (return sd))
 #+end_src
@@ -2180,8 +2191,8 @@ Adapted from [[https://realpython.com/primer-on-python-decorators/][Primer on Py
 
 #+begin_src hy
 (defn __getattr__ [self subcommand]
-    (if (.cls/is-attr self.__class__ subcommand)
-        (raise (AttributeError f"Sorry! `{(unmangle subcommand)}' doesn't exist as an attribute!"))
+    (if (setx prefix (.cls/is-attr self.__class__ subcommand))
+        (return (.__getattribute__ object self (.cls/process-attr self.__class__ subcommand prefix)))
         (do (defn inner [ #* args [before-func #()] #** kwargs ]
                   <<2a073ac1-8eb4-442c-942e-8107507b9703(subcommand='t)>>)
             (return inner))))

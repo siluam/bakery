@@ -1,4 +1,0 @@
-{
-    "python.pythonPath": "/home/shadowrylander/.conda/envs/python3.8/bin/python",
-    "python.formatting.provider": "black"
-}

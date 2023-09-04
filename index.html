@@ -3,18 +3,18 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-09-24 Sat 17:52 -->
+<!-- 2023-09-04 Mon 14:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>&lrm;</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="Jeet Ray" />
-<link rel="stylesheet" type="text/css" href="https://combinatronics.com/sylvorg/settings/main/src/styles/primary/syvl.css" />
-<link rel="icon" href="https://combinatronics.com/sylvorg/settings/main/src/icons/favicons/shiny-sandshrew-alola.ico" sizes="any" />
-<link rel="icon" href="https://combinatronics.com/sylvorg/settings/main/src/icons/favicons/shiny-sandshrew-alola.svg" />
-<link rel="manifest" href="https://combinatronics.com/sylvorg/settings/main/manifest.json" />
-<link rel="stylesheet" type="text/css" href="https://combinatronics.com/sylvorg/settings/main/src/styles/highlight/paraiso-dark.min.css" />
-<script src="https://combinatronics.com/sylvorg/settings/main/src/scripts/highlight/highlight.min.js"></script>
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="https://combinatronics.io/sylvorg/bundle/main/src/styles/primary/syvl.css" />
+<link rel="icon" href="https://combinatronics.io/sylvorg/bundle/main/src/icons/favicons/shiny-zigzagoon-galar.ico" sizes="any" />
+<link rel="icon" href="https://combinatronics.io/sylvorg/bundle/main/src/icons/favicons/shiny-zigzagoon-galar.svg" />
+<link rel="manifest" href="https://combinatronics.io/sylvorg/bundle/main/manifest.json" />
+<link rel="stylesheet" type="text/css" href="https://combinatronics.io/sylvorg/bundle/main/src/styles/highlight/paraiso-dark.min.css" />
+<script src="https://combinatronics.io/sylvorg/bundle/main/src/scripts/highlight/highlight.min.js"></script>
 <script>hljs.highlightAll();</script>
 <div class="header">
 <h1>We Are Syvlorg.</h1>
@@ -24,60 +24,37 @@
 <a href="https://resume.syvl.org">Résumé</a>
 <a href="https://index.syvl.org">Index</a>
 </div>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
-<div id="content">
-<div id="table-of-contents">
+<div id="content" class="content">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org7f318a2">Welcome to the <code>bakery</code>! May I wrap your program?</a>
+<li><a href="#org2354759">Welcome to the <code>bakery</code>! May I wrap your program?</a>
 <ul>
-<li><a href="#org3f40fcf">Program options can be directly set without baking them in first (heresy, I know!)</a></li>
-<li><a href="#orgb31b470">The general command string will end up like this</a></li>
-<li><a href="#org8c6a5e2">While I'm not sure how different the following behavious is, you can iterate over the <code>bakery</code> object itself to get its output</a></li>
-<li><a href="#org57b9f9d">You can use specific shells to run commands as well</a></li>
-<li><a href="#orgba566e1">Want to get the command you're about to run?</a></li>
-<li><a href="#orgd6562bd">Want to <i>see</i> the command you're about to run?</a></li>
-<li><a href="#orgdd92119">Want some more details?</a></li>
-<li><a href="#orgfc0f1db">Here's how to use <code>sudo</code></a></li>
-<li><a href="#org7f7f9b7">If you want visible prompts, set <code>:m/capture</code> to <code>run</code>, or <code>:m/run</code> to <code>True</code></a></li>
+<li><a href="#orgd4c0763">Program options can be directly set without baking them in first (heresy, I know!)</a></li>
+<li><a href="#org9e43c2e">The general command string will end up like this</a></li>
+<li><a href="#orga29e373">While I'm not sure how different the following behavious is, you can iterate over the <code>bakery</code> object itself to get its output</a></li>
+<li><a href="#org0bbb793">You can use specific shells to run commands as well</a></li>
+<li><a href="#orge029894">Want to get the command you're about to run?</a></li>
+<li><a href="#org40bd4d2">Want to <i>see</i> the command you're about to run?</a></li>
+<li><a href="#org79a87e8">Want some more details?</a></li>
+<li><a href="#org5974a9a">Here's how to use <code>sudo</code></a></li>
+<li><a href="#orga05d582">If you want visible prompts, set <code>:m/capture</code> to <code>run</code>, or <code>:m/run</code> to <code>True</code></a></li>
 <li><a href="#6e879d2f-2dd0-447d-8cd0-5e4b680868d7">Freeze <code>bakery</code> objects, allowing other <code>bakery</code> objects to act on them</a></li>
-<li><a href="#orge159cee">Piping and Redirection is implemented through the use of frozen <code>bakery</code> objects and strings&#x2026;</a></li>
-<li><a href="#orgafbc153">Use a <code>bakery</code> object with a context manager</a></li>
-<li><a href="#orge403191">Ignore Stderr</a></li>
-<li><a href="#orgc100459">Pipe Stderr to Stdout</a></li>
+<li><a href="#org68b6f19">Piping and Redirection is implemented through the use of frozen <code>bakery</code> objects and strings&#x2026;</a></li>
+<li><a href="#org166a3c8">Use a <code>bakery</code> object with a context manager</a></li>
+<li><a href="#org9bf163e">Ignore Stderr</a></li>
+<li><a href="#org8c1d837">Pipe Stderr to Stdout</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-
-<div id="outline-container-org7f318a2" class="outline-2">
-<h2 id="org7f318a2">Welcome to the <code>bakery</code>! May I wrap your program?</h2>
-<div class="outline-text-2" id="text-org7f318a2">
+<div id="outline-container-org2354759" class="outline-2">
+<h2 id="org2354759">Welcome to the <code>bakery</code>! May I wrap your program?</h2>
+<div class="outline-text-2" id="text-org2354759">
 <p>
 <code>bakery</code> is a <a href="https://docs.hylang.org/en/alpha/">hylang</a> module heavily inspired by <a href="https://amoffat.github.io/sh/">sh</a>,
 written by <a href="https://github.com/amoffat">Andrew Moffat / amoffat</a>;
@@ -90,19 +67,19 @@ Here are a few more differences (note that in python, <code>m/option</code> beco
 </p>
 </div>
 
-<div id="outline-container-org3f40fcf" class="outline-3">
-<h3 id="org3f40fcf">Program options can be directly set without baking them in first (heresy, I know!)</h3>
-<div class="outline-text-3" id="text-org3f40fcf">
+<div id="outline-container-orgd4c0763" class="outline-3">
+<h3 id="orgd4c0763">Program options can be directly set without baking them in first (heresy, I know!)</h3>
+<div class="outline-text-3" id="text-orgd4c0763">
 <p>
 <code>Python:</code>
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">import hy
-from bakery import git
+<pre><code class="language-python match-braces rainbow-braces"><span style="font-weight: bold;">import</span> hy
+<span style="font-weight: bold;">from</span> bakery <span style="font-weight: bold;">import</span> git
 
-# git -C "..." status
-git(C = "...").status()
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">git -C "..." status</span>
+git(C = <span style="font-style: italic;">"..."</span>).status()
 </code></pre>
 </div>
 
@@ -126,9 +103,9 @@ while setting <code>program.m/gitea.off</code> to <code>False</code> will overri
 </div>
 </div>
 
-<div id="outline-container-orgb31b470" class="outline-3">
-<h3 id="orgb31b470">The general command string will end up like this</h3>
-<div class="outline-text-3" id="text-orgb31b470">
+<div id="outline-container-org9e43c2e" class="outline-3">
+<h3 id="org9e43c2e">The general command string will end up like this</h3>
+<div class="outline-text-3" id="text-org9e43c2e">
 <div class="org-src-container">
 <pre><code class="language-hy match-braces rainbow-braces">f"{m/shell} -c {m/program}
                {m/starter-kwargs}
@@ -144,19 +121,19 @@ while setting <code>program.m/gitea.off</code> to <code>False</code> will overri
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">import hy
-from bakery import ls, find
+<pre><code class="language-python match-braces rainbow-braces"><span style="font-weight: bold;">import</span> hy
+<span style="font-weight: bold;">from</span> bakery <span style="font-weight: bold;">import</span> ls, find
 
-# ls -l -a ~
-ls("~", l = True, a = True)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls -l -a ~</span>
+ls(<span style="font-style: italic;">"~"</span>, l = <span style="font-weight: bold; text-decoration: underline;">True</span>, a = <span style="font-weight: bold; text-decoration: underline;">True</span>)
 
-# find . -empty -type d -delete
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">find . -empty -type d -delete</span>
 find(
-    empty = True,
-    delete = True,
-    type = "d",
-    _one_dash = True,
-    _starter_args = "."
+    empty = <span style="font-weight: bold; text-decoration: underline;">True</span>,
+    delete = <span style="font-weight: bold; text-decoration: underline;">True</span>,
+    <span style="font-weight: bold;">type</span> = <span style="font-style: italic;">"d"</span>,
+    _one_dash = <span style="font-weight: bold; text-decoration: underline;">True</span>,
+    _starter_args = <span style="font-style: italic;">"."</span>
 )
 </code></pre>
 </div>
@@ -182,22 +159,22 @@ find(
 </div>
 </div>
 
-<div id="outline-container-org8c6a5e2" class="outline-3">
-<h3 id="org8c6a5e2">While I'm not sure how different the following behavious is, you can iterate over the <code>bakery</code> object itself to get its output</h3>
-<div class="outline-text-3" id="text-org8c6a5e2">
+<div id="outline-container-orga29e373" class="outline-3">
+<h3 id="orga29e373">While I'm not sure how different the following behavious is, you can iterate over the <code>bakery</code> object itself to get its output</h3>
+<div class="outline-text-3" id="text-orga29e373">
 <p>
 <code>Python:</code>
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">import hy
-from bakery import ls
+<pre><code class="language-python match-braces rainbow-braces"><span style="font-weight: bold;">import</span> hy
+<span style="font-weight: bold;">from</span> bakery <span style="font-weight: bold;">import</span> ls
 
-# And no, I didn't miss the brackets.
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">And no, I didn't miss the brackets.</span>
 
-# ls
-for item in ls:
-    print(item)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls</span>
+<span style="font-weight: bold;">for</span> item <span style="font-weight: bold;">in</span> ls:
+    <span style="font-weight: bold;">print</span>(item)
 </code></pre>
 </div>
 
@@ -217,19 +194,19 @@ for item in ls:
 </div>
 </div>
 
-<div id="outline-container-org57b9f9d" class="outline-3">
-<h3 id="org57b9f9d">You can use specific shells to run commands as well</h3>
-<div class="outline-text-3" id="text-org57b9f9d">
+<div id="outline-container-org0bbb793" class="outline-3">
+<h3 id="org0bbb793">You can use specific shells to run commands as well</h3>
+<div class="outline-text-3" id="text-org0bbb793">
 <p>
 <code>Python:</code>
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">import hy
-from bakery import ls
+<pre><code class="language-python match-braces rainbow-braces"><span style="font-weight: bold;">import</span> hy
+<span style="font-weight: bold;">from</span> bakery <span style="font-weight: bold;">import</span> ls
 
-# bash -c 'ls'
-ls(_shell = "bash")
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">bash -c 'ls'</span>
+ls(_shell = <span style="font-style: italic;">"bash"</span>)
 </code></pre>
 </div>
 
@@ -247,19 +224,19 @@ ls(:m/shell "bash")
 </div>
 </div>
 
-<div id="outline-container-orgba566e1" class="outline-3">
-<h3 id="orgba566e1">Want to get the command you're about to run?</h3>
-<div class="outline-text-3" id="text-orgba566e1">
+<div id="outline-container-orge029894" class="outline-3">
+<h3 id="orge029894">Want to get the command you're about to run?</h3>
+<div class="outline-text-3" id="text-orge029894">
 <p>
 <code>Python:</code>
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">import hy
-from bakery import ls
+<pre><code class="language-python match-braces rainbow-braces"><span style="font-weight: bold;">import</span> hy
+<span style="font-weight: bold;">from</span> bakery <span style="font-weight: bold;">import</span> ls
 
-# bash -c 'ls'
-ls(_shell = "bash", _return_command = True)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">bash -c 'ls'</span>
+ls(_shell = <span style="font-style: italic;">"bash"</span>, _return_command = <span style="font-weight: bold; text-decoration: underline;">True</span>)
 </code></pre>
 </div>
 
@@ -277,19 +254,19 @@ ls(:m/shell "bash" :m/return-command True)
 </div>
 </div>
 
-<div id="outline-container-orgd6562bd" class="outline-3">
-<h3 id="orgd6562bd">Want to <i>see</i> the command you're about to run?</h3>
-<div class="outline-text-3" id="text-orgd6562bd">
+<div id="outline-container-org40bd4d2" class="outline-3">
+<h3 id="org40bd4d2">Want to <i>see</i> the command you're about to run?</h3>
+<div class="outline-text-3" id="text-org40bd4d2">
 <p>
 <code>Python:</code>
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">import hy
-from bakery import ls
+<pre><code class="language-python match-braces rainbow-braces"><span style="font-weight: bold;">import</span> hy
+<span style="font-weight: bold;">from</span> bakery <span style="font-weight: bold;">import</span> ls
 
-# bash -c 'ls'
-ls(_shell = "bash", _print_command = True)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">bash -c 'ls'</span>
+ls(_shell = <span style="font-style: italic;">"bash"</span>, _print_command = <span style="font-weight: bold; text-decoration: underline;">True</span>)
 </code></pre>
 </div>
 
@@ -307,20 +284,20 @@ ls(:m/shell "bash" :m/print-command True)
 </div>
 </div>
 
-<div id="outline-container-orgdd92119" class="outline-3">
-<h3 id="orgdd92119">Want some more details?</h3>
-<div class="outline-text-3" id="text-orgdd92119">
+<div id="outline-container-org79a87e8" class="outline-3">
+<h3 id="org79a87e8">Want some more details?</h3>
+<div class="outline-text-3" id="text-org79a87e8">
 <p>
 <code>Python:</code>
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">import hy
-from bakery import ls
+<pre><code class="language-python match-braces rainbow-braces"><span style="font-weight: bold;">import</span> hy
+<span style="font-weight: bold;">from</span> bakery <span style="font-weight: bold;">import</span> ls
 
-ls(_debug = True)
+ls(_debug = <span style="font-weight: bold; text-decoration: underline;">True</span>)
 
-# OR
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">OR</span>
 ls.inspect_()
 </code></pre>
 </div>
@@ -341,31 +318,31 @@ ls.inspect_()
 </div>
 </div>
 
-<div id="outline-container-orgfc0f1db" class="outline-3">
-<h3 id="orgfc0f1db">Here's how to use <code>sudo</code></h3>
-<div class="outline-text-3" id="text-orgfc0f1db">
+<div id="outline-container-org5974a9a" class="outline-3">
+<h3 id="org5974a9a">Here's how to use <code>sudo</code></h3>
+<div class="outline-text-3" id="text-org5974a9a">
 <p>
 <code>Python:</code>
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">import hy
-from bakery import ls
+<pre><code class="language-python match-braces rainbow-braces"><span style="font-weight: bold;">import</span> hy
+<span style="font-weight: bold;">from</span> bakery <span style="font-weight: bold;">import</span> ls
 
-# sudo ls /
-ls("/", _sudo = True)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">sudo ls /</span>
+ls(<span style="font-style: italic;">"/"</span>, _sudo = <span style="font-weight: bold; text-decoration: underline;">True</span>)
 
-# sudo -i -u root ls /
-ls("/", _sudo = "i")
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">sudo -i -u root ls /</span>
+ls(<span style="font-style: italic;">"/"</span>, _sudo = <span style="font-style: italic;">"i"</span>)
 
-# sudo -s -u root ls /
-ls("/", _sudo = "s")
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">sudo -s -u root ls /</span>
+ls(<span style="font-style: italic;">"/"</span>, _sudo = <span style="font-style: italic;">"s"</span>)
 
-# sudo -i -u user ls /
-ls("/", _sudo = dict(i = "user"))
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">sudo -i -u user ls /</span>
+ls(<span style="font-style: italic;">"/"</span>, _sudo = <span style="font-weight: bold;">dict</span>(i = <span style="font-style: italic;">"user"</span>))
 
-# sudo -s -u user ls /
-ls("/", _sudo = dict(s = "user"))
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">sudo -s -u user ls /</span>
+ls(<span style="font-style: italic;">"/"</span>, _sudo = <span style="font-weight: bold;">dict</span>(s = <span style="font-style: italic;">"user"</span>))
 </code></pre>
 </div>
 
@@ -386,9 +363,9 @@ ls("/", _sudo = dict(s = "user"))
 </div>
 </div>
 
-<div id="outline-container-org7f7f9b7" class="outline-3">
-<h3 id="org7f7f9b7">If you want visible prompts, set <code>:m/capture</code> to <code>run</code>, or <code>:m/run</code> to <code>True</code></h3>
-<div class="outline-text-3" id="text-org7f7f9b7">
+<div id="outline-container-orga05d582" class="outline-3">
+<h3 id="orga05d582">If you want visible prompts, set <code>:m/capture</code> to <code>run</code>, or <code>:m/run</code> to <code>True</code></h3>
+<div class="outline-text-3" id="text-orga05d582">
 <p>
 Otherwise, prompts will be captured in the output, while the process still halts for input.
 </p>
@@ -398,19 +375,19 @@ Otherwise, prompts will be captured in the output, while the process still halts
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">import hy
-from bakery import zfs
+<pre><code class="language-python match-braces rainbow-braces"><span style="font-weight: bold;">import</span> hy
+<span style="font-weight: bold;">from</span> bakery <span style="font-weight: bold;">import</span> zfs
 
-# Will show input prompt
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Will show input prompt</span>
 
-# zfs load-key pool
-zfs.load_key(pool, _capture = "run")
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">zfs load-key pool</span>
+zfs.load_key(pool, _capture = <span style="font-style: italic;">"run"</span>)
 
 
 
-# Will NOT show input prompt
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Will NOT show input prompt</span>
 
-# zfs load-key pool
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">zfs load-key pool</span>
 zfs.load_key(pool)
 </code></pre>
 </div>
@@ -456,22 +433,22 @@ frozen objects are simply <code>deepcopies</code> of the instance they were call
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">import hy
-from bakery import ls
+<pre><code class="language-python match-braces rainbow-braces"><span style="font-weight: bold;">import</span> hy
+<span style="font-weight: bold;">from</span> bakery <span style="font-weight: bold;">import</span> ls
 
-# ls
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls</span>
 ls([])
 
-# Some Alternatives
-ls(None)
-ls(False)
-ls(bool(0))
-ls(bool(""))
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Some Alternatives</span>
+ls(<span style="font-weight: bold; text-decoration: underline;">None</span>)
+ls(<span style="font-weight: bold; text-decoration: underline;">False</span>)
+ls(<span style="font-weight: bold;">bool</span>(0))
+ls(<span style="font-weight: bold;">bool</span>(<span style="font-style: italic;">""</span>))
 
-# Freeze using the keyword (but it's longer; why would you want to do that? :P)
-ls(_frozen = True)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Freeze using the keyword (but it's longer; why would you want to do that? :P)</span>
+ls(_frozen = <span style="font-weight: bold; text-decoration: underline;">True</span>)
 
-# Freeze using... Nothing! :D
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Freeze using... Nothing! :D</span>
 ls
 </code></pre>
 </div>
@@ -506,9 +483,9 @@ ls
 </div>
 </div>
 
-<div id="outline-container-orge159cee" class="outline-3">
-<h3 id="orge159cee">Piping and Redirection is implemented through the use of frozen <code>bakery</code> objects and strings&#x2026;</h3>
-<div class="outline-text-3" id="text-orge159cee">
+<div id="outline-container-org68b6f19" class="outline-3">
+<h3 id="org68b6f19">Piping and Redirection is implemented through the use of frozen <code>bakery</code> objects and strings&#x2026;</h3>
+<div class="outline-text-3" id="text-org68b6f19">
 <p>
 &#x2026; or <a href="https://gitlab.com/picotech/nanotech/gensing">tea or frosting objects</a>.
 </p>
@@ -523,61 +500,61 @@ if the same setting is set while freezing both objects.
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">import hy
-from os import devnull
-from bakery import ls, tail
+<pre><code class="language-python match-braces rainbow-braces"><span style="font-weight: bold;">import</span> hy
+<span style="font-weight: bold;">from</span> os <span style="font-weight: bold;">import</span> devnull
+<span style="font-weight: bold;">from</span> bakery <span style="font-weight: bold;">import</span> ls, tail
 
-# Piping using frozen objects
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Piping using frozen objects</span>
 
-# ls | tail
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls | tail</span>
 
-tails = ls | tail
-tails = "ls" | tail
-tails = ls | "tail"
+<span style="font-weight: bold; font-style: italic;">tails</span> = ls | tail
+<span style="font-weight: bold; font-style: italic;">tails</span> = <span style="font-style: italic;">"ls"</span> | tail
+<span style="font-weight: bold; font-style: italic;">tails</span> = ls | <span style="font-style: italic;">"tail"</span>
 
-tails = ls([]) | tail([])
-tails = "ls" | tail([])
-tails = ls([]) | "tail"
+<span style="font-weight: bold; font-style: italic;">tails</span> = ls([]) | tail([])
+<span style="font-weight: bold; font-style: italic;">tails</span> = <span style="font-style: italic;">"ls"</span> | tail([])
+<span style="font-weight: bold; font-style: italic;">tails</span> = ls([]) | <span style="font-style: italic;">"tail"</span>
 
 tails()
 
 
-# Piping to tee
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Piping to tee</span>
 
-# ls | tee /dev/null
-teels = ls &amp; devnull
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls | tee /dev/null</span>
+<span style="font-weight: bold; font-style: italic;">teels</span> = ls &amp; devnull
 teels()
 
-# ls | tee -a /dev/null
-teels = ls + devnull
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls | tee -a /dev/null</span>
+<span style="font-weight: bold; font-style: italic;">teels</span> = ls + devnull
 teels()
 
-# Redirection using frozen objects
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Redirection using frozen objects</span>
 
-# ls &gt; /dev/null
-nulls = ls &gt; devnull
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls &gt; /dev/null</span>
+<span style="font-weight: bold; font-style: italic;">nulls</span> = ls &gt; devnull
 nulls()
 
-# ls &gt;&gt; /dev/null
-nulls = ls &gt;&gt; devnull
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls &gt;&gt; /dev/null</span>
+<span style="font-weight: bold; font-style: italic;">nulls</span> = ls &gt;&gt; devnull
 nulls()
 
-# ls &lt; /dev/null
-nulls = ls &lt; devnull
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls &lt; /dev/null</span>
+<span style="font-weight: bold; font-style: italic;">nulls</span> = ls &lt; devnull
 nulls()
 
-# ls &lt;&lt; /dev/null
-nulls = ls &lt;&lt; devnull
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls &lt;&lt; /dev/null</span>
+<span style="font-weight: bold; font-style: italic;">nulls</span> = ls &lt;&lt; devnull
 nulls()
 
-# Any of the above pipes or redirections with a tuple
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Any of the above pipes or redirections with a tuple</span>
 
-# ls 2&gt;&amp;1 /dev/null
-nulls = ls | (devnull, "2&gt;&amp;1")
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls 2&gt;&amp;1 /dev/null</span>
+<span style="font-weight: bold; font-style: italic;">nulls</span> = ls | (devnull, <span style="font-style: italic;">"2&gt;&amp;1"</span>)
 nulls()
 
-# ls &amp;&gt; /dev/null
-nulls = ls &gt; (devnull, "&amp;&gt;")
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls &amp;&gt; /dev/null</span>
+<span style="font-weight: bold; font-style: italic;">nulls</span> = ls &gt; (devnull, <span style="font-style: italic;">"&amp;&gt;"</span>)
 nulls()
 </code></pre>
 </div>
@@ -647,23 +624,23 @@ nulls()
 </div>
 </div>
 
-<div id="outline-container-orgafbc153" class="outline-3">
-<h3 id="orgafbc153">Use a <code>bakery</code> object with a context manager</h3>
-<div class="outline-text-3" id="text-orgafbc153">
+<div id="outline-container-org166a3c8" class="outline-3">
+<h3 id="org166a3c8">Use a <code>bakery</code> object with a context manager</h3>
+<div class="outline-text-3" id="text-org166a3c8">
 <p>
 <code>Python:</code>
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">import hy
-from bakery import ls
+<pre><code class="language-python match-braces rainbow-braces"><span style="font-weight: bold;">import</span> hy
+<span style="font-weight: bold;">from</span> bakery <span style="font-weight: bold;">import</span> ls
 
-# ls -l -a
-with ls(_c = True, l = True) as lsl:
-    lsl(a = True)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls -l -a</span>
+<span style="font-weight: bold;">with</span> ls(_c = <span style="font-weight: bold; text-decoration: underline;">True</span>, l = <span style="font-weight: bold; text-decoration: underline;">True</span>) <span style="font-weight: bold;">as</span> lsl:
+    lsl(a = <span style="font-weight: bold; text-decoration: underline;">True</span>)
 
-# ls -l -a | tail
-with ls([], l = True, a = True) | tail as tails:
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls -l -a | tail</span>
+<span style="font-weight: bold;">with</span> ls([], l = <span style="font-weight: bold; text-decoration: underline;">True</span>, a = <span style="font-weight: bold; text-decoration: underline;">True</span>) | tail <span style="font-weight: bold;">as</span> tails:
     tails()
 </code></pre>
 </div>
@@ -687,28 +664,28 @@ with ls([], l = True, a = True) | tail as tails:
 </div>
 </div>
 
-<div id="outline-container-orge403191" class="outline-3">
-<h3 id="orge403191">Ignore Stderr</h3>
-<div class="outline-text-3" id="text-orge403191">
+<div id="outline-container-org9bf163e" class="outline-3">
+<h3 id="org9bf163e">Ignore Stderr</h3>
+<div class="outline-text-3" id="text-org9bf163e">
 <p>
 <code>Python:</code>
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">ls(j = True)
+<pre><code class="language-python match-braces rainbow-braces">ls(j = <span style="font-weight: bold; text-decoration: underline;">True</span>)
 
-# Without `_ignore_stderr = True':
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Without `_ignore_stderr = True':</span>
 
-# SystemError: In trying to run `ls -j':
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">SystemError: In trying to run `ls -j':</span>
 
-# ls: invalid option -- 'j'
-# Try 'ls --help' for more information.
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls: invalid option -- 'j'</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Try 'ls --help' for more information.</span>
 
-ls(j = True, _ignore_stderr = True)
+ls(j = <span style="font-weight: bold; text-decoration: underline;">True</span>, _ignore_stderr = <span style="font-weight: bold; text-decoration: underline;">True</span>)
 
-# With `_ignore_stderr = True':
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">With `_ignore_stderr = True':</span>
 
-# ...
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">...</span>
 </code></pre>
 </div>
 
@@ -736,29 +713,29 @@ ls(j = True, _ignore_stderr = True)
 </div>
 </div>
 
-<div id="outline-container-orgc100459" class="outline-3">
-<h3 id="orgc100459">Pipe Stderr to Stdout</h3>
-<div class="outline-text-3" id="text-orgc100459">
+<div id="outline-container-org8c1d837" class="outline-3">
+<h3 id="org8c1d837">Pipe Stderr to Stdout</h3>
+<div class="outline-text-3" id="text-org8c1d837">
 <p>
 <code>Python:</code>
 </p>
 
 <div class="org-src-container">
-<pre><code class="language-python match-braces rainbow-braces">ls(j = True)
+<pre><code class="language-python match-braces rainbow-braces">ls(j = <span style="font-weight: bold; text-decoration: underline;">True</span>)
 
-# Without `_stdout_stderr = True':
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Without `_stdout_stderr = True':</span>
 
-# SystemError: In trying to run `ls -j':
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">SystemError: In trying to run `ls -j':</span>
 
-# ls: invalid option -- 'j'
-# Try 'ls --help' for more information.
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls: invalid option -- 'j'</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Try 'ls --help' for more information.</span>
 
-ls(j = True, _stdout_stderr = True)
+ls(j = <span style="font-weight: bold; text-decoration: underline;">True</span>, _stdout_stderr = <span style="font-weight: bold; text-decoration: underline;">True</span>)
 
-# With `_stdout_stderr = True':
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">With `_stdout_stderr = True':</span>
 
-# ls: invalid option -- 'j'
-# Try 'ls --help' for more information.
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">ls: invalid option -- 'j'</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Try 'ls --help' for more information.</span>
 </code></pre>
 </div>
 
@@ -790,7 +767,7 @@ ls(j = True, _stdout_stderr = True)
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Jeet Ray</p>
-<p class="date">Created: 2022-09-24 Sat 17:52</p>
+<p class="date">Created: 2023-09-04 Mon 14:08</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
